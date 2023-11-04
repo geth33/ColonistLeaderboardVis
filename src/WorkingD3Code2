@@ -1,0 +1,94 @@
+import React, { useEffect, useRef } from 'react';
+import './App.css';
+import * as d3 from 'd3';
+
+function App() {
+  const svgRef = useRef();
+
+  useEffect(() => {
+    // Sample data
+    const data = [
+      { date: new Date(2023, 0), value: 10 },
+      { date: new Date(2023, 1), value: 15 },
+      { date: new Date(2023, 2), value: 12 },
+      // ... Add more data points
+    ];
+
+    // Define dimensions and margins
+    const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+    const width = 600 - margin.left - margin.right;
+    const height = 400 - margin.top - margin.bottom;
+
+    // Create an SVG element
+    const svg = d3
+      .select(svgRef.current)
+      .attr('width', width + margin.left + margin.right)
+      .attr('height', height + margin.top + margin.bottom)
+      .append('g')
+      .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+    // Create x and y scales
+    const xScale = d3
+      .scaleTime()
+      .domain([d3.min(data, (d) => d.date), d3.max(data, (d) => d.date)])
+      .range([0, width]);
+
+    const yScale = d3
+      .scaleLinear()
+      .domain([0, d3.max(data, (d) => d.value)])
+      .range([height, 0]);
+
+    // Create x and y axes
+    const xAxis = d3.axisBottom(xScale);
+    const yAxis = d3.axisLeft(yScale);
+
+    // Append x and y axes
+    svg
+      .append('g')
+      .attr('class', 'x-axis')
+      .attr('transform', `translate(0, ${height})`)
+      .call(xAxis);
+
+    const yAxisGroup = svg.append('g').attr('class', 'y-axis').call(yAxis);
+
+    // Create a line generator
+    const line = d3
+      .line()
+      .x((d) => xScale(d.date))
+      .y((d) => yScale(d.value));
+
+    // Append the line to the chart
+    const path = svg
+      .append('path')
+      .datum(data)
+      .attr('class', 'line')
+      .attr('d', line)
+      .attr('fill', 'none')
+      .attr('stroke', 'steelblue')
+      .attr('stroke-width', 2);
+
+    // Simulate a change in the y-axis scale after a second
+    setTimeout(() => {
+      yScale.domain([0, 2 * d3.max(data, (d) => d.value)]); // Update the y-axis scale
+      yAxisGroup.transition().duration(1000).call(yAxis); // Transition the y-axis
+      path.transition().duration(1000).attr('d', line); // Transition the line
+    }, 1000); // Change the scale after 1 second
+  }, []); // Ensure this effect runs once when the component mounts
+
+  return (
+    <div className='App'>
+      <div className='visContainer'>
+        <div className='coreVisContainer'>
+          <svg ref={svgRef}></svg>
+        </div>
+        <div className='supportingVisContainer'>
+          <div className='topThreeVis'></div>
+          <div className='winRateVis'></div>
+          <div className='countryVis'></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default App;

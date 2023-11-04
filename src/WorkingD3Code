@@ -1,9 +1,4 @@
-import React, { useEffect, useRef } from 'react';
-import './App.css';
-import * as d3 from 'd3';
-
-function App() {
-  useEffect(() => {
+useEffect(() => {
     let t = -1;
   const n = 40;
   const duration = 750;
@@ -119,20 +114,3 @@ function App() {
   }
   
   }, []);
-
-  return (
-    <div className='App'>
-      <div className='visContainer'>
-        <div className='coreVisContainer'>
-        </div>
-        <div className='supportingVisContainer'>
-          <div className='topThreeVis'></div>
-          <div className='winRateVis'></div>
-          <div className='countryVis'></div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-export default App;
