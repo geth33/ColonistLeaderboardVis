@@ -1,0 +1,27 @@
+.leaderBoardRow {
+    margin: 0 0 3px 0;
+    background-color: rgba(0,0,0,.05);
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    color: white;
+    font-size: 12px;
+}
+  
+  .rank {
+    font-weight: bold;
+    width: 30px;
+    text-align: right;
+  }
+  
+  .name {
+    flex: 1;
+    padding-left: 10px;
+  }
+  
+  .value {
+    width: 60px;
+    text-align: right;
+    font-weight: bold;
+    margin-right: 10px;
+  }
