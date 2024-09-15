@@ -12,8 +12,8 @@ function App() {
 
       // Set dimensions and margins for the chart
       const margin = { top: 20, right: 60, bottom: 40, left: 60 };
-      const h = window.innerHeight - margin.top - margin.bottom;
-      const w = window.innerWidth / 3 - margin.left - margin.right;
+      const h = window.innerHeight / 1.2 - margin.top - margin.bottom;
+      const w = window.innerWidth / 1.8 - margin.left - margin.right;
 
       let time = 0;
       let num = 500; // Number of points to display at any given time
@@ -111,8 +111,20 @@ function App() {
 
       // Define colors for lines
       const myColor = [
-        '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-        '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'
+        '#e50000', // House red
+        '#fb9031', // House orange
+        '#11e928', // House lime
+        '#ba3ee1', // House purple
+        '#d1d3d1', // House gray
+        '#059bfb', // House blue
+        '#747678', // House black 
+        '#ffe001', // House yellow 
+        '#a0f2ed', // Pro icon - light blue
+        '#dbc5f8', // Pro icon - light purple
+        '#219b42', // Wood green
+        '#e36728', // Brick red
+        '#8cb60c', // Sheep light green
+        '#e1b568', // sands
       ];
 
       // Add path elements for each line
@@ -125,7 +137,7 @@ function App() {
             d3.select(this).style('stroke', '#7f7f7f');  // Turn line gray on hover
           })
           .on('mouseout', function () {
-            d3.select(this).style('stroke', myColor[index % 10]);  // Revert to original color on mouse out
+            d3.select(this).style('stroke', myColor[index % 14]);  // Revert to original color on mouse out
           });
       });
 
