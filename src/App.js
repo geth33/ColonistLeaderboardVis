@@ -1,21 +1,34 @@
+// src/App.js
 import React from 'react';
 import './App.css';
-import LeaderBoard from './LeaderBoard';
-import LineChart from './LineChart';  // Import the new LineChart component
-import constants from "./constants";
+import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
+import FAQ from './FAQ';
+import Home from './Home';
 
 function App() {
   return (
-    <div className='App'>
-      <div className='visContainer'>
-        <LineChart />  {/* Use the LineChart component here */}
-        <div className='supportingVisContainer'>
-          <LeaderBoard title="Top Rating" data={constants.ratingData} leaderBoardMetric="rating" />
-          <LeaderBoard title="Top Win Rate" data={constants.winRateData} leaderBoardMetric="winRate" />
-          <LeaderBoard title="Top Countries" data={constants.countryData} leaderBoardMetric="countryNumber" />
-        </div>
+    <Router>
+      <div className='App'>
+      <AppBar position="static" color="primary">
+          <Container>
+            <Toolbar>
+              <Typography variant="h6" component={Link} to="/" style={{ flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
+                Data Tracker
+              </Typography>
+              <Button color="inherit" component={Link} to="/">Home</Button>
+              <Button color="inherit" component={Link} to="/faq">FAQ</Button>
+            </Toolbar>
+          </Container>
+        </AppBar>
+
+        {/* Routes */}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/faq" element={<FAQ />} />
+        </Routes>
       </div>
-    </div>
+    </Router>
   );
 }
 

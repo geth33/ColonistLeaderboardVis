@@ -5,6 +5,11 @@ export default {
         Charlie: { rating: 1450, winRate: 58, country: 'UK' },
         Hannah: { rating: 1420, winRate: 62, country: 'USA' },
         Eva: { rating: 1370, winRate: 52, country: 'UK' },
+        Julia: { rating: 1540, winRate: 32, country: 'UK' },
+        Paul: { rating: 1470, winRate: 44, country: 'UK' },
+        Quinn: { rating: 1399, winRate: 63, country: 'UK' },
+        Sam: { rating: 1384, winRate: 50, country: 'UK' },
+        Tina: { rating: 1430, winRate: 49, country: 'UK' },
       },
       
       winRateData: {

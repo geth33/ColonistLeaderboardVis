@@ -3,24 +3,48 @@
 }
 
 .visContainer {
-  margin: 7.5% 2.5%;
   display: flex;
   justify-content: space-between;
-  height: 80vh;
+  height: 85vh;
 }
 
 .coreVisContainer {
-  flex:0.7;
   background: #1e63ac;
   filter: drop-shadow(2px 4px 4px rgba(20,20,20,0.4));
   border-radius: 8px;
 }
 
-.supportingVisContainer {
+/* .supportingVisContainer {
   flex:0.25;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+} */
+
+.supportingVisContainer {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns */
+  grid-template-rows: auto auto; /* Two rows */
+  gap: 20px; /* Space between grid items */
+  margin-left: 40px; /* Margin to the left of the line chart */
+}
+
+/* "Top Rating" leaderboard spanning two rows */
+.leaderboardItem1 {
+  grid-column: 1; /* First column */
+  grid-row: 1 / span 2; /* Spans two rows */
+}
+
+/* "Top Win Rate" leaderboard in the first row of the second column */
+.leaderboardItem2 {
+  grid-column: 2; /* Second column */
+  grid-row: 1; /* First row */
+}
+
+/* "Top Countries" leaderboard in the second row of the second column */
+.leaderboardItem3 {
+  grid-column: 2; /* Second column */
+  grid-row: 2; /* Second row */
 }
 
 .topThreeVis, .winRateVis, .countryVis {
@@ -55,7 +79,6 @@ body {
   margin: 0;
   padding: 0;
   font: 10px sans-serif;
-  margin-left: 10em;
 }
 
 text {
@@ -90,4 +113,65 @@ text {
 
 .average-25 {
   stroke: #ff0;
+}
+
+/* src/App.css */
+.App {
+  text-align: center;
+}
+
+.navbar {
+  background-color: #333;
+  padding: 10px;
+}
+
+.navbar ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.navbar li {
+  display: inline;
+  margin-right: 20px;
+}
+
+.navbar li a {
+  color: white;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.navbar li a:hover {
+  text-decoration: underline;
+}
+
+.visContainer {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 20px;
+}
+
+.faq {
+  padding: 20px;
+  text-align: left;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.faq h1 {
+  margin-bottom: 20px;
+}
+
+.faq h2 {
+  margin-top: 20px;
+  font-size: 1.2em;
+  color: #333;
+}
+
+.faq p {
+  margin-top: 5px;
+  color: #555;
 }

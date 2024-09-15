@@ -9,13 +9,15 @@ const LineChart = () => {
     if (!graphInitialized) {
       setGraphInitialized(true);
 
+      d3.select(coreVisRef.current).select('svg').remove();
+
       // Set dimensions and margins for the chart
       const margin = { top: 20, right: 60, bottom: 40, left: 60 };
       const h = window.innerHeight / 1.2 - margin.top - margin.bottom;
-      const w = window.innerWidth / 1.8 - margin.left - margin.right;
+      const w = window.innerWidth / 2.5 - margin.left - margin.right;
 
       let time = 0;
-      let num = 500; // Number of points to display at any given time
+      let num = 200; // Number of points to display at any given time
 
       let allData = [];  // Array to hold all 20 lines data
       let numLines = 20;  // Total number of lines to generate
@@ -182,7 +184,7 @@ const LineChart = () => {
         });
       }
 
-      // Initial rendering setup
+    //   // Initial rendering setup
       for (let i = 0; i < num + 50; i++) {
         tick();
       }
