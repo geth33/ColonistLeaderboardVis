@@ -9,6 +9,7 @@
 }
 
 .coreVisContainer {
+  flex: 2;
   background: #1e63ac;
   filter: drop-shadow(2px 4px 4px rgba(20,20,20,0.4));
   border-radius: 8px;
@@ -22,10 +23,10 @@
 } */
 
 .supportingVisContainer {
+  flex: 2;
   display: grid;
   grid-template-columns: 1fr 1fr; /* Two columns */
   grid-template-rows: auto auto; /* Two rows */
-  gap: 20px; /* Space between grid items */
   margin-left: 40px; /* Margin to the left of the line chart */
 }
 

@@ -1,27 +1,33 @@
+
 .leaderBoardRow {
-    margin: 0 0 3px 0;
-    background-color: rgba(0,0,0,.05);
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    color: white;
-    font-size: 12px;
+  position: absolute; /* Absolute to allow smooth gliding */
+  width: 100%; /* Full width of the container */
+  margin: 0 0 5px 0;
 }
-  
-  .rank {
-    font-weight: bold;
-    width: 30px;
-    text-align: right;
-  }
-  
-  .name {
-    flex: 1;
-    padding-left: 10px;
-  }
-  
-  .value {
-    width: 60px;
-    text-align: right;
-    font-weight: bold;
-    margin-right: 10px;
-  }
+.rowContent {
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.05);
+  display: flex;
+  justify-content: space-between;
+  color: white;
+  font-size: 12px;
+}
+
+.rank {
+  font-weight: bold;
+  width: 30px;
+  text-align: center;
+}
+
+.name {
+  text-align: left;
+  padding-left: 10px;
+}
+
+.value {
+  width: 60px;
+  text-align: right;
+  font-weight: bold;
+  margin-right: 10px;
+
+}
