@@ -25,6 +25,7 @@
 .supportingVisContainer {
   flex: 2;
   display: grid;
+  gap: 20px;
   grid-template-columns: 1fr 1fr; /* Two columns */
   grid-template-rows: auto auto; /* Two rows */
   margin-left: 40px; /* Margin to the left of the line chart */
@@ -46,6 +47,7 @@
 .leaderboardItem3 {
   grid-column: 2; /* Second column */
   grid-row: 2; /* Second row */
+  margin-top: 21em;
 }
 
 .topThreeVis, .winRateVis, .countryVis {
