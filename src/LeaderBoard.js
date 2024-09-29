@@ -7,7 +7,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
   const [sortedData, setSortedData] = useState([]);
   const [removedEntries, setRemovedEntries] = useState([]);
   const [newEntries, setNewEntries] = useState([]);
-  const [previousPositions, setPreviousPositions] = useState(null);
+  const [previousPositions, setPreviousPositions] = useState({});
   const listRef = useRef(null); // Ref to target the list container
 
   // Sort data by the given metric (rating) and set the rank
@@ -29,23 +29,36 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
       setRemovedEntries(removed);
     }
 
-    if (sortedData.length > 0){
+    // Ensure `previousPositions` is updated immediately with new entries
+    const updatedPreviousPositions = { ...previousPositions };
+
+    if (sortedData.length > 0) {
       // Identify new entries (entries not present in previous data)
       const newAdded = sorted.filter(entry => !(entry.name in previousPositions));
       if (newAdded.length > 0) {
-        setNewEntries(newAdded);
+        // Only set new entries if they aren't already present in newEntries array
+        const uniqueNewEntries = newAdded.filter(entry => !newEntries.some(newEntry => newEntry.name === entry.name));
+        if (uniqueNewEntries.length > 0) {
+          setNewEntries(uniqueNewEntries);
+          // Add new entries immediately to `previousPositions`
+          uniqueNewEntries.forEach(entry => {
+            updatedPreviousPositions[entry.name] = sorted.findIndex(e => e.name === entry.name);
+          });
+        }
       }
     }
 
     // Store the current positions of all entries
-    const positions = {};
-    let newData = sortedData.length === 0 ? sorted : sortedData; 
-    newData.forEach((entry, index) => {
-      positions[entry.name] = index;
+    sorted.forEach((entry, index) => {
+      updatedPreviousPositions[entry.name] = index;
     });
-    setPreviousPositions(positions); // Update previous positions
 
-    setSortedData(sorted); // Update sorted data
+    // Update previous positions immediately
+    setPreviousPositions(updatedPreviousPositions);
+
+    // Update sorted data
+    setSortedData(sorted);
+
   }, [data, leaderBoardMetric]);
 
   // Handle the fade-out and removal of entries
@@ -85,7 +98,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
       newEntries.forEach(newEntry => {
         const newItem = listRef.current.querySelector(`[data-name="${newEntry.name}"]`);
         const newIndex = sortedData.findIndex(entry => entry.name === newEntry.name); // Find the final index
-        console.log('Oh')
+
         if (newItem) {
           anime({
             targets: newItem,
@@ -104,8 +117,11 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
           });
         }
       });
+
+      // Clear the newEntries after the animation to prevent it from running again
+      setNewEntries([]);
     }
-  }, [newEntries]); // Depend on both newEntries and sortedData for the animation
+  }, [newEntries, sortedData]); // Depend on both newEntries and sortedData for the animation
 
   // Glide elements into new positions when data updates
   useEffect(() => {
