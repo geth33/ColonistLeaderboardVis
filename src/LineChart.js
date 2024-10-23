@@ -38,7 +38,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
       // Create line generator with segmented paths
       const line = d3.line()
         .defined(d => d !== -1) // Ignore points where rating is -1
-        .x((d, i) => x(i + time - num))
+        .x((d, i) => x(Math.max(time - num,0) + i + 1)) // Adjust to move the x-axis dynamically
         .y(d => y(d))
         .curve(d3.curveBasis);
 
@@ -97,19 +97,14 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
         });
 
         // Update the domain for x and y axes
+        x.domain([Math.max(time - num + 1,0), Math.max(time + 1,200)]); // Dynamically update the x-axis based on time
 
-        x.domain([time - num, time]);
-        
         let maxRating = 0;
-        //let minRating = 10000;
-        for (let i=0; i < 20; i++){
+        for (let i = 0; i < 20; i++) {
           let value = playerData[activePlayers[i]][time];
-          if ( value > maxRating){
+          if (value > maxRating) {
             maxRating = value;
           }
-          //  else if (value < minRating && value != -1) {
-          //   minRating = value;
-          // }
         }
         y.domain([minMap[time] - 50, maxRating + 50]);
 
@@ -126,17 +121,12 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
         update();
       }
 
-      // Initial rendering setup
-      // for (let i = 0; i < num; i++) {
-      //   tick();
-      // }
-
       // Set interval for continuous update of the chart
       setInterval(() => {
         tick();
       }, 15);
     }
-  }, [graphInitialized, playerData]);
+  }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap]);
 
   return <div ref={coreVisRef} className='coreVisContainer'></div>;
 };
