@@ -10,6 +10,7 @@
   display: flex;
   justify-content: space-between;
   color: white;
+  font-weight: bold;
 }
 
 .rank {
@@ -17,6 +18,7 @@
   width: 30px;
   text-align: center;
 }
+/* #5f9df5 */
 
 .name {
   text-align: left;
