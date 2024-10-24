@@ -89,34 +89,41 @@ Object.keys(allData).forEach(username => {
     season7Data.forEach(entry => {
       const { snapshotNumber, skillRating } = entry;
 
-      // Use standard object notation to check and set properties
-      if (!top20Map[snapshotNumber]) {
-        top20Map[snapshotNumber] = [];
-      }
+      if (snapshotNumber > 9){
+        // Use standard object notation to check and set properties
+        if (!top20Map[snapshotNumber]) {
+          top20Map[snapshotNumber] = [];
+        }
 
-      // Add the player entry along with their rating to the snapshot array
-      top20Map[snapshotNumber].push(username);
+        // Add the player entry along with their rating to the snapshot array
+        top20Map[snapshotNumber].push({username, skillRating});
+      }
     });
   }
 });
+console.log(top20Map);
 let top20MapKeys = Object.keys(top20Map).map(Number).sort((a, b) => a - b);
 
 // Now, sort and trim each snapshot array to retain only the top 20 players by rating
 top20MapKeys.forEach(snapshotNumber => {
-  // Sort players by skillRating descending and take the top 20
-  top20Map[snapshotNumber].sort((a, b) => b.skillRating - a.skillRating);
-  top20Map[snapshotNumber] = top20Map[snapshotNumber].slice(0, 20);
+  top20Map[snapshotNumber] = top20Map[snapshotNumber]
+    .sort((a, b) => b.skillRating - a.skillRating) // Sort by skillRating descending
+    .slice(0, 20) // Keep only top 20
+    .map(player => player.username); // Convert to usernames only
 });
+console.log(top20Map);
+
 
   let top20MapSubSnapshots = {};
   let currSubsnapshot = 1;
   for (let i of top20MapKeys){
     let jStart = currSubsnapshot 
-    for (let j =jStart; j <= jStart + 50; j++){
+    for (let j =jStart; j < jStart + 50; j++){
       top20MapSubSnapshots[j] = top20Map[i];
       currSubsnapshot++;
     }
   }
+  console.log(top20MapSubSnapshots);
 
   let top20MapAllVisiblePlayersAtTime = {};
   let num = 200;
@@ -129,6 +136,7 @@ top20MapKeys.forEach(snapshotNumber => {
     }
     top20MapAllVisiblePlayersAtTime[i] = activePlayers;
   }
+  console.log(top20MapAllVisiblePlayersAtTime);
 
   setMinMap(createMinMap(top20MapAllVisiblePlayersAtTime, playerRatingMapLocal));
   return top20MapAllVisiblePlayersAtTime;
@@ -199,29 +207,31 @@ const playerReachesTop20 = (player) => {
 const preparePlayerForLineChart = (player) => {
   let ratings = [];
   let season7Data = allData[player]['Season 7'];
-  season7Data = season7Data.filter(d => d.snapshotNumber > 5);
-  let snapshotCount = 6;
+  season7Data = season7Data.filter(d => d.snapshotNumber > 9);
+  let snapshotCount = 10;
   for (let i = 0; i < season7Data.length-1; i++){
-    while (snapshotCount != season7Data[i].snapshotNumber && snapshotCount < 185){
-      for (let j = 0; j < 50; j++){
-        ratings.push(-1);
+    if (season7Data[i].snapshotNumber > 9){
+      while (snapshotCount != season7Data[i].snapshotNumber && snapshotCount < 185){
+        for (let j = 0; j < 50; j++){
+          ratings.push(-1);
+        }
+        snapshotCount++;
       }
-      snapshotCount++;
-    }
-    // If the next piece of data is in the next snapshot, we want to interpolate between the two values
-    if (snapshotCount + 1 == season7Data[i+1].snapshotNumber){
-      let rating1 = season7Data[i].skillRating;
-      let rating2 = season7Data[i+1].skillRating;
-      let step = (rating2 - rating1)/50;
-      for (let j = 0; j < 50; j++){
-        ratings.push(rating1 + step * j);
+      // If the next piece of data is in the next snapshot, we want to interpolate between the two values
+      if (snapshotCount + 1 == season7Data[i+1].snapshotNumber){
+        let rating1 = season7Data[i].skillRating;
+        let rating2 = season7Data[i+1].skillRating;
+        let step = (rating2 - rating1)/50;
+        for (let j = 0; j < 50; j++){
+          ratings.push(rating1 + step * j);
+        }
+        snapshotCount++;
+      } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top 20
+        for (let j = 0; j < 50; j++){
+          ratings.push(-1);
+        }
+        snapshotCount++;
       }
-      snapshotCount++;
-    } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top 20
-      for (let j = 0; j < 50; j++){
-        ratings.push(-1);
-      }
-      snapshotCount++;
     }
   }
   return ratings;

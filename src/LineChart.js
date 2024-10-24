@@ -5,6 +5,8 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null); // Ref to target coreVisContainer div
   const pathsRef = useRef({}); // Object to keep track of active paths by username
+  const labelsRef = useRef({}); // Object to keep track of label elements
+  const playerStartIndexRef = useRef({}); // Object to store start index for each player
 
   useEffect(() => {
     if (!graphInitialized && playerData && Object.values(playerData).length > 0) {
@@ -38,7 +40,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
       // Create line generator with segmented paths
       const line = d3.line()
         .defined(d => d !== -1) // Ignore points where rating is -1
-        .x((d, i) => x(Math.max(time - num,0) + i + 1)) // Adjust to move the x-axis dynamically
+        .x((d, i) => x(Math.max(time - num, 0) + i + 1)) // Adjust to move the x-axis dynamically
         .y(d => y(d))
         .curve(d3.curveBasis);
 
@@ -67,6 +69,24 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
 
       let activePlayers = [];
 
+      function getStartIndexForPlayer(username) {
+        // Check if the start index is already stored
+        if (playerStartIndexRef.current[username] !== undefined) {
+          return playerStartIndexRef.current[username];
+        }
+
+        // If not stored, calculate and save it
+        let startIndex = 0;
+        for (let t = 0; t <= time; t++) {
+          if (topPlayersAtTimeMap[t] && [...topPlayersAtTimeMap[t]].includes(username)) {
+            startIndex = t;
+            playerStartIndexRef.current[username] = startIndex; // Store the start index
+            break;
+          }
+        }
+        return startIndex;
+      }
+
       // Function to update the chart
       function update() {
         // Track top 20 players across the current visible range (time - num to time)
@@ -80,24 +100,62 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
               .attr('class', `line data line-${index}`)
               .style('stroke', myColor[index % 14])
               .style('fill', 'none');
+
+              // Create a label if it doesn't exist
+            labelsRef.current[username] = svg.append('text')
+            .attr('class', `line-label label-${index}`)
+            .style('fill', myColor[index % 14])
+            .style('font-size', '12px');
           }
 
+          const startIndex = getStartIndexForPlayer(username);
+
+          // Adjust x function to account for the startIndex
+          const adjustedLine = d3.line()
+            .defined(d => d !== -1)
+            .x((d, i) => x(Math.max(time - num, startIndex) + i)) // Adjust x to start from the correct time index
+            .y(d => y(d))
+            .curve(d3.curveBasis);
+
           // Update the path with the new data
-          const lineData = playerData[username].slice(Math.max(0, time - num), time + 1);
+          const lineData = playerData[username].slice(Math.max(startIndex, time - num), time + 1);
           pathsRef.current[username]
             .datum(lineData)
-            .attr('d', line);
+            .attr('d', adjustedLine);
+
+          // Set opacity based on data availability at the current time
+          const currentDataPoint = playerData[username][time];
+          const opacity = (currentDataPoint !== undefined && currentDataPoint !== -1) ? 1 : 0.25;
+          pathsRef.current[username].style('opacity', opacity);
+
+          const lastIndex = lineData.length - 1;
+          if (lineData[lastIndex] !== undefined) {
+            labelsRef.current[username]
+              .text(username)
+              .attr('x', x(Math.max(time - num, startIndex) + lastIndex)) // Position to the right of the last point
+              .attr('y', y(lineData[lastIndex])) // Position vertically at the last point's y
+              .attr('dx', 5) // Offset to the right
+              .attr('dy', 4); // Offset vertically
+          }
         });
 
         Object.keys(pathsRef.current).forEach(username => {
           if (!activePlayers.includes(username)) {
             pathsRef.current[username].remove();
             delete pathsRef.current[username];
+            labelsRef.current[username].remove();
+            delete labelsRef.current[username];
+          }
+        });
+
+        Object.keys(playerStartIndexRef.current).forEach(username => {
+          if (!activePlayers.includes(username)) {
+            delete playerStartIndexRef.current[username];
           }
         });
 
         // Update the domain for x and y axes
-        x.domain([Math.max(time - num + 1,0), Math.max(time + 1,200)]); // Dynamically update the x-axis based on time
+        x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, 200)]); // Dynamically update the x-axis based on time
 
         let maxRating = 0;
         for (let i = 0; i < 20; i++) {
@@ -124,7 +182,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
       // Set interval for continuous update of the chart
       setInterval(() => {
         tick();
-      }, 15);
+      }, 100);
     }
   }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap]);
 
