@@ -111,16 +111,27 @@ top20MapKeys.forEach(snapshotNumber => {
     .slice(0, 20) // Keep only top 20
     .map(player => player.username); // Convert to usernames only
 });
+
+let lastSnapshot = top20MapKeys[top20MapKeys.length-1];
+top20MapKeys.forEach(snapshotNumber => {
+  if (snapshotNumber != lastSnapshot){
+    top20Map[snapshotNumber] = top20Map[snapshotNumber].concat(top20Map[snapshotNumber+1]);
+  }
+});
+
 console.log(top20Map);
 
 
   let top20MapSubSnapshots = {};
   let currSubsnapshot = 1;
+  let largestKey = top20MapKeys[top20MapKeys.length-1];
   for (let i of top20MapKeys){
-    let jStart = currSubsnapshot 
-    for (let j =jStart; j < jStart + 50; j++){
-      top20MapSubSnapshots[j] = top20Map[i];
-      currSubsnapshot++;
+    if (i != largestKey){
+      let jStart = currSubsnapshot 
+      for (let j =jStart; j < jStart + 50; j++){
+        top20MapSubSnapshots[j] = top20Map[i];
+        currSubsnapshot++;
+      }
     }
   }
   console.log(top20MapSubSnapshots);
@@ -145,12 +156,16 @@ console.log(top20Map);
 const createMinMap = (top20MapAllVisiblePlayersAtTime, playerRatingMapLocal) => {
   let minMapForVisiblePlayers = {};
   let keys = Object.keys(top20MapAllVisiblePlayersAtTime);
+  console.log(keys);
   for (let key of keys){
     let currPlayers = [...top20MapAllVisiblePlayersAtTime[key]];
 
     let minRating = 10000;
     for (let i=0; i < 20; i++){
       let value = playerRatingMapLocal[currPlayers[i]][key];
+      if (key == 8649){
+        console.log(value);
+      }
       if (value < minRating && value != -1) {
         minRating = value;
       }
@@ -201,7 +216,7 @@ function smoothLine(dataObj, windowSize = 10) {
 
 
 const playerReachesTop20 = (player) => {
-  return allData[player]['Season 7'].filter(p => p.playerRank >= 20).length > 1;
+  return allData[player]['Season 7'].filter(p => p.playerRank >= 20).length > 0;
 }
 
 const preparePlayerForLineChart = (player) => {
@@ -218,7 +233,7 @@ const preparePlayerForLineChart = (player) => {
         snapshotCount++;
       }
       // If the next piece of data is in the next snapshot, we want to interpolate between the two values
-      if (snapshotCount + 1 == season7Data[i+1].snapshotNumber){
+      if (snapshotCount + 1 == season7Data[i+1].snapshotNumber && ((season7Data[i].playerRank <= 20 && season7Data[i+1].playerRank <= 20) || (season7Data[i].playerRank > 20 && season7Data[i+1].playerRank <= 20))){
         let rating1 = season7Data[i].skillRating;
         let rating2 = season7Data[i+1].skillRating;
         let step = (rating2 - rating1)/50;

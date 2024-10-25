@@ -7,6 +7,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
   const pathsRef = useRef({}); // Object to keep track of active paths by username
   const labelsRef = useRef({}); // Object to keep track of label elements
   const playerStartIndexRef = useRef({}); // Object to store start index for each player
+  const colorUsage = useRef({}); // Object to track color usage counts
 
   useEffect(() => {
     if (!graphInitialized && playerData && Object.values(playerData).length > 0) {
@@ -21,6 +22,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
 
       let time = 0;
       let num = 200; // Number of points to display at any given time
+      let timeMax = Object.keys(topPlayersAtTimeMap).length;
 
       // Create scales
       let x = d3.scaleLinear().range([0, w]);
@@ -67,63 +69,63 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
         '#a0f2ed', '#dbc5f8', '#219b42', '#e36728', '#8cb60c', '#e1b568'
       ];
 
+      // Initialize color usage counts
+      myColor.forEach(color => {
+        colorUsage.current[color] = 0;
+      });
+
       let activePlayers = [];
 
       function getStartIndexForPlayer(username) {
-        // Check if the start index is already stored
         if (playerStartIndexRef.current[username] !== undefined) {
           return playerStartIndexRef.current[username];
         }
-
-        // If not stored, calculate and save it
-        let startIndex = 0;
-        for (let t = 0; t <= time; t++) {
-          if (topPlayersAtTimeMap[t] && [...topPlayersAtTimeMap[t]].includes(username)) {
-            startIndex = t;
-            playerStartIndexRef.current[username] = startIndex; // Store the start index
-            break;
-          }
-        }
-        return startIndex;
+        playerStartIndexRef.current[username] = time; 
+        return time;
       }
 
-      // Function to update the chart
+      function getLeastUsedColor() {
+        return Object.entries(colorUsage.current).reduce((leastUsedColor, [color, count]) => {
+          if (leastUsedColor === null || count < colorUsage.current[leastUsedColor]) {
+            return color;
+          }
+          return leastUsedColor;
+        }, null);
+      }
+
       function update() {
-        // Track top 20 players across the current visible range (time - num to time)
         activePlayers = [...topPlayersAtTimeMap[time]];
 
         activePlayers.forEach((username, index) => {
-          // Check if the path already exists
           if (!pathsRef.current[username]) {
-            // Create a new path if it doesn't exist
+            const color = getLeastUsedColor();
+            colorUsage.current[color]++;
+
             pathsRef.current[username] = svg.append('path')
               .attr('class', `line data line-${index}`)
-              .style('stroke', myColor[index % 14])
+              .style('stroke', color)
               .style('fill', 'none');
 
-              // Create a label if it doesn't exist
             labelsRef.current[username] = svg.append('text')
-            .attr('class', `line-label label-${index}`)
-            .style('fill', myColor[index % 14])
-            .style('font-size', '12px');
+              .attr('class', `line-label label-${index}`)
+              .style('fill', color)
+              .style('font-size', '12px');
           }
 
           const startIndex = getStartIndexForPlayer(username);
-
-          // Adjust x function to account for the startIndex
           const adjustedLine = d3.line()
             .defined(d => d !== -1)
-            .x((d, i) => x(Math.max(time - num, startIndex) + i)) // Adjust x to start from the correct time index
+            .x((d, i) => x(Math.max(time - num, startIndex) + i))
             .y(d => y(d))
             .curve(d3.curveBasis);
-
-          // Update the path with the new data
+          if (time > 200){
+            console.log(username);
+          }
           const lineData = playerData[username].slice(Math.max(startIndex, time - num), time + 1);
           pathsRef.current[username]
             .datum(lineData)
             .attr('d', adjustedLine);
 
-          // Set opacity based on data availability at the current time
           const currentDataPoint = playerData[username][time];
           const opacity = (currentDataPoint !== undefined && currentDataPoint !== -1) ? 1 : 0.25;
           pathsRef.current[username].style('opacity', opacity);
@@ -132,15 +134,18 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
           if (lineData[lastIndex] !== undefined) {
             labelsRef.current[username]
               .text(username)
-              .attr('x', x(Math.max(time - num, startIndex) + lastIndex)) // Position to the right of the last point
-              .attr('y', y(lineData[lastIndex])) // Position vertically at the last point's y
-              .attr('dx', 5) // Offset to the right
-              .attr('dy', 4); // Offset vertically
+              .attr('x', x(Math.max(time - num, startIndex) + lastIndex))
+              .attr('y', y(lineData[lastIndex]))
+              .attr('dx', 5)
+              .attr('dy', 4);
           }
         });
 
         Object.keys(pathsRef.current).forEach(username => {
           if (!activePlayers.includes(username)) {
+            const color = pathsRef.current[username].style('stroke');
+            colorUsage.current[color]--;
+
             pathsRef.current[username].remove();
             delete pathsRef.current[username];
             labelsRef.current[username].remove();
@@ -154,9 +159,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
           }
         });
 
-        // Update the domain for x and y axes
-        x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, 200)]); // Dynamically update the x-axis based on time
-
+        x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, 200)]);
         let maxRating = 0;
         for (let i = 0; i < 20; i++) {
           let value = playerData[activePlayers[i]][time];
@@ -170,18 +173,18 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
         $yAxis.transition().duration(15).call(yAxis);
       }
 
-      // Function to handle the animation tick
       function tick() {
-        time++;
-        // If the graph has run out of data to display, stop updating
-        if (time > Math.max(...Object.values(playerData).map(r => r.length))) return;
-
-        update();
+        if (time < timeMax) {
+          time++;
+          update();
+        }
       }
 
-      // Set interval for continuous update of the chart
-      setInterval(() => {
+      const intervalId = setInterval(() => {
         tick();
+        if (time >= timeMax -1) {
+          clearInterval(intervalId);
+        }
       }, 100);
     }
   }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap]);
