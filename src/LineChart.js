@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
+const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap }) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null); // Ref to target coreVisContainer div
   const pathsRef = useRef({}); // Object to keep track of active paths by username
@@ -10,7 +10,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
   const colorUsage = useRef({}); // Object to track color usage counts
 
   useEffect(() => {
-    if (!graphInitialized && playerData && Object.values(playerData).length > 0) {
+    if (!graphInitialized && playerData && Object.values(playerData).length > 0 && minMap && maxMap) {
       setGraphInitialized(true);
 
       d3.select(coreVisRef.current).select('svg').remove();
@@ -118,9 +118,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
             .x((d, i) => x(Math.max(time - num, startIndex) + i))
             .y(d => y(d))
             .curve(d3.curveBasis);
-          if (time > 200){
-            console.log(username);
-          }
+        
           const lineData = playerData[username].slice(Math.max(startIndex, time - num), time + 1);
           pathsRef.current[username]
             .datum(lineData)
@@ -160,14 +158,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
         });
 
         x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, 200)]);
-        let maxRating = 0;
-        for (let i = 0; i < 20; i++) {
-          let value = playerData[activePlayers[i]][time];
-          if (value > maxRating) {
-            maxRating = value;
-          }
-        }
-        y.domain([minMap[time] - 50, maxRating + 50]);
+        y.domain([minMap[time] - 0, maxMap[time] + 10]);
 
         $xAxis.transition().duration(15).call(xAxis);
         $yAxis.transition().duration(15).call(yAxis);
@@ -185,9 +176,9 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap }) => {
         if (time >= timeMax -1) {
           clearInterval(intervalId);
         }
-      }, 100);
+      }, 25);
     }
-  }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap]);
+  }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap, maxMap]);
 
   return <div ref={coreVisRef} className='coreVisContainer'></div>;
 };

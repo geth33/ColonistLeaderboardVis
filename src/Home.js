@@ -43,6 +43,7 @@ const Home = () => {
   const [playerRatingMap, setPlayerRatingMap] = useState({});
   const [topPlayersAtTimeMap, setTopPlayersAtTimeMap] = useState({});
   const [minMap, setMinMap] = useState({});
+  const [maxMap, setMaxMap] = useState({});
 
 
   useEffect(() => {
@@ -67,8 +68,6 @@ const createSeason7DataStruct = () => {
   });
 
   let playerRatingMap = {};
-  console.log(usersWithSeason7)
-
   for (let username of usersWithSeason7){
     playerRatingMap[username] = preparePlayerForLineChart(username);
   }
@@ -150,54 +149,73 @@ console.log(top20Map);
     top20MapAllVisiblePlayersAtTime[i] = activePlayers;
   }
   console.log(top20MapAllVisiblePlayersAtTime);
-
-  setMinMap(createMinMap(top20MapAllVisiblePlayersAtTime, playerRatingMapLocal));
+  createMinAndMaxMaps(playerRatingMapLocal);
   return top20MapAllVisiblePlayersAtTime;
 }
 
-const createMinMap = (top20MapAllVisiblePlayersAtTime, playerRatingMapLocal) => {
-  let minMapForVisiblePlayers = {};
-  let keys = Object.keys(top20MapAllVisiblePlayersAtTime);
-  console.log(keys);
-  for (let key of keys){
-    let currPlayers = [...top20MapAllVisiblePlayersAtTime[key]];
+const createMinAndMaxMaps = (playerRatingMapLocal) => {
+  const currMinMap = {};
+  const currMaxMap = {};
 
-    let minRating = 10000;
-    for (let i=0; i < 20; i++){
-      let value = playerRatingMapLocal[currPlayers[i]][key];
-      if (key == 8649){
-        console.log(value);
+  // Determine the length of the longest array in playerRatingMapLocal
+  const maxLength = Math.max(...Object.values(playerRatingMapLocal).map(arr => arr.length));
+
+  // Iterate through each index position (0 to maxLength - 1)
+  for (let i = 0; i < maxLength; i++) {
+    let minValue = Infinity;
+    let maxValue = -Infinity;
+
+    // Go through each player's ratings array at the index `i`
+    Object.values(playerRatingMapLocal).forEach(ratings => {
+      const rating = ratings[i];
+
+      // Check if the rating is not -1 and is a valid number
+      if (rating !== -1 && rating !== undefined) {
+        if (rating < minValue) minValue = rating;
+        if (rating > maxValue) maxValue = rating;
       }
-      if (value < minRating && value != -1) {
-        minRating = value;
-      }
-    }
-    minMapForVisiblePlayers[key] = minRating;
+    });
+
+    // Store the min and max values at the index in the respective maps
+    currMinMap[i] = minValue === Infinity ? -1 : Math.floor(minValue); // If no valid min found, set as -1
+    currMaxMap[i] = maxValue === -Infinity ? -1 : Math.ceil(maxValue); // If no valid max found, set as -1
   }
-  console.log(minMapForVisiblePlayers)
+
   let minMapSmooth = {};
-  for (let i = 1; i <= keys.length; i++){
-    let minRating = 10000;
+  let maxMapSmooth = {};
+
+  for (let i = 1; i <= maxLength-1; i++) {
+
+    let minRating = Infinity;
+    let maxRating = -Infinity;
     if (i <= 200){
       for (let j = i; j > 0; j--){
-        if (minMapForVisiblePlayers[j] < minRating){
-          minRating = minMapForVisiblePlayers[j];
+        if (currMinMap[j] < minRating){
+          minRating = currMinMap[j];
+        }
+        if (currMaxMap[j] > maxRating){
+          maxRating = currMaxMap[j];
         }
       }
     } else {
       for (let j = i; j > i-200; j--){
-        if (minMapForVisiblePlayers[j] < minRating){
-          minRating = minMapForVisiblePlayers[j];
+        if (currMinMap[j] < minRating){
+          minRating = currMinMap[j];
+        }
+        if (currMaxMap[j] > maxRating){
+          maxRating = currMaxMap[j];
         }
       }
     }
+  
+    // Store the smoothed values
     minMapSmooth[i] = minRating;
+    maxMapSmooth[i] = maxRating;
   }
-  console.log(minMapSmooth);
-  let smooth = smoothLine(minMapSmooth);
-  console.log(smooth);
-  return smooth;
-}
+  setMinMap(smoothLine(minMapSmooth));
+  setMaxMap(smoothLine(maxMapSmooth));
+};
+
 
 function smoothLine(dataObj, windowSize = 10) {
   const smoothedData = {};
@@ -235,11 +253,6 @@ const preparePlayerForLineChart = (player) => {
         snapshotCount++;
       }
       if (season7Data[i].playerRank <= 20 && (i == 0 || season7Data[i - 1].snapshotNumber != snapshotCount - 1) && snapshotCount > 10) {
-        console.log(player);
-        console.log(snapshotCount);
-        console.log(season7Data[i]);
-        console.log(snapshotCount - 1);
-      
         // Calculate the new rating values to replace the last 50 elements
         let rating1 = season7Data[i].skillRating - 100;
         let rating2 = season7Data[i].skillRating;
@@ -504,7 +517,7 @@ const processPlayerData = (data) => {
 
   return (
     <div className='visContainer'>
-        <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} minMap={minMap}/>
+        <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} minMap={minMap} maxMap={maxMap}/>
         <div className='supportingVisContainer'>
             <div className='leaderboardItem leaderboardItem1'>
             <LeaderBoard title="Top Rating" data={playerData} leaderBoardMetric="rating" size={10}/>
