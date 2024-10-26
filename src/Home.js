@@ -67,6 +67,8 @@ const createSeason7DataStruct = () => {
   });
 
   let playerRatingMap = {};
+  console.log(usersWithSeason7)
+
   for (let username of usersWithSeason7){
     playerRatingMap[username] = preparePlayerForLineChart(username);
   }
@@ -216,7 +218,7 @@ function smoothLine(dataObj, windowSize = 10) {
 
 
 const playerReachesTop20 = (player) => {
-  return allData[player]['Season 7'].filter(p => p.playerRank >= 20).length > 0;
+  return allData[player]['Season 7'].filter(p => p.playerRank <= 20).length > 0;
 }
 
 const preparePlayerForLineChart = (player) => {
@@ -224,7 +226,7 @@ const preparePlayerForLineChart = (player) => {
   let season7Data = allData[player]['Season 7'];
   season7Data = season7Data.filter(d => d.snapshotNumber > 9);
   let snapshotCount = 10;
-  for (let i = 0; i < season7Data.length-1; i++){
+  for (let i = 0; i < season7Data.length; i++){
     if (season7Data[i].snapshotNumber > 9){
       while (snapshotCount != season7Data[i].snapshotNumber && snapshotCount < 185){
         for (let j = 0; j < 50; j++){
@@ -232,21 +234,48 @@ const preparePlayerForLineChart = (player) => {
         }
         snapshotCount++;
       }
-      // If the next piece of data is in the next snapshot, we want to interpolate between the two values
-      if (snapshotCount + 1 == season7Data[i+1].snapshotNumber && ((season7Data[i].playerRank <= 20 && season7Data[i+1].playerRank <= 20) || (season7Data[i].playerRank > 20 && season7Data[i+1].playerRank <= 20))){
-        let rating1 = season7Data[i].skillRating;
-        let rating2 = season7Data[i+1].skillRating;
-        let step = (rating2 - rating1)/50;
-        for (let j = 0; j < 50; j++){
-          ratings.push(rating1 + step * j);
+      if (season7Data[i].playerRank <= 20 && (i == 0 || season7Data[i - 1].snapshotNumber != snapshotCount - 1) && snapshotCount > 10) {
+        console.log(player);
+        console.log(snapshotCount);
+        console.log(season7Data[i]);
+        console.log(snapshotCount - 1);
+      
+        // Calculate the new rating values to replace the last 50 elements
+        let rating1 = season7Data[i].skillRating - 100;
+        let rating2 = season7Data[i].skillRating;
+        let step = (rating2 - rating1) / 50;
+        let newRatings = [];
+      
+        for (let j = 0; j < 50; j++) {
+          newRatings.push(rating1 + step * j);
         }
-        snapshotCount++;
-      } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top 20
-        for (let j = 0; j < 50; j++){
-          ratings.push(-1);
+      
+        // Replace the last 50 elements of the ratings array
+        if (ratings.length >= 50) {
+          ratings.splice(ratings.length - 50, 50, ...newRatings);
+        } else {
+          // If there are less than 50 elements, replace what exists and add the rest
+          ratings.splice(ratings.length - 50, 50, ...newRatings.slice(0, ratings.length));
+          ratings.push(...newRatings.slice(ratings.length));
         }
-        snapshotCount++;
       }
+      if (i !== season7Data.length - 1){
+        let enteringTop20 = (season7Data[i].playerRank > 20 && season7Data[i+1].playerRank <= 20);
+        // If the next piece of data is in the next snapshot, we want to interpolate between the two values
+        if (snapshotCount + 1 == season7Data[i+1].snapshotNumber && ((season7Data[i].playerRank <= 20 && season7Data[i+1].playerRank <= 20) || enteringTop20)){
+          let rating1 = season7Data[i].skillRating;
+          let rating2 = season7Data[i+1].skillRating;
+          let step = (rating2 - rating1)/50;
+          for (let j = 0; j < 50; j++){
+            ratings.push(rating1 + step * j);
+          }
+        } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top 20
+          for (let j = 0; j < 50; j++){
+            ratings.push(-1);
+          }
+        }
+      }
+      snapshotCount++;
     }
   }
   return ratings;
