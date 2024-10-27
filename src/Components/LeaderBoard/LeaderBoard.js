@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import './LeaderBoard.css'; // Import CSS for styling
-import LeaderBoardEntry from './LeaderBoardEntry';
+import LeaderBoardEntry from '../LeaderBoardEntry/LeaderBoardEntry';
 import anime from 'animejs';
 
 const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
@@ -12,6 +12,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
 
   // Sort data by the given metric (rating) and set the rank
   useEffect(() => {
+    console.log(data);
     const initialSortedData = Object.keys(data).map((key) => ({
       name: key,
       ...data[key],

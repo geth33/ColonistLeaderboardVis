@@ -3,8 +3,8 @@ import React from 'react';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Container } from '@mui/material';
-import FAQ from './FAQ';
-import Home from './Home';
+import FAQ from './Pages/FAQ';
+import Home from './Pages/Home';
 
 function App() {
   return (
