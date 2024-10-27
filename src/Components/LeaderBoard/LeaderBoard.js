@@ -12,7 +12,6 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
 
   // Sort data by the given metric (rating) and set the rank
   useEffect(() => {
-    console.log(data);
     const initialSortedData = Object.keys(data).map((key) => ({
       name: key,
       ...data[key],
@@ -91,7 +90,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
         }
       });
     }
-  }, [removedEntries, previousPositions]);
+  }, [removedEntries, previousPositions, size]);
 
   // Handle the animation of new entries gliding into position
   useEffect(() => {
@@ -122,7 +121,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
       // Clear the newEntries after the animation to prevent it from running again
       setNewEntries([]);
     }
-  }, [newEntries, sortedData]); // Depend on both newEntries and sortedData for the animation
+  }, [newEntries, sortedData, size]); // Depend on both newEntries and sortedData for the animation
 
   // Glide elements into new positions when data updates
   useEffect(() => {

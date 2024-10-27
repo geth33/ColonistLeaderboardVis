@@ -39,13 +39,6 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap }) => {
         .tickSizeOuter(0)
         .tickPadding(10);
 
-      // Create line generator with segmented paths
-      const line = d3.line()
-        .defined(d => d !== -1) // Ignore points where rating is -1
-        .x((d, i) => x(Math.max(time - num, 0) + i + 1)) // Adjust to move the x-axis dynamically
-        .y(d => y(d))
-        .curve(d3.curveBasis);
-
       // Create SVG container in the coreVisContainer div
       let svg = d3.select(coreVisRef.current).append('svg')
         .attr('width', w + margin.left + margin.right)
@@ -92,7 +85,6 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap }) => {
           return leastUsedColor;
         }, null);
       }
-
       function update() {
         activePlayers = [...topPlayersAtTimeMap[time]];
 

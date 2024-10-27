@@ -1,3 +1,29 @@
+export const updateLeaderBoardCharts = (playerData, countryData, winRateData, setPlayerData, setCountryData, setWinRateData) => {
+  let updatedPlayerData = updatePlayerRatings(playerData);
+  let updatedCountryData = updateCountryNumbers(countryData);
+  let updatedWinRateData = updateWinRates(winRateData);
+
+  // Occasionally add a new player and ensure 10 players
+  if (Math.random() < 0.2) {
+    updatedPlayerData = addNewPlayer(updatedPlayerData);
+    updatedCountryData = addNewCountry(updatedCountryData);
+    updatedWinRateData = addNewWinRatePlayer(updatedWinRateData);
+  }
+  if (Object.keys(updatedPlayerData).length < 10) {
+    updatedPlayerData = addNewPlayer(updatedPlayerData);
+  }
+  if (Object.keys(updatedCountryData).length < 5) {
+    updatedCountryData = addNewCountry(updatedCountryData);
+  }
+  if (Object.keys(updatedWinRateData).length < 5) {
+    updatedWinRateData = addNewWinRatePlayer(updatedWinRateData);
+  }
+
+  setPlayerData({ ...updatedPlayerData });
+  setCountryData({ ...updatedCountryData });
+  setWinRateData({ ...updatedWinRateData });
+}
+
 // Function to randomly add or subtract 10 from each user's rating
 export const updatePlayerRatings = (playerData) => {
     const updatedData = { ...playerData };
