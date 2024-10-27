@@ -32,3 +32,66 @@
   margin-right: 10px;
 
 }
+
+.gold {
+  line-height: 1;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    rgba(186, 148, 62, 1) 0%,
+    rgba(236, 172, 32, 1) 15%,
+    rgba(186, 148, 62, 1) 30%,
+    rgba(249, 244, 180, 1) 50%, /* Light streak in the middle */
+    rgba(186, 148, 62, 1) 70%,
+    rgba(236, 172, 32, 1) 85%,
+    rgba(186, 148, 62, 1) 100%
+  );
+  background-size: 200%; /* Extend gradient for continuous scroll */
+  animation: shine 6s infinite linear;
+}
+
+.silver {
+  line-height: 1;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    rgba(192, 192, 192, 1) 0%,    /* Silver */
+    rgba(169, 169, 169, 1) 15%,    /* Darker gray */
+    rgba(192, 192, 192, 1) 30%,    /* Silver */
+    rgba(230, 230, 230, 1) 50%,    /* Light streak */
+    rgba(192, 192, 192, 1) 70%,    /* Silver */
+    rgba(169, 169, 169, 1) 85%,    /* Darker gray */
+    rgba(192, 192, 192, 1) 100%    /* Silver */
+  );
+  background-size: 200%; /* Extend gradient for continuous scroll */
+  animation: shine 6s infinite linear;
+}
+
+.bronze {
+  line-height: 1;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(
+    90deg,
+    rgba(205, 127, 50, 1) 0%,    /* Bronze */
+    rgba(139, 69, 19, 1) 15%,     /* Darker brown */
+    rgba(205, 127, 50, 1) 30%,    /* Bronze */
+    rgba(233, 185, 110, 1) 50%,   /* Light streak */
+    rgba(205, 127, 50, 1) 70%,    /* Bronze */
+    rgba(139, 69, 19, 1) 85%,     /* Darker brown */
+    rgba(205, 127, 50, 1) 100%    /* Bronze */
+  );
+  background-size: 200%; /* Extend gradient for continuous scroll */
+  animation: shine 6s infinite linear;
+}
+
+@keyframes shine {
+  0% {
+    background-position: 0%;
+  }
+  100% {
+    background-position: 200%; /* Move to the far right for continuous scroll */
+  }
+}
