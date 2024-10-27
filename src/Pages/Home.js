@@ -9,7 +9,7 @@ import {
   read1v1DataFromFile
 } from '../utils/importDataUtils';
 import {
-  createSeason7DataStruct
+  createSeasonDataStruct
 } from '../utils/prepareLineChartUtils';
 
 const Home = () => {
@@ -21,6 +21,11 @@ const Home = () => {
   const [topPlayersAtTimeMap, setTopPlayersAtTimeMap] = useState(null);
   const [minMap, setMinMap] = useState(null);
   const [maxMap, setMaxMap] = useState(null);
+  const season = 7;
+  const numOfTicksOnGraph = 200;
+  const lineChartSpeed = 25;
+  const numOfPlayersOnChart = 10;
+  const startingSnapshot = 10;
 
   useEffect(() => {
     read1v1DataFromFile(setAllData);
@@ -28,7 +33,7 @@ const Home = () => {
 
 useEffect(() => {
   if (allData){
-    createSeason7DataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap);
+    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, season, numOfPlayersOnChart, startingSnapshot, numOfTicksOnGraph);
   }
 }, [allData]);
 
@@ -43,7 +48,8 @@ useEffect(() => {
 
   return (
     <div className='visContainer'>
-        <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} minMap={minMap} maxMap={maxMap}/>
+        <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
+        minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={lineChartSpeed}/>
         <div className='supportingVisContainer'>
             <div className='leaderboardItem leaderboardItem1'>
             <LeaderBoard title="Top Rating" data={playerData} leaderBoardMetric="rating" size={10}/>

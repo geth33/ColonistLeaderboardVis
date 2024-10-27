@@ -1,91 +1,88 @@
-export const createSeason7DataStruct = (allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap) => {
-    const usersWithSeason7 = [];
+export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, season, numOfPlayersOnChart, startingSnapshot, numOfTicksOnGraph) => {
+    const playersOnGraph = [];
     // Loop through each user in the allData object
     Object.keys(allData).forEach(username => {
-        // Check if the user has a 'Season 7' property and it contains data
-        if (allData[username]['Season 7'] && allData[username]['Season 7'].length > 0 && playerReachesTop20(allData, username)) {
-            usersWithSeason7.push(username);
+        if (allData[username]['Season ' + season] && allData[username]['Season ' + season].length > 0 && playerAppearsInGraph(allData, username, season, numOfPlayersOnChart)) {
+            playersOnGraph.push(username);
         }
     });
   
     let playerRatingMap = {};
-    for (let username of usersWithSeason7){
-      playerRatingMap[username] = preparePlayerForLineChart(allData, username);
+    for (let username of playersOnGraph){
+      playerRatingMap[username] = preparePlayerForLineChart(allData, username, season, numOfPlayersOnChart, startingSnapshot);
     }
     setPlayerRatingMap(playerRatingMap);
-    setTopPlayersAtTimeMap(createTopPlayersAtTimeMap(allData, playerRatingMap, setMinMap, setMaxMap));
+    setTopPlayersAtTimeMap(createTopPlayersAtTimeMap(allData, playerRatingMap, setMinMap, setMaxMap, startingSnapshot, season, numOfPlayersOnChart, numOfTicksOnGraph));
   }
   
-  export const createTopPlayersAtTimeMap = (allData, playerRatingMapLocal, setMinMap, setMaxMap) => {
-    const top20Map = {};
+  export const createTopPlayersAtTimeMap = (allData, playerRatingMapLocal, setMinMap, setMaxMap, startingSnapshot, season, numOfPlayersOnChart, numOfTicksOnGraph) => {
+    const topPlayerMap = {};
   
   // Iterate over each player in the original data
   Object.keys(allData).forEach(username => {
-    const season7Data = allData[username]['Season 7'];
+    const currSeasonData = allData[username]['Season ' + season];
   
-    if (season7Data) {
-      // For each entry in Season 7 data, add it to the corresponding snapshot number
-      season7Data.forEach(entry => {
+    if (currSeasonData) {
+      // For each entry in season, add it to the corresponding snapshot number
+      currSeasonData.forEach(entry => {
         const { snapshotNumber, skillRating } = entry;
   
-        if (snapshotNumber > 9){
+        if (snapshotNumber >= startingSnapshot){
           // Use standard object notation to check and set properties
-          if (!top20Map[snapshotNumber]) {
-            top20Map[snapshotNumber] = [];
+          if (!topPlayerMap[snapshotNumber]) {
+            topPlayerMap[snapshotNumber] = [];
           }
   
           // Add the player entry along with their rating to the snapshot array
-          top20Map[snapshotNumber].push({username, skillRating});
+          topPlayerMap[snapshotNumber].push({username, skillRating});
         }
       });
     }
   });
-  let top20MapKeys = Object.keys(top20Map).map(Number).sort((a, b) => a - b);
+  let topPlayerMapKeys = Object.keys(topPlayerMap).map(Number).sort((a, b) => a - b);
   
-  // Now, sort and trim each snapshot array to retain only the top 20 players by rating
-  top20MapKeys.forEach(snapshotNumber => {
-    top20Map[snapshotNumber] = top20Map[snapshotNumber]
+  // Now, sort and trim each snapshot array to retain only the top players by rating
+  topPlayerMapKeys.forEach(snapshotNumber => {
+    topPlayerMap[snapshotNumber] = topPlayerMap[snapshotNumber]
       .sort((a, b) => b.skillRating - a.skillRating) // Sort by skillRating descending
-      .slice(0, 20) // Keep only top 20
+      .slice(0, numOfPlayersOnChart) // Keep only top players
       .map(player => player.username); // Convert to usernames only
   });
   
-  let lastSnapshot = top20MapKeys[top20MapKeys.length-1];
-  top20MapKeys.forEach(snapshotNumber => {
+  let lastSnapshot = topPlayerMapKeys[topPlayerMapKeys.length-1];
+  topPlayerMapKeys.forEach(snapshotNumber => {
     if (snapshotNumber != lastSnapshot){
-      top20Map[snapshotNumber] = top20Map[snapshotNumber].concat(top20Map[snapshotNumber+1]);
+      topPlayerMap[snapshotNumber] = topPlayerMap[snapshotNumber].concat(topPlayerMap[snapshotNumber+1]);
     }
   });
   
-  let top20MapSubSnapshots = {};
+  let topPlayerMapSubSnapshots = {};
   let currSubsnapshot = 1;
-  let largestKey = top20MapKeys[top20MapKeys.length-1];
-  for (let i of top20MapKeys){
+  let largestKey = topPlayerMapKeys[topPlayerMapKeys.length-1];
+  for (let i of topPlayerMapKeys){
     if (i != largestKey){
       let jStart = currSubsnapshot 
       for (let j =jStart; j < jStart + 50; j++){
-        top20MapSubSnapshots[j] = top20Map[i];
+        topPlayerMapSubSnapshots[j] = topPlayerMap[i];
         currSubsnapshot++;
       }
     }
   }
   
-    let top20MapAllVisiblePlayersAtTime = {};
-    let num = 200;
-    //let highestTime = Math.max(...exampleMap.keys());
-    for (let i of Object.keys(top20MapSubSnapshots)){
+    let topPlayerMapAllVisiblePlayersAtTime = {};
+    for (let i of Object.keys(topPlayerMapSubSnapshots)){
       let activePlayers = new Set();
-      let jStart = i <= num ? 1 : i-num+1;
+      let jStart = i <= numOfTicksOnGraph ? 1 : i-numOfTicksOnGraph+1;
       for (let j = jStart; j <= i; j++){
-        top20MapSubSnapshots[j].forEach(element => activePlayers.add(element));
+        topPlayerMapSubSnapshots[j].forEach(element => activePlayers.add(element));
       }
-      top20MapAllVisiblePlayersAtTime[i] = activePlayers;
+      topPlayerMapAllVisiblePlayersAtTime[i] = activePlayers;
     }
-    createMinAndMaxMaps(playerRatingMapLocal, setMinMap, setMaxMap);
-    return top20MapAllVisiblePlayersAtTime;
+    createMinAndMaxMaps(playerRatingMapLocal, setMinMap, setMaxMap, numOfTicksOnGraph);
+    return topPlayerMapAllVisiblePlayersAtTime;
   }
   
-  export const createMinAndMaxMaps = (playerRatingMapLocal, setMinMap, setMaxMap) => {
+  export const createMinAndMaxMaps = (playerRatingMapLocal, setMinMap, setMaxMap, numOfTicksOnGraph) => {
     const currMinMap = {};
     const currMaxMap = {};
   
@@ -120,7 +117,7 @@ export const createSeason7DataStruct = (allData, setPlayerRatingMap, setTopPlaye
   
       let minRating = Infinity;
       let maxRating = -Infinity;
-      if (i <= 200){
+      if (i <= numOfTicksOnGraph){
         for (let j = i; j > 0; j--){
           if (currMinMap[j] < minRating){
             minRating = currMinMap[j];
@@ -130,7 +127,7 @@ export const createSeason7DataStruct = (allData, setPlayerRatingMap, setTopPlaye
           }
         }
       } else {
-        for (let j = i; j > i-200; j--){
+        for (let j = i; j > i-numOfTicksOnGraph; j--){
           if (currMinMap[j] < minRating){
             minRating = currMinMap[j];
           }
@@ -167,27 +164,27 @@ export const createSeason7DataStruct = (allData, setPlayerRatingMap, setTopPlaye
   }
   
   
-  export const playerReachesTop20 = (allData, player) => {
-    return allData[player]['Season 7'].filter(p => p.playerRank <= 20).length > 0;
+  export const playerAppearsInGraph = (allData, player, season, numOfPlayersOnChart) => {
+    return allData[player]['Season '+season].filter(p => p.playerRank <= numOfPlayersOnChart).length > 0;
   }
   
-  export const preparePlayerForLineChart = (allData, player) => {
+  export const preparePlayerForLineChart = (allData, player, season, numOfPlayersOnChart, startingSnapshot) => {
     let ratings = [];
-    let season7Data = allData[player]['Season 7'];
-    season7Data = season7Data.filter(d => d.snapshotNumber > 9);
-    let snapshotCount = 10;
-    for (let i = 0; i < season7Data.length; i++){
-      if (season7Data[i].snapshotNumber > 9){
-        while (snapshotCount != season7Data[i].snapshotNumber && snapshotCount < 185){
+    let seasonData = allData[player]['Season ' + season];
+    seasonData = seasonData.filter(d => d.snapshotNumber > startingSnapshot-1);
+    let snapshotCount = startingSnapshot;
+    for (let i = 0; i < seasonData.length; i++){
+      if (seasonData[i].snapshotNumber > startingSnapshot-1){
+        while (snapshotCount != seasonData[i].snapshotNumber && snapshotCount < 185){
           for (let j = 0; j < 50; j++){
             ratings.push(-1);
           }
           snapshotCount++;
         }
-        if (season7Data[i].playerRank <= 20 && (i == 0 || season7Data[i - 1].snapshotNumber != snapshotCount - 1) && snapshotCount > 10) {
+        if (seasonData[i].playerRank <= numOfPlayersOnChart && (i == 0 || seasonData[i - 1].snapshotNumber != snapshotCount - 1) && snapshotCount > startingSnapshot) {
           // Calculate the new rating values to replace the last 50 elements
-          let rating1 = season7Data[i].skillRating - 100;
-          let rating2 = season7Data[i].skillRating;
+          let rating1 = seasonData[i].skillRating - 100;
+          let rating2 = seasonData[i].skillRating;
           let step = (rating2 - rating1) / 50;
           let newRatings = [];
         
@@ -204,17 +201,17 @@ export const createSeason7DataStruct = (allData, setPlayerRatingMap, setTopPlaye
             ratings.push(...newRatings.slice(ratings.length));
           }
         }
-        if (i !== season7Data.length - 1){
-          let enteringTop20 = (season7Data[i].playerRank > 20 && season7Data[i+1].playerRank <= 20);
+        if (i !== seasonData.length - 1){
+          let enteringTop = (seasonData[i].playerRank > numOfPlayersOnChart && seasonData[i+1].playerRank <= numOfPlayersOnChart);
           // If the next piece of data is in the next snapshot, we want to interpolate between the two values
-          if (snapshotCount + 1 == season7Data[i+1].snapshotNumber && ((season7Data[i].playerRank <= 20 && season7Data[i+1].playerRank <= 20) || enteringTop20)){
-            let rating1 = season7Data[i].skillRating;
-            let rating2 = season7Data[i+1].skillRating;
+          if (snapshotCount + 1 == seasonData[i+1].snapshotNumber && ((seasonData[i].playerRank <= numOfPlayersOnChart && seasonData[i+1].playerRank <= numOfPlayersOnChart) || enteringTop)){
+            let rating1 = seasonData[i].skillRating;
+            let rating2 = seasonData[i+1].skillRating;
             let step = (rating2 - rating1)/50;
             for (let j = 0; j < 50; j++){
               ratings.push(rating1 + step * j);
             }
-          } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top 20
+          } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top
             for (let j = 0; j < 50; j++){
               ratings.push(-1);
             }

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap }) => {
+const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed }) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null); // Ref to target coreVisContainer div
   const pathsRef = useRef({}); // Object to keep track of active paths by username
@@ -21,7 +21,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap }) => {
       const w = window.innerWidth / 2.5 - margin.left - margin.right;
 
       let time = 0;
-      let num = 200; // Number of points to display at any given time
+      let num = numOfTicksOnGraph; // Number of points to display at any given time
       let timeMax = Object.keys(topPlayersAtTimeMap).length;
 
       // Create scales
@@ -149,7 +149,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap }) => {
           }
         });
 
-        x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, 200)]);
+        x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, numOfTicksOnGraph)]);
         y.domain([minMap[time] - 0, maxMap[time] + 10]);
 
         $xAxis.transition().duration(15).call(xAxis);
@@ -168,7 +168,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap }) => {
         if (time >= timeMax -1) {
           clearInterval(intervalId);
         }
-      }, 25);
+      }, lineChartSpeed);
     }
   }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap, maxMap]);
 
