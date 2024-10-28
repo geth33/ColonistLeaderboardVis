@@ -3,27 +3,28 @@ import './LeaderBoard.css'; // Import CSS for styling
 import LeaderBoardEntry from '../LeaderBoardEntry/LeaderBoardEntry';
 import anime from 'animejs';
 
-const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
+const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot }) => {
   const [sortedData, setSortedData] = useState([]);
   const [removedEntries, setRemovedEntries] = useState([]);
   const [newEntries, setNewEntries] = useState([]);
+  const [newEntryNames, setNewEntryNames] = useState([]);
+
   const [previousPositions, setPreviousPositions] = useState({});
   const listRef = useRef(null); // Ref to target the list container
+  let keyProp = leaderBoardMetric !== 'count' ? 'username' : 'countryCode'
+
 
   // Sort data by the given metric (rating) and set the rank
   useEffect(() => {
-    const initialSortedData = Object.keys(data).map((key) => ({
-      name: key,
-      ...data[key],
-      rank: 0, // Initialize rank, will update after sorting
-    }));
-
-    // Sort by rating and assign rank
-    const sorted = initialSortedData.sort((a, b) => b[leaderBoardMetric] - a[leaderBoardMetric]);
-
+    if (data){
+      const sorted = data[currSnapshot].map((userEntry) => ({
+        name: userEntry[keyProp],
+        ...userEntry,
+        rank: 0, // Initialize rank, will update after sorting
+      }));
     // Identify removed entries
-    const removed = sortedData.filter(entry => !data[entry.name]);
-
+    let previousNames = sorted.map(s => s.name);
+    const removed = sortedData.filter(entry => !previousNames.includes(entry.name));
     // Add removed entries to state for fade-out animation
     if (removed.length > 0) {
       setRemovedEntries(removed);
@@ -40,6 +41,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
         const uniqueNewEntries = newAdded.filter(entry => !newEntries.some(newEntry => newEntry.name === entry.name));
         if (uniqueNewEntries.length > 0) {
           setNewEntries(uniqueNewEntries);
+          setNewEntryNames(uniqueNewEntries.map(e => e.name));
           // Add new entries immediately to `previousPositions`
           uniqueNewEntries.forEach(entry => {
             updatedPreviousPositions[entry.name] = sorted.findIndex(e => e.name === entry.name);
@@ -55,11 +57,11 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
 
     // Update previous positions immediately
     setPreviousPositions(updatedPreviousPositions);
-
     // Update sorted data
     setSortedData(sorted);
 
-  }, [data, leaderBoardMetric]);
+    }
+  }, [data, leaderBoardMetric, currSnapshot]);
 
   // Handle the fade-out and removal of entries
   useEffect(() => {
@@ -82,6 +84,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
                 complete: () => {
                   // Remove the element after the animation
                   setSortedData(prevData => prevData.filter(entry => entry.name !== removedEntry.name));
+                  setPreviousPositions(prevData => Object.fromEntries(Object.entries(prevData).filter(([key]) => key !== removedEntry.name)));
                   setRemovedEntries(prevRemoved => prevRemoved.filter(entry => entry.name !== removedEntry.name));
                 }
               });
@@ -97,31 +100,33 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
     if (newEntries.length > 0) {
       newEntries.forEach(newEntry => {
         const newItem = listRef.current.querySelector(`[data-name="${newEntry.name}"]`);
-        const newIndex = sortedData.findIndex(entry => entry.name === newEntry.name); // Find the final index
-
+        const newIndex = sortedData.findIndex(entry => entry.name === newEntry.name);
+  
         if (newItem) {
           anime({
             targets: newItem,
-            translateY: size * 40, // Start below the list (off-screen)
-            opacity: 0, // Start fully transparent
-            duration: 0, // Instantly position it off-screen
+            translateY: 400, // Start 400px below
+            opacity: 0,
+            duration: 0,
             complete: () => {
               anime({
                 targets: newItem,
-                translateY: newIndex * 40, // Move to its correct position directly
-                opacity: 1, // Fade in
+                translateY: newIndex * 40, // Move to its final position
+                opacity: 1,
                 duration: 500,
                 easing: 'easeInOutQuad',
+                complete: () => newItem.classList.remove('new') // Remove 'new' class after animation
               });
             }
           });
         }
       });
-
-      // Clear the newEntries after the animation to prevent it from running again
+  
       setNewEntries([]);
+      setNewEntryNames([]);
     }
-  }, [newEntries, sortedData, size]); // Depend on both newEntries and sortedData for the animation
+  }, [newEntries, sortedData, size]);
+  
 
   // Glide elements into new positions when data updates
   useEffect(() => {
@@ -145,24 +150,27 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size }) => {
     <div className='leaderboard'>
       <h3>{title}</h3>
       <ul ref={listRef}>
-        {sortedData.map((entry, index) => (
-          <LeaderBoardEntry
-            key={entry.name}
-            rank={index + 1} // Set the rank dynamically based on index
-            name={entry.name}
-            value={entry[leaderBoardMetric]} // Use rating, winRate, etc.
-          />
-        ))}
-        {removedEntries.map((entry) => (
-          <LeaderBoardEntry
-            key={entry.name}
-            rank={''} // Mark as removed for clarity
-            name={entry.name}
-            value={entry[leaderBoardMetric]} // Keep the original value
-            isRemoving // Add an identifier to style it differently if needed
-          />
-        ))}
-      </ul>
+  {sortedData.map((entry, index) => (
+    <LeaderBoardEntry
+      key={entry.name}
+      rank={index + 1}
+      name={entry.name}
+      value={entry[leaderBoardMetric]}
+      isNew={newEntryNames.includes(entry.name)} // Pass isNew based on newEntryNames
+    />
+  ))}
+  {removedEntries.map((entry) => (
+    <LeaderBoardEntry
+      key={entry.name}
+      rank={''}
+      name={entry.name}
+      value={entry[leaderBoardMetric]}
+      isNew={true}
+      isRemoving
+    />
+  ))}
+</ul>
+
     </div>
   );
 };

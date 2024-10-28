@@ -156,10 +156,18 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
         $yAxis.transition().duration(15).call(yAxis);
       }
 
+      const dispatchNextSnapshotEvent = () => {
+        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/50)} });
+        window.dispatchEvent(event);
+      };
+
       function tick() {
         if (time < timeMax) {
           time++;
           update();
+        }
+        if (time % 50 === 0){
+          dispatchNextSnapshotEvent();
         }
       }
 

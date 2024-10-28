@@ -9,18 +9,21 @@ import {
   read1v1DataFromFile
 } from '../utils/importDataUtils';
 import {
-  createSeasonDataStruct
+  createSeasonDataStruct,
+  generateSnapshotMaps
 } from '../utils/prepareLineChartUtils';
 
 const Home = () => {
-  const [playerData, setPlayerData] = useState(constants.initialPlayerData);
-  const [countryData, setCountryData] = useState(constants.initialCountryData);
-  const [winRateData, setWinRateData] = useState(constants.initialWinRateData);
   const [allData, setAllData] = useState(null);
   const [playerRatingMap, setPlayerRatingMap] = useState(null);
   const [topPlayersAtTimeMap, setTopPlayersAtTimeMap] = useState(null);
   const [minMap, setMinMap] = useState(null);
   const [maxMap, setMaxMap] = useState(null);
+  const [top10RankMap, setTop10RankMap] = useState(null);
+  const [top5WinRateMap, setTop5WinRateMap] = useState(null);
+  const [top5CountryMap, setTop5CountryMap] = useState(null);
+  const [currSnapshot, setCurrSnapshot] = useState(1);
+
   const season = 7;
   const numOfTicksOnGraph = 200;
   const lineChartSpeed = 25;
@@ -34,17 +37,24 @@ const Home = () => {
 useEffect(() => {
   if (allData){
     createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, season, numOfPlayersOnChart, startingSnapshot, numOfTicksOnGraph);
+    const {top10RankMap, top5WinRateMap, top5CountryMap} = generateSnapshotMaps(allData, season);
+    setTop10RankMap(top10RankMap);
+    setTop5WinRateMap(top5WinRateMap);
+    setTop5CountryMap(top5CountryMap);
   }
 }, [allData]);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      updateLeaderBoardCharts(playerData, countryData, winRateData, setPlayerData, setCountryData, setWinRateData);
-    }, 2000); // Update every 2 seconds    
-    return () => {
-      clearInterval(interval);
-    };
-  }, [playerData, countryData, winRateData]);
+useEffect(() => {
+  const handleTickEvent = (e) => {
+    const { snapshot } = e.detail;
+    setCurrSnapshot(startingSnapshot + snapshot);
+    console.log(snapshot);
+  };
+
+  window.addEventListener("nextSnapshot", handleTickEvent);
+
+  return () => window.removeEventListener("nextSnapshot", handleTickEvent);
+}, []);
 
   return (
     <div className='visContainer'>
@@ -52,15 +62,15 @@ useEffect(() => {
         minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={lineChartSpeed}/>
         <div className='supportingVisContainer'>
             <div className='leaderboardItem leaderboardItem1'>
-            <LeaderBoard title="Top Rating" data={playerData} leaderBoardMetric="rating" size={10}/>
+            <LeaderBoard title="Top Rating" data={top10RankMap} leaderBoardMetric="skillRating" size={10} currSnapshot={currSnapshot}/>
             </div>
 
             <div className='leaderboardItem leaderboardItem2'>
-            <LeaderBoard title="Top Win Rate" data={winRateData} leaderBoardMetric="winRate" size={5}/>
+            <LeaderBoard title="Top Win Rate" data={top5WinRateMap} leaderBoardMetric="winRate" size={5} currSnapshot={currSnapshot}/>
             </div>
 
             <div className='leaderboardItem leaderboardItem3'>
-              <LeaderBoard title="Top Countries" data={countryData} leaderBoardMetric="countryNumber" size={5}/>
+              <LeaderBoard title="Top Countries" data={top5CountryMap} leaderBoardMetric="count" size={5} currSnapshot={currSnapshot}/>
             </div>
         </div>
     </div>

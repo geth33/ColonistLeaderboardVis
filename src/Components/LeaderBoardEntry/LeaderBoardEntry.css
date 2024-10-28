@@ -13,6 +13,12 @@
   font-weight: bold;
 }
 
+.new {
+  transform: translateY(400px); /* Position new entries 400px below */
+  opacity: 0;
+}
+
+
 .rank {
   font-weight: bold;
   width: 30px;
@@ -33,7 +39,13 @@
 
 }
 
+.default {
+  font-size: 12px;
+
+}
+
 .gold {
+  font-size: 16px;
   line-height: 1;
   text-align: center;
   color: #fff;
@@ -52,6 +64,7 @@
 }
 
 .silver {
+  font-size: 14px;
   line-height: 1;
   text-align: center;
   color: #fff;
@@ -70,6 +83,7 @@
 }
 
 .bronze {
+  font-size: 13px;
   line-height: 1;
   text-align: center;
   color: #fff;

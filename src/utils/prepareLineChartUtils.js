@@ -222,3 +222,65 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     }
     return ratings;
   }
+
+  export const generateSnapshotMaps = (data, season) => {
+    const top10RankMap = {};
+    const top5WinRateMap = {};
+    const top5CountryMap = {};
+  
+    Object.keys(data).forEach(username => {
+      const userSeasons = data[username];
+  
+      // Ensure the specified season exists for the user
+      if (userSeasons["Season " + season]) {
+        userSeasons["Season " + season].forEach(entry => {
+          const { playerRank, snapshotNumber, winRate, countryCode } = entry;
+  
+          // Initialize snapshot entry arrays if they don’t exist
+          if (!top10RankMap[snapshotNumber]) top10RankMap[snapshotNumber] = [];
+          if (!top5WinRateMap[snapshotNumber]) top5WinRateMap[snapshotNumber] = [];
+          if (!top5CountryMap[snapshotNumber]) top5CountryMap[snapshotNumber] = {};
+  
+          // Add to top10RankMap if playerRank is between 1 and 10
+          if (playerRank >= 1 && playerRank <= 10) {
+            top10RankMap[snapshotNumber].push({ username, ...entry });
+          }
+  
+          // Add to top5WinRateMap (consider all entries for win rate comparison)
+          top5WinRateMap[snapshotNumber].push({ username, ...entry });
+  
+          // Count occurrences of each country for top5CountryMap
+          if (!top5CountryMap[snapshotNumber][countryCode]) {
+            top5CountryMap[snapshotNumber][countryCode] = 0;
+          }
+          top5CountryMap[snapshotNumber][countryCode]++;
+        });
+      }
+    });
+  
+    // Process and finalize each map to retain only the top players/countries as specified
+    Object.keys(top10RankMap).forEach(snapshotNumber => {
+      // Sort by playerRank and keep top 10, retaining full entry data
+      top10RankMap[snapshotNumber] = top10RankMap[snapshotNumber]
+        .sort((a, b) => a.playerRank - b.playerRank)
+        .slice(0, 10); // Keep the full entries
+    });
+  
+    Object.keys(top5WinRateMap).forEach(snapshotNumber => {
+      // Sort by winRate and keep top 5, retaining full entry data
+      top5WinRateMap[snapshotNumber] = top5WinRateMap[snapshotNumber]
+        .sort((a, b) => b.winRate - a.winRate)
+        .slice(0, 5); // Keep the full entries
+    });
+  
+    Object.keys(top5CountryMap).forEach(snapshotNumber => {
+      // Sort countries by count and keep top 5 with country code and count
+      top5CountryMap[snapshotNumber] = Object.entries(top5CountryMap[snapshotNumber])
+        .sort((a, b) => b[1] - a[1]) // Sort by frequency of players from each country
+        .slice(0, 5)
+        .map(([countryCode, count]) => ({ countryCode, count })); // Include country and count
+    });
+  
+    return { top10RankMap, top5WinRateMap, top5CountryMap };
+  };
+  

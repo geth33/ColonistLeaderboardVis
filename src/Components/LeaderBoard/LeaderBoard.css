@@ -25,4 +25,20 @@
     margin: 0;
     position: relative;
   }
+
+  .leaderboard-entry {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+  
+  .leaderboard-entry.new {
+    opacity: 0;
+    transform: translateY(100px); /* Starts below the visible area */
+  }
+  
+  .leaderboard-entry.removing {
+    opacity: 0;
+    transform: translateY(-100%);
+  }
   

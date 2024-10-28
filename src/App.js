@@ -14,7 +14,7 @@ function App() {
           <Container>
             <Toolbar>
               <Typography variant="h6" component={Link} to="/" style={{ flexGrow: 1, color: 'inherit', textDecoration: 'none', textAlign: 'left' }}>
-                Data Tracker
+                Base and 1v1 Leaderboard Tracker
               </Typography>
               <Button color="inherit" component={Link} to="/">Home</Button>
               <Button color="inherit" component={Link} to="/faq">FAQ</Button>
