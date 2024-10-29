@@ -23,6 +23,8 @@ steps:
 
 # Specify the Cloud Run service account that Cloud Build will use
 timeout: '1200s'  # Optional: sets a timeout for the build process (default is 10 min)
+options:
+  logging: CLOUD_LOGGING_ONLY
 
 # Optionally, define any substitutions
 substitutions:
