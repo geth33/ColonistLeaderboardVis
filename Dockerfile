@@ -14,10 +14,15 @@ RUN npm run build
 
 # Stage 2: Serve with nginx
 FROM nginx:alpine
+
+# Copy the built React app to the NGINX html folder
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Expose the default Nginx port
-EXPOSE 80
+# Add custom nginx configuration file to listen on port 8080 for Cloud Run
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Start Nginx in the foreground
+# Expose port 8080 for Cloud Run
+EXPOSE 8080
+
+# Start NGINX in the foreground
 CMD ["nginx", "-g", "daemon off;"]
