@@ -14,11 +14,24 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       setGraphInitialized(true);
 
       d3.select(coreVisRef.current).select('svg').remove();
+      let margin = 0;
+      let h = 0;
+      let w = 0;
 
       // Set dimensions and margins for the chart
-      const margin = { top: 20, right: 60, bottom: 40, left: 60 };
-      const h = window.innerHeight / 1.2 - margin.top - margin.bottom;
-      const w = window.innerWidth / 2.5 - margin.left - margin.right;
+      if (window.innerWidth < 800){
+        margin = {top: 20, right: 80, bottom: 40, left: 60};
+        h = window.innerHeight / 1.5 - margin.top - margin.bottom;
+        w = window.innerWidth/1.1 - margin.left - margin.right;
+      } else if (window.innerWidth >= 800 && window.innerWidth <= 1200){
+        margin = {top: 20, right: 80, bottom: 40, left: 60};
+        h = window.innerHeight / 2 - margin.top - margin.bottom;
+        w = window.innerWidth/2 - margin.left - margin.right;
+      } else {
+        margin = { top: 20, right: 60, bottom: 40, left: 60 };
+        h = window.innerHeight / 1.2 - margin.top - margin.bottom;
+        w = window.innerWidth / 2.5 - margin.left - margin.right;
+      }
 
       let time = 0;
       let num = numOfTicksOnGraph; // Number of points to display at any given time
@@ -157,7 +170,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       }
 
       const dispatchNextSnapshotEvent = () => {
-        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/50)} });
+        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/30)} });
         window.dispatchEvent(event);
       };
 
@@ -166,7 +179,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
           time++;
           update();
         }
-        if (time % 50 === 0){
+        if (time % 30 === 0){
           dispatchNextSnapshotEvent();
         }
       }

@@ -3,16 +3,19 @@ import './LeaderBoard.css'; // Import CSS for styling
 import LeaderBoardEntry from '../LeaderBoardEntry/LeaderBoardEntry';
 import anime from 'animejs';
 
-const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot }) => {
+const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
   const [sortedData, setSortedData] = useState([]);
   const [removedEntries, setRemovedEntries] = useState([]);
   const [newEntries, setNewEntries] = useState([]);
   const [newEntryNames, setNewEntryNames] = useState([]);
+  const [suffix, setSuffix] = useState('');
+  const [entrySize, setEntrySize] = useState(0);
+  const [entryGap, setEntryGap] = useState(0);
+
 
   const [previousPositions, setPreviousPositions] = useState({});
   const listRef = useRef(null); // Ref to target the list container
-  let keyProp = leaderBoardMetric !== 'count' ? 'username' : 'countryCode'
-
+  let keyProp = leaderBoardMetric !== 'count' ? 'username' : 'countryCode';
 
   // Sort data by the given metric (rating) and set the rank
   useEffect(() => {
@@ -72,12 +75,12 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot }) => 
           const prevPosition = previousPositions[removedEntry.name]; // Get the previous Y position
           anime({
             targets: itemToRemove,
-            translateY: prevPosition * 40, // Start at the previous Y position
+            translateY: prevPosition * entryGap, // Start at the previous Y position
             duration: 0, // Instantly set it to the previous Y position
             complete: () => {
               anime({
                 targets: itemToRemove,
-                translateY: size * 40, // Move it down beyond the list
+                translateY: size * entryGap, // Move it down beyond the list
                 opacity: 0, // Fade out
                 duration: 500,
                 easing: 'easeInOutQuad',
@@ -105,13 +108,13 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot }) => 
         if (newItem) {
           anime({
             targets: newItem,
-            translateY: 400, // Start 400px below
+            translateY: leaderBoardMetric === 'skillRating' ? 400 : 300, // Start 400px below
             opacity: 0,
             duration: 0,
             complete: () => {
               anime({
                 targets: newItem,
-                translateY: newIndex * 40, // Move to its final position
+                translateY: newIndex * entryGap, // Move to its final position
                 opacity: 1,
                 duration: 500,
                 easing: 'easeInOutQuad',
@@ -138,13 +141,37 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot }) => 
       anime({
         targets: listItems,
         translateY: function (el, i) {
-          return i * 40; // Move based on the new index in the sorted array
+          return i * entryGap; // Move based on the new index in the sorted array
         },
         duration: 500, // Duration of the animation
         easing: 'easeInOutQuad', // Smooth animation
       });
     }
   }, [sortedData]); // Run when sortedData changes
+
+  useEffect(() => {
+    if (leaderBoardMetric === 'skillRating') {
+      if (window.innerWidth < 800){
+        setEntryGap(35);
+        setEntrySize('large');
+      } else {
+        setEntryGap(38);
+        setEntrySize('large');
+      }
+    } else if (leaderBoardMetric === 'winRate') {
+      setSuffix('%');
+      setEntrySize('xl');
+      if (window.innerWidth < 800){
+        setEntryGap(40);
+      } else {
+        setEntryGap(42);
+      }
+    } else {
+      setSuffix(' days');
+      setEntryGap(30);
+      setEntrySize('small');
+    }
+  }, []);
 
   return (
     <div className='leaderboard'>
@@ -155,7 +182,9 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot }) => 
       key={entry.name}
       rank={index + 1}
       name={entry.name}
-      value={entry[leaderBoardMetric]}
+      value={entry[leaderBoardMetric] + suffix}
+      subValue={leaderBoardMetric === 'winRate' ? "("+entry['totalGamesPlayed'] + " games)" : ''}
+      size={entrySize}
       isNew={newEntryNames.includes(entry.name)} // Pass isNew based on newEntryNames
     />
   ))}
@@ -164,7 +193,9 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot }) => 
       key={entry.name}
       rank={''}
       name={entry.name}
-      value={entry[leaderBoardMetric]}
+      value={entry[leaderBoardMetric] + suffix}
+      subValue={leaderBoardMetric === 'winRate' ? "("+entry['totalGamesPlayed'] + " games)" : ''}
+      size={entrySize}
       isNew={true}
       isRemoving
     />

@@ -7,12 +7,11 @@
   
   .leaderboard h3 {
     margin: 0 0 3px 0;
-    padding: 10px 0px; 
+    padding: 7px 0px; 
     font-size: 18px;
     font-weight: bold;
     color: white;
     background: #0567a6;
-
   }
 
   li:last-child {
@@ -42,3 +41,22 @@
     transform: translateY(-100%);
   }
   
+  @media (max-width: 1824px) {
+
+  }
+  
+  @media (max-width: 1224px) {
+  
+  }
+  
+  @media (max-width: 768px) {
+    .leaderboard h3 {
+      margin: 0 0 3px 0;
+      padding: 5px 0px; 
+      font-size: 16px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    
+  }

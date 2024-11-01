@@ -5,12 +5,12 @@
   margin: 0 0 5px 0;
 }
 .rowContent {
-  padding: 10px;
   background-color: rgba(0, 0, 0, 0.05);
   display: flex;
   justify-content: space-between;
   color: white;
   font-weight: bold;
+  align-items: center;
 }
 
 .new {
@@ -33,15 +33,31 @@
 
 .value {
   width: 60px;
+  text-align: center;
+  font-weight: bold;
+  margin: 0 0 0 0;
+}
+
+.subValue {
+  width: 60px;
+  font-size: 10px;
   text-align: right;
   font-weight: bold;
-  margin-right: 10px;
-
+  margin: 0.2em 0 0 0;
 }
 
 .default {
   font-size: 12px;
+}
 
+.xl {
+  padding: 8px 10px;
+}
+.large {
+  padding: 10px;
+}
+.small {
+  padding: 7px 10px;
 }
 
 .gold {
@@ -101,6 +117,24 @@
   animation: shine 6s infinite linear;
 }
 
+.gold .small,
+.silver .small,
+.bronze .small {
+  min-height: 16px;
+}
+
+.gold .large,
+.silver .large,
+.bronze .large {
+  min-height: 18px;
+}
+
+.gold .xl,
+.silver .xl,
+.bronze .xl {
+  min-height: 25px;
+}
+
 @keyframes shine {
   0% {
     background-position: 0%;
@@ -108,4 +142,34 @@
   100% {
     background-position: 200%; /* Move to the far right for continuous scroll */
   }
+}
+
+@media (max-width: 1824px) {
+
+}
+
+@media (max-width: 1224px) {
+
+}
+
+@media (max-width: 768px) {
+  .gold {
+    font-size: 14px;
+  }
+  .silver {
+    font-size: 13px;
+  }
+  .bronze {
+    font-size: 12px;
+  }
+  .default {
+    font-size: 10px;
+  }
+  .value{
+    margin-right: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  
 }
