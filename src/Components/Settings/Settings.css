@@ -1,0 +1,100 @@
+.settingsContainer {
+    background: #0567a6;
+    height: 300px;
+    width: 100%;
+    filter: drop-shadow(2px 4px 4px rgba(20,20,20,0.4));
+}
+
+.lineChartModeButtonContainer{
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.lineChartModeContainer {
+    padding-top: 3em;
+}
+
+.gameModeContainer {
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 2em;
+}
+
+.settingsButton {
+    display: flex !important;
+    background: white !important;
+    width: 120px !important;
+    justify-content: space-evenly !important;
+    border-radius: 15px !important; 
+    padding: 3px 15px !important; 
+    border: 1px solid gray !important; 
+    line-height: 1 !important;
+}
+
+.settingsButtonText {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    text-transform: none;
+    font-weight: bold;
+}
+
+.settingsButtonText p{
+    margin: 0;
+}
+
+.settingsButtonTextSmall {
+    font-size: 10px;
+}
+
+.lineChartModeSubtextContainer p {
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.disabled {
+    background: gray !important;
+    opacity: 0.9;
+}
+
+.settingsSelect {
+    background: white;
+    padding: 0;
+    margin: 0;
+}
+
+.settingsLabel {
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    margin-right: 1em;
+    align-self: center;
+}
+
+.setting {
+    display: flex;
+    justify-content: center;
+}
+
+.settingsGroup {
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 3em;
+}
+
+.generateChartButton {
+    display: flex;
+    justify-content: space-evenly;
+    padding-top: 3em;
+}
+
+.selected {
+    border: 2px solid #ADD8E6 !important;
+}
+
+.notSelected {
+    background: lightgray !important;
+}

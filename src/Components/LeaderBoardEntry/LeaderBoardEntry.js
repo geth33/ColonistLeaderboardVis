@@ -27,7 +27,7 @@ const LeaderBoardEntry = ({ rank, name, value, subValue, isNew, size }) => {
               <p className='value'>{value}</p>
               <p className='subValue'>{subValue}</p>
             </div>
-          : <span className='value'>{value}</span>
+          : <span className='value' style={{width: size === 'small' ? '80px' : '60px'}}>{value}</span>
         }
       </div>
     </li>

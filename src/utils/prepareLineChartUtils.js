@@ -25,7 +25,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     if (currSeasonData) {
       // For each entry in season, add it to the corresponding snapshot number
       currSeasonData.forEach(entry => {
-        const { snapshotNumber, skillRating } = entry;
+        const { snapshotNumber, skillRating, playerRank } = entry;
   
         if (snapshotNumber >= startingSnapshot){
           // Use standard object notation to check and set properties
@@ -34,7 +34,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
           }
   
           // Add the player entry along with their rating to the snapshot array
-          topPlayerMap[snapshotNumber].push({username, skillRating});
+          topPlayerMap[snapshotNumber].push({username, playerRank});
         }
       });
     }
@@ -44,10 +44,12 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
   // Now, sort and trim each snapshot array to retain only the top players by rating
   topPlayerMapKeys.forEach(snapshotNumber => {
     topPlayerMap[snapshotNumber] = topPlayerMap[snapshotNumber]
-      .sort((a, b) => b.skillRating - a.skillRating) // Sort by skillRating descending
+      .sort((a, b) => a.playerRank - b.playerRank) // Sort by skillRating descending
       .slice(0, numOfPlayersOnChart) // Keep only top players
       .map(player => player.username); // Convert to usernames only
   });
+  console.log(numOfPlayersOnChart);
+  console.log(topPlayerMap);
   
   let lastSnapshot = topPlayerMapKeys[topPlayerMapKeys.length-1];
   topPlayerMapKeys.forEach(snapshotNumber => {
@@ -55,6 +57,8 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
       topPlayerMap[snapshotNumber] = topPlayerMap[snapshotNumber].concat(topPlayerMap[snapshotNumber+1]);
     }
   });
+
+  console.log(topPlayerMap);
   
   let topPlayerMapSubSnapshots = {};
   let currSubsnapshot = 1;
@@ -62,7 +66,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
   for (let i of topPlayerMapKeys){
     if (i != largestKey){
       let jStart = currSubsnapshot 
-      for (let j =jStart; j < jStart + 30; j++){
+      for (let j =jStart; j < jStart + 50; j++){
         topPlayerMapSubSnapshots[j] = topPlayerMap[i];
         currSubsnapshot++;
       }
@@ -176,7 +180,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     for (let i = 0; i < seasonData.length; i++){
       if (seasonData[i].snapshotNumber > startingSnapshot-1){
         while (snapshotCount != seasonData[i].snapshotNumber && snapshotCount < 185){
-          for (let j = 0; j < 30; j++){
+          for (let j = 0; j < 50; j++){
             ratings.push(-1);
           }
           snapshotCount++;
@@ -185,19 +189,19 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
           // Calculate the new rating values to replace the last 30 elements
           let rating1 = seasonData[i].skillRating - 100;
           let rating2 = seasonData[i].skillRating;
-          let step = (rating2 - rating1) / 30;
+          let step = (rating2 - rating1) / 50;
           let newRatings = [];
         
-          for (let j = 0; j < 30; j++) {
+          for (let j = 0; j < 50; j++) {
             newRatings.push(rating1 + step * j);
           }
         
           // Replace the last 30 elements of the ratings array
-          if (ratings.length >= 30) {
-            ratings.splice(ratings.length - 30, 30, ...newRatings);
+          if (ratings.length >= 50) {
+            ratings.splice(ratings.length - 50, 50, ...newRatings);
           } else {
             // If there are less than 30 elements, replace what exists and add the rest
-            ratings.splice(ratings.length - 30, 30, ...newRatings.slice(0, ratings.length));
+            ratings.splice(ratings.length - 50, 50, ...newRatings.slice(0, ratings.length));
             ratings.push(...newRatings.slice(ratings.length));
           }
         }
@@ -207,12 +211,12 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
           if (snapshotCount + 1 == seasonData[i+1].snapshotNumber && ((seasonData[i].playerRank <= numOfPlayersOnChart && seasonData[i+1].playerRank <= numOfPlayersOnChart) || enteringTop)){
             let rating1 = seasonData[i].skillRating;
             let rating2 = seasonData[i+1].skillRating;
-            let step = (rating2 - rating1)/30;
-            for (let j = 0; j < 30; j++){
+            let step = (rating2 - rating1)/50;
+            for (let j = 0; j < 50; j++){
               ratings.push(rating1 + step * j);
             }
           } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top
-            for (let j = 0; j < 30; j++){
+            for (let j = 0; j < 50; j++){
               ratings.push(-1);
             }
           }
@@ -223,10 +227,10 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     return ratings;
   }
 
-  export const generateSnapshotMaps = (data, season) => {
+  export const generateSnapshotMaps = (data, season, startingSnapshot) => {
     const top10RankMap = {};
     const top5WinRateMap = {};
-    const top5CountryMap = {};
+    const timeInFirstPlaceMap = {};
   
     Object.keys(data).forEach(username => {
       const userSeasons = data[username];
@@ -239,7 +243,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
           // Initialize snapshot entry arrays if they don’t exist
           if (!top10RankMap[snapshotNumber]) top10RankMap[snapshotNumber] = [];
           if (!top5WinRateMap[snapshotNumber]) top5WinRateMap[snapshotNumber] = [];
-          if (!top5CountryMap[snapshotNumber]) top5CountryMap[snapshotNumber] = {};
+          if (!timeInFirstPlaceMap[snapshotNumber]) timeInFirstPlaceMap[snapshotNumber] = {};
   
           // Add to top10RankMap if playerRank is between 1 and 10
           if (playerRank >= 1 && playerRank <= 10) {
@@ -248,12 +252,6 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
   
           // Add to top5WinRateMap (consider all entries for win rate comparison)
           top5WinRateMap[snapshotNumber].push({ username, ...entry, winRate: parseFloat(entry.winRate.toFixed(1))});
-  
-          // Count occurrences of each country for top5CountryMap
-          if (!top5CountryMap[snapshotNumber][countryCode]) {
-            top5CountryMap[snapshotNumber][countryCode] = 0;
-          }
-          top5CountryMap[snapshotNumber][countryCode]++;
         });
       }
     });
@@ -272,15 +270,49 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
         .sort((a, b) => b.winRate - a.winRate)
         .slice(0, 5); // Keep the full entries
     });
-  
-    Object.keys(top5CountryMap).forEach(snapshotNumber => {
-      // Sort countries by count and keep top 5 with country code and count
-      top5CountryMap[snapshotNumber] = Object.entries(top5CountryMap[snapshotNumber])
-        .sort((a, b) => b[1] - a[1]) // Sort by frequency of players from each country
-        .slice(0, 3)
-        .map(([countryCode, count]) => ({ countryCode, count })); // Include country and count
+
+    let previousFirstPlace = null;
+    let consecutiveFirstPlaceCount = 0;
+    const firstPlaceStreaks = {}; // Keeps track of total first-place streak for each player
+
+    Object.keys(top10RankMap).forEach(snapshotNumber => {
+      if (snapshotNumber >= startingSnapshot){
+        const firstPlacePlayer = top10RankMap[snapshotNumber][0]?.username;
+
+        // Initialize first place streaks for the current snapshot if needed
+        if (!timeInFirstPlaceMap[snapshotNumber]) {
+            timeInFirstPlaceMap[snapshotNumber] = [];
+        }
+
+        if (firstPlacePlayer) {
+            // Update consecutive count for the current first-place player
+            if (firstPlacePlayer === previousFirstPlace) {
+                consecutiveFirstPlaceCount += 0.5;
+            } else {
+              if (firstPlaceStreaks[firstPlacePlayer]){
+                consecutiveFirstPlaceCount = firstPlaceStreaks[firstPlacePlayer] + 0.5;
+              } else {
+                consecutiveFirstPlaceCount = 0.5;
+              }
+            }
+
+            // Update or initialize the streak for the current player
+            firstPlaceStreaks[firstPlacePlayer] = consecutiveFirstPlaceCount;
+
+            // Update timeInFirstPlace for the current snapshot
+            timeInFirstPlaceMap[snapshotNumber] = Object.entries(firstPlaceStreaks)
+                .map(([username, daysInFirst]) => ({ username, daysInFirst }))
+                .sort((a, b) => b.daysInFirst - a.daysInFirst) // Sort by most days in first place
+                .slice(0, 3); // Keep only the top 3 players
+
+            // Update previous first-place player
+            previousFirstPlace = firstPlacePlayer;
+        }
+      }
     });
+    console.log(top10RankMap);
+    console.log(timeInFirstPlaceMap);
   
-    return { top10RankMap, top5WinRateMap, top5CountryMap };
+    return { top10RankMap, top5WinRateMap, timeInFirstPlaceMap };
   };
   

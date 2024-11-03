@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import LeaderBoard from '../Components/LeaderBoard/LeaderBoard';
 import LineChart from '../Components/LineChart/LineChart';
+import Settings from '../Components/Settings/Settings';
 import {
 	Tab, tabClasses,
 	Tabs,
 	tabsClasses
 } from "@mui/material";
 import {
-  read1v1DataFromFile
+  readDataFromFile
 } from '../utils/importDataUtils';
 import {
   createSeasonDataStruct,
@@ -84,38 +85,46 @@ const Home = () => {
   const [top1RankMap, setTop1RankMap] = useState(null);
   const [top10RankMap, setTop10RankMap] = useState(null);
   const [top5WinRateMap, setTop5WinRateMap] = useState(null);
-  const [top5CountryMap, setTop5CountryMap] = useState(null);
-  const [currSnapshot, setCurrSnapshot] = useState(1);
+  const [timeInFirstPlaceMap, setTimeInFirstPlaceMap] = useState(null);
+  const [currSnapshot, setCurrSnapshot] = useState(10);
   const [tabIndex, setTabIndex] = React.useState(0);
 	const tabItemSx = toSx(tabItemStyles, tabClasses);
   const [tabLabel, setTabLabel] = useState("Settings");
+  const [settings, setSettings] = useState(null);
+  console.log(playerRatingMap);
 
-  const season = 7;
-  const numOfTicksOnGraph = 200;
+  const season = 8;
+  const numOfTicksOnGraph = 180;
   const lineChartSpeed = 35;
   const numOfPlayersOnChart = 10;
   const startingSnapshot = 10;
 
-  useEffect(() => {
-    read1v1DataFromFile(setAllData);
-}, []);
 
 useEffect(() => {
   if (allData){
-    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, season, numOfPlayersOnChart, startingSnapshot, numOfTicksOnGraph);
-    const {top10RankMap, top5WinRateMap, top5CountryMap} = generateSnapshotMaps(allData, season);
+    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, startingSnapshot, numOfTicksOnGraph);
+    const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allData, settings.season, startingSnapshot);
     setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
     setTop10RankMap(top10RankMap);
     setTop5WinRateMap(top5WinRateMap);
-    setTop5CountryMap(top5CountryMap);
+    setTimeInFirstPlaceMap(timeInFirstPlaceMap);
+    setTabIndex(1);
   }
 }, [allData]);
+
+useEffect(() => {
+  console.log('in settings useEffect');
+  if (settings != null){
+    console.log('not null');
+    let csvFileName = settings.gameMode === '1v1' ? '/leaderboards_oneOnOne.csv' : '/leaderboards_base.csv';
+    readDataFromFile(csvFileName, setAllData);
+  }
+}, [settings]);
 
 useEffect(() => {
   const handleTickEvent = (e) => {
     const { snapshot } = e.detail;
     setCurrSnapshot(startingSnapshot + snapshot);
-    console.log(snapshot);
   };
 
   window.addEventListener("nextSnapshot", handleTickEvent);
@@ -123,10 +132,22 @@ useEffect(() => {
   return () => window.removeEventListener("nextSnapshot", handleTickEvent);
 }, []);
 
+useEffect(() => {
+  const handleInitiateChartEvent = (e) => {
+    console.log('chart event initiated');
+    console.log(e.detail);
+    setSettings(e.detail);
+  };
+
+  window.addEventListener("initiateChart", handleInitiateChartEvent);
+
+  return () => window.removeEventListener("initiateChart", handleInitiateChartEvent);
+}, []);
+
   return (
     <div className='visContainer'>
         <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
-        minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={lineChartSpeed}/>
+        minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed}/>
         <div className="supportingContentContainer">
           <div className='tabModule'>
             <Tabs
@@ -138,23 +159,28 @@ useEffect(() => {
                 <Tab disableRipple label={"Leaderboards"} sx={tabItemSx}/>
 						</Tabs>
           </div>
-          <div className='supportingVisContainer'>
-            <div className='leaderboardItem leadingUserModule'>
-              <LeadingUser data={top1RankMap} currSnapshot={currSnapshot}/>
-            </div>
-            <div className='leaderboardItem leaderboardItem1'>
-              <LeaderBoard title="Top Rating" data={top10RankMap} leaderBoardMetric="skillRating" size={10} currSnapshot={currSnapshot}/>
-            </div>
+          {
+            tabIndex === 0 ? <>
+              <Settings/>
+            </> : 
+            <div className='supportingVisContainer'>
+              <div className='leaderboardItem leadingUserModule'>
+                <LeadingUser data={top1RankMap} currSnapshot={currSnapshot}/>
+              </div>
+              <div className='leaderboardItem leaderboardItem1'>
+                <LeaderBoard title="Top Rating" data={top10RankMap} leaderBoardMetric="skillRating" size={10} currSnapshot={currSnapshot}/>
+              </div>
 
-            <div className='leaderboardItem leaderboardItem2'>
-              <LeaderBoard title="Top Win Rate" data={top5WinRateMap} leaderBoardMetric="winRate" size={5} currSnapshot={currSnapshot}/>
-            </div>
+              <div className='leaderboardItem leaderboardItem2'>
+                <LeaderBoard title="Top Win Rate" data={top5WinRateMap} leaderBoardMetric="winRate" size={5} currSnapshot={currSnapshot}/>
+              </div>
 
-            <div className='leaderboardItem leaderboardItem3'>
-              <LeaderBoard title="Top Countries" data={top5CountryMap} leaderBoardMetric="count" size={3} currSnapshot={currSnapshot}/>
+              <div className='leaderboardItem leaderboardItem3'>
+                <LeaderBoard title="Time in First" data={timeInFirstPlaceMap} leaderBoardMetric="daysInFirst" size={3} currSnapshot={currSnapshot}/>
+              </div>
             </div>
+          }
           </div>
-        </div>
     </div>
   );
 };

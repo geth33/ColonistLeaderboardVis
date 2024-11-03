@@ -20,15 +20,15 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
 
       // Set dimensions and margins for the chart
       if (window.innerWidth < 800){
-        margin = {top: 20, right: 80, bottom: 40, left: 60};
+        margin = {top: 20, right: 100, bottom: 40, left: 60};
         h = window.innerHeight / 1.5 - margin.top - margin.bottom;
         w = window.innerWidth/1.1 - margin.left - margin.right;
       } else if (window.innerWidth >= 800 && window.innerWidth <= 1200){
-        margin = {top: 20, right: 80, bottom: 40, left: 60};
+        margin = {top: 20, right: 100, bottom: 40, left: 60};
         h = window.innerHeight / 2 - margin.top - margin.bottom;
         w = window.innerWidth/2 - margin.left - margin.right;
       } else {
-        margin = { top: 20, right: 60, bottom: 40, left: 60 };
+        margin = { top: 20, right: 100, bottom: 40, left: 60 };
         h = window.innerHeight / 1.2 - margin.top - margin.bottom;
         w = window.innerWidth / 2.5 - margin.left - margin.right;
       }
@@ -58,6 +58,19 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
         .attr('height', h + margin.top + margin.bottom)
         .append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
+
+        // Lighten grid line color
+    svg.selectAll('.tick line')
+      .style('stroke', '#cccccc'); // Light gray grid lines
+
+    // Add x-axis label
+    svg.append('text')
+      .attr('class', 'x-axis-label')
+      .attr('x', w / 2)
+      .attr('y', h + margin.bottom - 10)
+      .attr('text-anchor', 'middle')
+      .style('font-size', '14px')
+      .text('Day # in Season');
 
       // Append x and y axes
       let $xAxis = svg.append('g')
@@ -124,6 +137,8 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
             .y(d => y(d))
             .curve(d3.curveBasis);
         
+          console.log(Math.floor(time/50));
+          console.log(username);
           const lineData = playerData[username].slice(Math.max(startIndex, time - num), time + 1);
           pathsRef.current[username]
             .datum(lineData)
@@ -170,7 +185,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       }
 
       const dispatchNextSnapshotEvent = () => {
-        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/30)} });
+        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/50)} });
         window.dispatchEvent(event);
       };
 
@@ -179,7 +194,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
           time++;
           update();
         }
-        if (time % 30 === 0){
+        if (time % 50 === 0){
           dispatchNextSnapshotEvent();
         }
       }

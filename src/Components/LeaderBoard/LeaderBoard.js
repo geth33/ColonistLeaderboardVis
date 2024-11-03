@@ -15,7 +15,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
 
   const [previousPositions, setPreviousPositions] = useState({});
   const listRef = useRef(null); // Ref to target the list container
-  let keyProp = leaderBoardMetric !== 'count' ? 'username' : 'countryCode';
+  let keyProp = 'username';
 
   // Sort data by the given metric (rating) and set the rank
   useEffect(() => {
@@ -25,6 +25,10 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
         ...userEntry,
         rank: 0, // Initialize rank, will update after sorting
       }));
+      
+      if (leaderBoardMetric === 'daysInFirst'){
+        console.log(sorted);
+      }
     // Identify removed entries
     let previousNames = sorted.map(s => s.name);
     const removed = sortedData.filter(entry => !previousNames.includes(entry.name));

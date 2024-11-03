@@ -1,7 +1,7 @@
 import Papa from 'papaparse';
 
-export const read1v1DataFromFile = (setAllData) => {
-    fetch('/colonist_1v1_9_14_2024.csv') // Assuming the file is in the 'public' directory
+export const readDataFromFile = (csvFileName, setAllData) => {
+    fetch(csvFileName) // Assuming the file is in the 'public' directory
         .then(response => response.text())
         .then(csvText => {
             Papa.parse(csvText, {
