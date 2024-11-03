@@ -48,8 +48,6 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
       .slice(0, numOfPlayersOnChart) // Keep only top players
       .map(player => player.username); // Convert to usernames only
   });
-  console.log(numOfPlayersOnChart);
-  console.log(topPlayerMap);
   
   let lastSnapshot = topPlayerMapKeys[topPlayerMapKeys.length-1];
   topPlayerMapKeys.forEach(snapshotNumber => {
@@ -57,8 +55,6 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
       topPlayerMap[snapshotNumber] = topPlayerMap[snapshotNumber].concat(topPlayerMap[snapshotNumber+1]);
     }
   });
-
-  console.log(topPlayerMap);
   
   let topPlayerMapSubSnapshots = {};
   let currSubsnapshot = 1;
@@ -66,7 +62,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
   for (let i of topPlayerMapKeys){
     if (i != largestKey){
       let jStart = currSubsnapshot 
-      for (let j =jStart; j < jStart + 50; j++){
+      for (let j =jStart; j < jStart + 25; j++){
         topPlayerMapSubSnapshots[j] = topPlayerMap[i];
         currSubsnapshot++;
       }
@@ -180,7 +176,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     for (let i = 0; i < seasonData.length; i++){
       if (seasonData[i].snapshotNumber > startingSnapshot-1){
         while (snapshotCount != seasonData[i].snapshotNumber && snapshotCount < 185){
-          for (let j = 0; j < 50; j++){
+          for (let j = 0; j < 25; j++){
             ratings.push(-1);
           }
           snapshotCount++;
@@ -189,19 +185,19 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
           // Calculate the new rating values to replace the last 30 elements
           let rating1 = seasonData[i].skillRating - 100;
           let rating2 = seasonData[i].skillRating;
-          let step = (rating2 - rating1) / 50;
+          let step = (rating2 - rating1) / 25;
           let newRatings = [];
         
-          for (let j = 0; j < 50; j++) {
+          for (let j = 0; j < 25; j++) {
             newRatings.push(rating1 + step * j);
           }
         
           // Replace the last 30 elements of the ratings array
-          if (ratings.length >= 50) {
-            ratings.splice(ratings.length - 50, 50, ...newRatings);
+          if (ratings.length >= 25) {
+            ratings.splice(ratings.length - 25, 25, ...newRatings);
           } else {
             // If there are less than 30 elements, replace what exists and add the rest
-            ratings.splice(ratings.length - 50, 50, ...newRatings.slice(0, ratings.length));
+            ratings.splice(ratings.length - 25, 25, ...newRatings.slice(0, ratings.length));
             ratings.push(...newRatings.slice(ratings.length));
           }
         }
@@ -211,12 +207,12 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
           if (snapshotCount + 1 == seasonData[i+1].snapshotNumber && ((seasonData[i].playerRank <= numOfPlayersOnChart && seasonData[i+1].playerRank <= numOfPlayersOnChart) || enteringTop)){
             let rating1 = seasonData[i].skillRating;
             let rating2 = seasonData[i+1].skillRating;
-            let step = (rating2 - rating1)/50;
-            for (let j = 0; j < 50; j++){
+            let step = (rating2 - rating1)/25;
+            for (let j = 0; j < 25; j++){
               ratings.push(rating1 + step * j);
             }
           } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top
-            for (let j = 0; j < 50; j++){
+            for (let j = 0; j < 25; j++){
               ratings.push(-1);
             }
           }

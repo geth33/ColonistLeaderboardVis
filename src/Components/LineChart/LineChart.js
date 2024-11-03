@@ -45,7 +45,9 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       let xAxis = d3.axisBottom(x)
         .tickSizeInner(-h)
         .tickSizeOuter(0)
-        .tickPadding(10);
+        .tickPadding(10)
+        .ticks(4) 
+        .tickFormat(d => `Day ${5 + (d / 50)}`);// Set tick interval to 30 increments
 
       let yAxis = d3.axisLeft(y)
         .tickSizeInner(-w)
@@ -137,8 +139,6 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
             .y(d => y(d))
             .curve(d3.curveBasis);
         
-          console.log(Math.floor(time/50));
-          console.log(username);
           const lineData = playerData[username].slice(Math.max(startIndex, time - num), time + 1);
           pathsRef.current[username]
             .datum(lineData)
@@ -180,31 +180,40 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
         x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, numOfTicksOnGraph)]);
         y.domain([minMap[time] - 0, maxMap[time] + 10]);
 
-        $xAxis.transition().duration(15).call(xAxis);
-        $yAxis.transition().duration(15).call(yAxis);
+        $xAxis.call(xAxis);
+        $yAxis.call(yAxis);
       }
 
       const dispatchNextSnapshotEvent = () => {
-        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/50)} });
+        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/25)} });
         window.dispatchEvent(event);
       };
 
-      function tick() {
-        if (time < timeMax) {
-          time++;
-          update();
-        }
-        if (time % 50 === 0){
-          dispatchNextSnapshotEvent();
-        }
-      }
+      let lastTickTime = 0;
 
-      const intervalId = setInterval(() => {
-        tick();
-        if (time >= timeMax -1) {
-          clearInterval(intervalId);
-        }
-      }, lineChartSpeed);
+function tick(timestamp) {
+  console.log('tick')
+  // Check if this is the first frame or enough time has passed since the last tick
+  if (timestamp - lastTickTime >= lineChartSpeed) {
+    console.log("AHHHHHHHHHHh");
+    lastTickTime = timestamp; // Update the last tick time
+    if (time % 25 === 0){
+      dispatchNextSnapshotEvent();
+    }
+    // Run the tick logic here
+    time++;
+    update();
+
+    // Stop the animation if the maximum time has been reached
+    if (time >= timeMax) return;
+  }
+
+  // Continue the animation loop
+  requestAnimationFrame(tick);
+}
+
+// Start the animation loop
+requestAnimationFrame(tick);
     }
   }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap, maxMap]);
 

@@ -91,11 +91,10 @@ const Home = () => {
 	const tabItemSx = toSx(tabItemStyles, tabClasses);
   const [tabLabel, setTabLabel] = useState("Settings");
   const [settings, setSettings] = useState(null);
-  console.log(playerRatingMap);
 
   const season = 8;
   const numOfTicksOnGraph = 180;
-  const lineChartSpeed = 35;
+  const lineChartSpeed = 25;
   const numOfPlayersOnChart = 10;
   const startingSnapshot = 10;
 
@@ -113,9 +112,7 @@ useEffect(() => {
 }, [allData]);
 
 useEffect(() => {
-  console.log('in settings useEffect');
   if (settings != null){
-    console.log('not null');
     let csvFileName = settings.gameMode === '1v1' ? '/leaderboards_oneOnOne.csv' : '/leaderboards_base.csv';
     readDataFromFile(csvFileName, setAllData);
   }
@@ -134,8 +131,6 @@ useEffect(() => {
 
 useEffect(() => {
   const handleInitiateChartEvent = (e) => {
-    console.log('chart event initiated');
-    console.log(e.detail);
     setSettings(e.detail);
   };
 

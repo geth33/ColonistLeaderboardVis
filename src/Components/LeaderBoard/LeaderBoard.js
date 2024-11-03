@@ -26,9 +26,6 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
         rank: 0, // Initialize rank, will update after sorting
       }));
       
-      if (leaderBoardMetric === 'daysInFirst'){
-        console.log(sorted);
-      }
     // Identify removed entries
     let previousNames = sorted.map(s => s.name);
     const removed = sortedData.filter(entry => !previousNames.includes(entry.name));
