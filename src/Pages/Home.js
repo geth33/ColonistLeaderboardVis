@@ -76,32 +76,31 @@ function toSx(styles, classes) {
 	};
 }
 
+  const numOfTicksOnGraph = 180;
+  const lineChartSpeed = 25;
+  const startingSnapshot = 10;
+
 const Home = () => {
   const [allData, setAllData] = useState(null);
   const [playerRatingMap, setPlayerRatingMap] = useState(null);
   const [topPlayersAtTimeMap, setTopPlayersAtTimeMap] = useState(null);
   const [minMap, setMinMap] = useState(null);
   const [maxMap, setMaxMap] = useState(null);
+  const [seasonMaxSnapshotMap, setSeasonMaxSnapshotMap] = useState(null);
   const [top1RankMap, setTop1RankMap] = useState(null);
   const [top10RankMap, setTop10RankMap] = useState(null);
   const [top5WinRateMap, setTop5WinRateMap] = useState(null);
   const [timeInFirstPlaceMap, setTimeInFirstPlaceMap] = useState(null);
-  const [currSnapshot, setCurrSnapshot] = useState(10);
+  const [currSnapshot, setCurrSnapshot] = useState(startingSnapshot);
   const [tabIndex, setTabIndex] = React.useState(0);
 	const tabItemSx = toSx(tabItemStyles, tabClasses);
   const [tabLabel, setTabLabel] = useState("Settings");
   const [settings, setSettings] = useState(null);
 
-  const season = 8;
-  const numOfTicksOnGraph = 180;
-  const lineChartSpeed = 25;
-  const numOfPlayersOnChart = 10;
-  const startingSnapshot = 10;
-
 
 useEffect(() => {
   if (allData){
-    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, startingSnapshot, numOfTicksOnGraph);
+    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap);
     const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allData, settings.season, startingSnapshot);
     setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
     setTop10RankMap(top10RankMap);
@@ -114,7 +113,7 @@ useEffect(() => {
 useEffect(() => {
   if (settings != null){
     let csvFileName = settings.gameMode === '1v1' ? '/leaderboards_oneOnOne.csv' : '/leaderboards_base.csv';
-    readDataFromFile(csvFileName, setAllData);
+    readDataFromFile(csvFileName, setAllData, setSeasonMaxSnapshotMap);
   }
 }, [settings]);
 

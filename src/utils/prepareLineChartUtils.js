@@ -1,4 +1,4 @@
-export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, season, numOfPlayersOnChart, startingSnapshot, numOfTicksOnGraph) => {
+export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, season, numOfPlayersOnChart, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap) => {
     const playersOnGraph = [];
     // Loop through each user in the allData object
     Object.keys(allData).forEach(username => {
@@ -8,8 +8,9 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     });
   
     let playerRatingMap = {};
+    let maxSnapshot = seasonMaxSnapshotMap[season];
     for (let username of playersOnGraph){
-      playerRatingMap[username] = preparePlayerForLineChart(allData, username, season, numOfPlayersOnChart, startingSnapshot);
+      playerRatingMap[username] = preparePlayerForLineChart(allData, username, season, numOfPlayersOnChart, startingSnapshot, maxSnapshot);
     }
     setPlayerRatingMap(playerRatingMap);
     setTopPlayersAtTimeMap(createTopPlayersAtTimeMap(allData, playerRatingMap, setMinMap, setMaxMap, startingSnapshot, season, numOfPlayersOnChart, numOfTicksOnGraph));
@@ -168,7 +169,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     return allData[player]['Season '+season].filter(p => p.playerRank <= numOfPlayersOnChart).length > 0;
   }
   
-  export const preparePlayerForLineChart = (allData, player, season, numOfPlayersOnChart, startingSnapshot) => {
+  export const preparePlayerForLineChart = (allData, player, season, numOfPlayersOnChart, startingSnapshot, maxSnapshot) => {
     let ratings = [];
     let seasonData = allData[player]['Season ' + season];
     seasonData = seasonData.filter(d => d.snapshotNumber > startingSnapshot-1);
@@ -215,6 +216,10 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
             for (let j = 0; j < 25; j++){
               ratings.push(-1);
             }
+          }
+        } else {
+          if (seasonData[i].snapshotNumber !== maxSnapshot){
+            ratings.push(-1);
           }
         }
         snapshotCount++;
@@ -306,8 +311,6 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
         }
       }
     });
-    console.log(top10RankMap);
-    console.log(timeInFirstPlaceMap);
   
     return { top10RankMap, top5WinRateMap, timeInFirstPlaceMap };
   };

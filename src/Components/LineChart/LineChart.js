@@ -1,221 +1,198 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
+const MARGIN = { top: 20, right: 100, bottom: 40, left: 60 };
+const COLORS = [
+  '#e50000', '#fb9031', '#11e928', '#ba3ee1', '#d1d3d1', '#059bfb', '#747678',
+  '#ffe001', '#a0f2ed', '#dbc5f8', '#219b42', '#e36728', '#8cb60c', '#e1b568'
+];
+
 const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed }) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
-  const coreVisRef = useRef(null); // Ref to target coreVisContainer div
-  const pathsRef = useRef({}); // Object to keep track of active paths by username
-  const labelsRef = useRef({}); // Object to keep track of label elements
-  const playerStartIndexRef = useRef({}); // Object to store start index for each player
-  const colorUsage = useRef({}); // Object to track color usage counts
+  const coreVisRef = useRef(null);
+  const pathsRef = useRef({});
+  const labelsRef = useRef({});
+  const playerStartIndexRef = useRef({});
+  const colorUsage = useRef({});
 
   useEffect(() => {
     if (!graphInitialized && playerData && Object.values(playerData).length > 0 && minMap && maxMap) {
       setGraphInitialized(true);
 
-      d3.select(coreVisRef.current).select('svg').remove();
-      let margin = 0;
-      let h = 0;
-      let w = 0;
+      const dimensions = calculateDimensions();
+      const svg = setupChart(dimensions);
+      const { x, y, xAxis, yAxis, $xAxis, $yAxis } = setupScalesAndAxes(svg, dimensions);
 
-      // Set dimensions and margins for the chart
-      if (window.innerWidth < 800){
-        margin = {top: 20, right: 100, bottom: 40, left: 60};
-        h = window.innerHeight / 1.5 - margin.top - margin.bottom;
-        w = window.innerWidth/1.1 - margin.left - margin.right;
-      } else if (window.innerWidth >= 800 && window.innerWidth <= 1200){
-        margin = {top: 20, right: 100, bottom: 40, left: 60};
-        h = window.innerHeight / 2 - margin.top - margin.bottom;
-        w = window.innerWidth/2 - margin.left - margin.right;
-      } else {
-        margin = { top: 20, right: 100, bottom: 40, left: 60 };
-        h = window.innerHeight / 1.2 - margin.top - margin.bottom;
-        w = window.innerWidth / 2.5 - margin.left - margin.right;
-      }
+      initializeColorUsage();
 
       let time = 0;
-      let num = numOfTicksOnGraph; // Number of points to display at any given time
-      let timeMax = Object.keys(topPlayersAtTimeMap).length;
+      let lastTickTime = 0;
+      const timeMax = Object.keys(topPlayersAtTimeMap).length;
 
-      // Create scales
-      let x = d3.scaleLinear().range([0, w]);
-      let y = d3.scaleLinear().range([h, 0]);
+      function tick(timestamp) {
+        if (timestamp - lastTickTime >= lineChartSpeed) {
+          lastTickTime = timestamp;
+          time++;
+          if (time < timeMax) {
+            update(svg, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax);
+          }
+          if (time % 25 === 0) dispatchSnapshotEvent(time);
+        }
+        if (time < timeMax){
+          requestAnimationFrame(tick);
+        }
+      }
 
-      // Create axes
-      let xAxis = d3.axisBottom(x)
-        .tickSizeInner(-h)
-        .tickSizeOuter(0)
-        .tickPadding(10)
-        .ticks(4) 
-        .tickFormat(d => `Day ${5 + (d / 50)}`);// Set tick interval to 30 increments
+      requestAnimationFrame(tick);
+    }
+  }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap, maxMap]);
 
-      let yAxis = d3.axisLeft(y)
-        .tickSizeInner(-w)
-        .tickSizeOuter(0)
-        .tickPadding(10);
+  // Utility to calculate dimensions based on window size
+  const calculateDimensions = () => {
+    const width = window.innerWidth < 800 ? window.innerWidth / 1.1 : window.innerWidth / 2.5;
+    const height = window.innerWidth < 800 ? window.innerHeight / 1.5 : window.innerHeight / 1.2;
+    return { width: width - MARGIN.left - MARGIN.right, height: height - MARGIN.top - MARGIN.bottom };
+  };
 
-      // Create SVG container in the coreVisContainer div
-      let svg = d3.select(coreVisRef.current).append('svg')
-        .attr('width', w + margin.left + margin.right)
-        .attr('height', h + margin.top + margin.bottom)
-        .append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
-
-        // Lighten grid line color
-    svg.selectAll('.tick line')
-      .style('stroke', '#cccccc'); // Light gray grid lines
-
-    // Add x-axis label
+  // Setup SVG container and axis labels
+  const setupChart = ({ width, height }) => {
+    d3.select(coreVisRef.current).select('svg').remove();
+    const svg = d3.select(coreVisRef.current).append('svg')
+      .attr('width', width + MARGIN.left + MARGIN.right)
+      .attr('height', height + MARGIN.top + MARGIN.bottom)
+      .append('g')
+      .attr('transform', `translate(${MARGIN.left}, ${MARGIN.top})`);
     svg.append('text')
       .attr('class', 'x-axis-label')
-      .attr('x', w / 2)
-      .attr('y', h + margin.bottom - 10)
+      .attr('x', width / 2)
+      .attr('y', height + MARGIN.bottom - 10)
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .text('Day # in Season');
+    return svg;
+  };
 
-      // Append x and y axes
-      let $xAxis = svg.append('g')
-        .attr('class', 'x axis')
-        .attr('transform', `translate(0, ${h})`)
-        .call(xAxis);
+  // Setup scales and axes
+  const setupScalesAndAxes = (svg, { width, height }) => {
+    const x = d3.scaleLinear().range([0, width]);
+    const y = d3.scaleLinear().range([height, 0]);
 
-      let $yAxis = svg.append('g')
-        .attr('class', 'y axis')
-        .call(yAxis);
+    const xAxis = d3.axisBottom(x).tickSizeInner(-height).tickPadding(10).ticks(4)
+      .tickFormat(d => `Day ${5 + (d / 50)}`);
+    const yAxis = d3.axisLeft(y).tickSizeInner(-width).tickPadding(10);
 
-      // Define colors for lines
-      const myColor = [
-        '#e50000', '#fb9031', '#11e928', '#ba3ee1', '#d1d3d1', '#059bfb', '#747678', '#ffe001',
-        '#a0f2ed', '#dbc5f8', '#219b42', '#e36728', '#8cb60c', '#e1b568'
-      ];
+    const $xAxis = svg.append('g').attr('class', 'x axis').attr('transform', `translate(0, ${height})`).call(xAxis);
+    const $yAxis = svg.append('g').attr('class', 'y axis').call(yAxis);
 
-      // Initialize color usage counts
-      myColor.forEach(color => {
-        colorUsage.current[color] = 0;
-      });
+    svg.selectAll('.tick line').style('stroke', '#cccccc'); // Light gray grid lines
 
-      let activePlayers = [];
+    return { x, y, xAxis, yAxis, $xAxis, $yAxis };
+  };
 
-      function getStartIndexForPlayer(username) {
-        if (playerStartIndexRef.current[username] !== undefined) {
-          return playerStartIndexRef.current[username];
-        }
-        playerStartIndexRef.current[username] = time; 
-        return time;
-      }
+  const initializeColorUsage = () => {
+    COLORS.forEach(color => colorUsage.current[color] = 0);
+  };
 
-      function getLeastUsedColor() {
-        return Object.entries(colorUsage.current).reduce((leastUsedColor, [color, count]) => {
-          if (leastUsedColor === null || count < colorUsage.current[leastUsedColor]) {
-            return color;
-          }
-          return leastUsedColor;
-        }, null);
-      }
-      function update() {
-        activePlayers = [...topPlayersAtTimeMap[time]];
+  const dispatchSnapshotEvent = (time) => {
+    const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time / 25) } });
+    window.dispatchEvent(event);
+  };
 
-        activePlayers.forEach((username, index) => {
-          if (!pathsRef.current[username]) {
-            const color = getLeastUsedColor();
-            colorUsage.current[color]++;
+  // Main update function
+  const update = (svg, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax) => {
+    const activePlayers = [...topPlayersAtTimeMap[time]];
 
-            pathsRef.current[username] = svg.append('path')
-              .attr('class', `line data line-${index}`)
-              .style('stroke', color)
-              .style('fill', 'none');
+    activePlayers.forEach((username, index) => {
+      if (!pathsRef.current[username]) createPlayerElements(svg, username, index);
 
-            labelsRef.current[username] = svg.append('text')
-              .attr('class', `line-label label-${index}`)
-              .style('fill', color)
-              .style('font-size', '12px');
-          }
+      const startIndex = getStartIndexForPlayer(username, time);
+      const lineData = playerData[username].slice(Math.max(startIndex, time - numOfTicksOnGraph), time + 1);
 
-          const startIndex = getStartIndexForPlayer(username);
-          const adjustedLine = d3.line()
-            .defined(d => d !== -1)
-            .x((d, i) => x(Math.max(time - num, startIndex) + i))
-            .y(d => y(d))
-            .curve(d3.curveBasis);
-        
-          const lineData = playerData[username].slice(Math.max(startIndex, time - num), time + 1);
-          pathsRef.current[username]
-            .datum(lineData)
-            .attr('d', adjustedLine);
+      updatePlayerPath(username, lineData, time, timeMax, x, y, startIndex);
+      updatePlayerLabel(username, lineData, x, y, time, startIndex);
+    });
 
-          const currentDataPoint = playerData[username][time];
-          const opacity = (currentDataPoint !== undefined && currentDataPoint !== -1) ? 1 : 0.25;
-          pathsRef.current[username].style('opacity', opacity);
+    cleanupInactivePlayers(activePlayers);
+    updateScales(x, y, xAxis, yAxis, $xAxis, $yAxis, time);
+  };
 
-          const lastIndex = lineData.length - 1;
-          if (lineData[lastIndex] !== undefined) {
-            labelsRef.current[username]
-              .text(username)
-              .attr('x', x(Math.max(time - num, startIndex) + lastIndex))
-              .attr('y', y(lineData[lastIndex]))
-              .attr('dx', 5)
-              .attr('dy', 4);
-          }
-        });
+  const createPlayerElements = (svg, username, index) => {
+    const color = getLeastUsedColor();
+    colorUsage.current[color]++;
+    pathsRef.current[username] = svg.append('path')
+      .attr('class', `line data line-${index}`)
+      .style('stroke', color)
+      .style('fill', 'none');
+    labelsRef.current[username] = svg.append('text')
+      .attr('class', `line-label label-${index}`)
+      .style('fill', color)
+      .style('font-size', '12px');
+  };
 
-        Object.keys(pathsRef.current).forEach(username => {
-          if (!activePlayers.includes(username)) {
-            const color = pathsRef.current[username].style('stroke');
-            colorUsage.current[color]--;
-
-            pathsRef.current[username].remove();
-            delete pathsRef.current[username];
-            labelsRef.current[username].remove();
-            delete labelsRef.current[username];
-          }
-        });
-
-        Object.keys(playerStartIndexRef.current).forEach(username => {
-          if (!activePlayers.includes(username)) {
-            delete playerStartIndexRef.current[username];
-          }
-        });
-
-        x.domain([Math.max(time - num + 1, 0), Math.max(time + 1, numOfTicksOnGraph)]);
-        y.domain([minMap[time] - 0, maxMap[time] + 10]);
-
-        $xAxis.call(xAxis);
-        $yAxis.call(yAxis);
-      }
-
-      const dispatchNextSnapshotEvent = () => {
-        const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time/25)} });
-        window.dispatchEvent(event);
-      };
-
-      let lastTickTime = 0;
-
-function tick(timestamp) {
-  console.log('tick')
-  // Check if this is the first frame or enough time has passed since the last tick
-  if (timestamp - lastTickTime >= lineChartSpeed) {
-    console.log("AHHHHHHHHHHh");
-    lastTickTime = timestamp; // Update the last tick time
-    if (time % 25 === 0){
-      dispatchNextSnapshotEvent();
+  const getStartIndexForPlayer = (username, time) => {
+    if (playerStartIndexRef.current[username] === undefined) {
+      playerStartIndexRef.current[username] = time;
     }
-    // Run the tick logic here
-    time++;
-    update();
+    return playerStartIndexRef.current[username];
+  };
 
-    // Stop the animation if the maximum time has been reached
-    if (time >= timeMax) return;
-  }
+  const getLeastUsedColor = () => {
+    return Object.entries(colorUsage.current).reduce((leastUsed, [color, count]) =>
+      !leastUsed || count < colorUsage.current[leastUsed] ? color : leastUsed, null
+    );
+  };
 
-  // Continue the animation loop
-  requestAnimationFrame(tick);
-}
+  const updatePlayerPath = (username, lineData, time, timeMax, x, y, startIndex) => {
+    const pathGenerator = d3.line()
+      .defined(d => d !== -1)
+      .x((d, i) => x(Math.max(time - numOfTicksOnGraph, startIndex) + i))
+      .y(d => y(d))
+      .curve(d3.curveBasis);
+  
+    // Set path data
+    pathsRef.current[username].datum(lineData).attr('d', pathGenerator);
+  
+    // Set opacity based on the current data point
+    const currentDataPoint = playerData[username][time];
+    const opacity = ((currentDataPoint !== undefined && currentDataPoint !== -1) || time === timeMax) ? 1 : 0.25;
+    pathsRef.current[username].style('opacity', opacity);
+  };
+  
 
-// Start the animation loop
-requestAnimationFrame(tick);
+  const updatePlayerLabel = (username, lineData, x, y, time, startIndex) => {
+    const lastIndex = lineData.length - 1;
+    if (lineData[lastIndex] !== undefined) {
+      labelsRef.current[username]
+        .text(username)
+        .attr('x', x(Math.max(time - numOfTicksOnGraph, startIndex) + lastIndex))
+        .attr('y', y(lineData[lastIndex]))
+        .attr('dx', 5)
+        .attr('dy', 4);
     }
-  }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap, maxMap]);
+  };
+
+  const cleanupInactivePlayers = (activePlayers) => {
+    Object.keys(pathsRef.current).forEach(username => {
+      if (!activePlayers.includes(username)) {
+        const color = pathsRef.current[username].style('stroke');
+        colorUsage.current[color]--;
+        pathsRef.current[username].remove();
+        delete pathsRef.current[username];
+        labelsRef.current[username].remove();
+        delete labelsRef.current[username];
+      }
+    });
+    Object.keys(playerStartIndexRef.current).forEach(username => {
+      if (!activePlayers.includes(username)) delete playerStartIndexRef.current[username];
+    });
+  };
+
+  const updateScales = (x, y, xAxis, yAxis, $xAxis, $yAxis, time) => {
+    x.domain([Math.max(time - numOfTicksOnGraph + 1, 0), Math.max(time + 1, numOfTicksOnGraph)]);
+    y.domain([minMap[time] - 0, maxMap[time] + 10]);
+    $xAxis.call(xAxis);
+    $yAxis.call(yAxis);
+  };
 
   return <div ref={coreVisRef} className='coreVisContainer'></div>;
 };
