@@ -1,0 +1,125 @@
+// Define your color palette
+$color1: #afb5b1; // Light grayish-green
+$color2: #e46d2c; // Orange
+$color3: #11933a; // Green
+$color4: #f0b820; // Yellow
+$color5: #8fb40a; // Lime green
+$color6: #d6cf93; // Beige
+
+// Color list for random selection without consecutive colors
+$colors: ($color1, $color2, $color3, $color4, $color5, $color6);
+
+// Settings
+$hex-rows: 5; // Rows of hexagons
+$hex-size: 30px;
+$hex-gap: $hex-size * 0.25;
+$hex-color: green;
+$hex-animation-type: left-right; // Animation direction
+
+// ------------------------------------------------------
+// Base hex setup
+$ratio: if($hex-size / 1px < 35, 0.6, 0.57735);
+$hex-width: $hex-size;
+$hex-height: $hex-size * $ratio * 2;
+
+.loader {
+    position: relative;
+    width: $hex-width * $hex-rows + ($hex-gap * ($hex-rows - 1));
+    height: $hex-width * $hex-rows + (($hex-gap / 2) * ($hex-rows - 1));
+    margin: 0 auto;
+}
+
+.hex {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    padding-right: 3em;
+    height: $hex-height / 2;
+    background-color: currentColor;
+    transform: translate(-50%, -50%);
+    transform-origin: 0 0;
+        animation: scaleIt 2s ease-in-out infinite both; // Apply animation to all hexes
+
+
+    &:before,
+    &:after {
+        content: '';
+        position: absolute;
+        width: $hex-width;
+        height: $hex-height / 2;
+        background-color: currentColor;
+    }
+
+    &:before { transform: rotate(60deg); }
+    &:after { transform: rotate(-60deg); }
+
+    $x-dist: $hex-width + $hex-gap;
+    $y-dist: $hex-height + $hex-gap;
+    $el: 1;
+    $cols: floor($hex-rows / 2);
+    $even-cols: if($cols % 2 == 0, true, false);
+    $x-offset: if($even-cols, -($cols / 2) + 0.5, -(($cols - 1) / 2));
+    $y-offset: -(($hex-rows - 1) / 2);
+
+    // Positioning loop with color assignment
+    @for $r from 0 through ($hex-rows - 1) {
+        @if $y-offset <= 0 {
+            $cols: $cols + 1;
+            $x-offset: $x-offset - 0.5;
+        } @else {
+            $cols: $cols - 1;
+            $x-offset: $x-offset + 0.5;
+        }
+        $even-cols: if($cols % 2 == 0, true, false);
+        $row-x-offset: $x-offset;
+
+        // Iterate through columns with a color sequence that avoids duplicates
+        @for $c from 1 through $cols {
+            &:nth-of-type(#{$el}) {
+                display: block;
+
+                // Assign a color in a controlled random order
+                @if $el % 6 == 1 { color: $color1; }
+                @else if $el % 6 == 2 { color: $color2; }
+                @else if $el % 6 == 3 { color: $color3; }
+                @else if $el % 6 == 4 { color: $color4; }
+                @else if $el % 6 == 5 { color: $color5; }
+                @else if $el % 6 == 0 { color: $color6; }
+
+                // Position each hex
+                margin-left: $row-x-offset * $x-dist;
+                margin-top: $y-offset * ($y-dist * 0.75);
+
+                // Apply animation with optional delay
+                @if $hex-animation-type != none {
+                    animation: scaleIt 2s ease-in-out infinite both;
+                }
+
+                @if $hex-animation-type == top-bottom {
+                    animation-delay: 0.05 * $r * 1s;
+                } @else if $hex-animation-type == left-right {
+                    animation-delay: 0.05 * ($c - 1) * 1s;
+                }
+            }
+
+            // Increment element count
+            $el: $el + 1;
+
+            // Update x-offset based on even or odd columns
+            $row-x-offset: if($even-cols and $row-x-offset + 1 == 0, 1, $row-x-offset + 1);
+        }
+
+        // Update y-offset for the next row
+        $y-offset: $y-offset + 1;
+    }
+}
+
+// Animation keyframes
+@keyframes scaleIt {
+    25%, 100% {
+        transform: scale(1) translate(-50%, -50%);
+    }
+    50% {
+        transform: scale(0) translate(-50%, -50%);
+    }
+}

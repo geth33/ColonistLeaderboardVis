@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import LeaderBoard from '../Components/LeaderBoard/LeaderBoard';
 import LineChart from '../Components/LineChart/LineChart';
 import Settings from '../Components/Settings/Settings';
+import Loader from '../Components/Loader/Loader';
 import {
 	Tab, tabClasses,
 	Tabs,
-	tabsClasses
+	tabsClasses,
+  Backdrop
 } from "@mui/material";
 import {
   readDataFromFile
@@ -87,6 +89,7 @@ const Home = () => {
   const [minMap, setMinMap] = useState(null);
   const [maxMap, setMaxMap] = useState(null);
   const [seasonMaxSnapshotMap, setSeasonMaxSnapshotMap] = useState(null);
+  const [generatingChart, setGeneratingChart] = useState(false);
   const [top1RankMap, setTop1RankMap] = useState(null);
   const [top10RankMap, setTop10RankMap] = useState(null);
   const [top5WinRateMap, setTop5WinRateMap] = useState(null);
@@ -107,11 +110,23 @@ useEffect(() => {
     setTop5WinRateMap(top5WinRateMap);
     setTimeInFirstPlaceMap(timeInFirstPlaceMap);
     setTabIndex(1);
+    setGeneratingChart(false);
   }
 }, [allData]);
 
 useEffect(() => {
   if (settings != null){
+    setGeneratingChart(true);
+    setMinMap(null);
+    setMaxMap(null);
+    setSeasonMaxSnapshotMap(null);
+    setPlayerRatingMap(null);
+    setTopPlayersAtTimeMap(null);
+    setTop1RankMap(null);
+    setTop10RankMap(null);
+    setTop5WinRateMap(null);
+    setTimeInFirstPlaceMap(null);
+
     let csvFileName = settings.gameMode === '1v1' ? '/leaderboards_oneOnOne.csv' : '/leaderboards_base.csv';
     readDataFromFile(csvFileName, setAllData, setSeasonMaxSnapshotMap);
   }
@@ -141,7 +156,7 @@ useEffect(() => {
   return (
     <div className='visContainer'>
         <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
-        minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed}/>
+        minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} generatingChart={generatingChart}/>
         <div className="supportingContentContainer">
           <div className='tabModule'>
             <Tabs
@@ -156,6 +171,9 @@ useEffect(() => {
           {
             tabIndex === 0 ? <>
               <Settings/>
+              <Backdrop open={generatingChart}>
+                <Loader/>
+              </Backdrop>
             </> : 
             <div className='supportingVisContainer'>
               <div className='leaderboardItem leadingUserModule'>

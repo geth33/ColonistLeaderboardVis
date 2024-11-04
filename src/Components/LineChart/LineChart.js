@@ -7,13 +7,14 @@ const COLORS = [
   '#ffe001', '#a0f2ed', '#dbc5f8', '#219b42', '#e36728', '#8cb60c', '#e1b568'
 ];
 
-const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed }) => {
+const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart }) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null);
   const pathsRef = useRef({});
   const labelsRef = useRef({});
   const playerStartIndexRef = useRef({});
   const colorUsage = useRef({});
+  let requestId = useRef(null); // Reference for requestAnimationFrame ID
 
   useEffect(() => {
     if (!graphInitialized && playerData && Object.values(playerData).length > 0 && minMap && maxMap) {
@@ -39,13 +40,25 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
           if (time % 25 === 0) dispatchSnapshotEvent(time);
         }
         if (time < timeMax){
-          requestAnimationFrame(tick);
+          requestId.current = requestAnimationFrame(tick);
         }
       }
 
-      requestAnimationFrame(tick);
+      requestId.current = requestAnimationFrame(tick);
     }
   }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap, maxMap]);
+
+  useEffect(() => {
+    if (generatingChart){
+      setGraphInitialized(false);
+      d3.select(coreVisRef.current).select('svg').remove();
+      if (requestId.current) cancelAnimationFrame(requestId.current);
+      pathsRef.current = {};
+      labelsRef.current = {};
+      playerStartIndexRef.current = {};
+      colorUsage.current = {};
+    }
+  }, [generatingChart]);
 
   // Utility to calculate dimensions based on window size
   const calculateDimensions = () => {
