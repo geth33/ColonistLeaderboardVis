@@ -126,6 +126,7 @@ useEffect(() => {
     setTop10RankMap(null);
     setTop5WinRateMap(null);
     setTimeInFirstPlaceMap(null);
+    setCurrSnapshot(startingSnapshot);
 
     let csvFileName = settings.gameMode === '1v1' ? '/leaderboards_oneOnOne.csv' : '/leaderboards_base.csv';
     readDataFromFile(csvFileName, setAllData, setSeasonMaxSnapshotMap);
@@ -155,9 +156,11 @@ useEffect(() => {
 
   return (
     <div className='visContainer'>
-        <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
-        minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} generatingChart={generatingChart}/>
-        <div className="supportingContentContainer">
+        {
+          allData && !generatingChart && <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
+          minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} generatingChart={generatingChart}/> 
+        }
+        <div className={`${allData === null || generatingChart ? 'fullContainer' : 'supportingContentContainer'}`}>
           <div className='tabModule'>
             <Tabs
                 value={tabIndex}
@@ -165,7 +168,7 @@ useEffect(() => {
                 sx={toSx(tabsStyles, tabsClasses)}
               >
                 <Tab disableRipple label={"Settings"} sx={tabItemSx} />
-                <Tab disableRipple label={"Leaderboards"} sx={tabItemSx}/>
+                <Tab disableRipple label={"Leaderboards"} sx={tabItemSx} disabled={settings === null}/>
 						</Tabs>
           </div>
           {

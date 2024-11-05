@@ -42,6 +42,11 @@
   grid-template-rows: auto auto auto; /* Two rows */
 }
 
+.fullContainer {
+  width: 40%;
+  margin: 5em auto 5em;
+}
+
 .leadingUserModule {
   grid-column: 1 / span 2;
   grid-row: 1;
@@ -201,11 +206,15 @@ text {
 }
 
 @media (max-width: 1824px) {
-
+  .fullContainer {
+    width: 50%;
+  }
 }
 
 @media (max-width: 1224px) {
-
+  .fullContainer {
+    width: 60%;
+  }
 }
 
 @media (max-width: 1050px) {
@@ -248,11 +257,20 @@ text {
     grid-row: 2; /* Second row */
     margin-top: 22em;
   }
+  .fullContainer {
+    width: 80%;
+  }
 }
 
 @media (max-width: 900px) {
   .tabModule{
     width: 225px;
+  }
+}
+
+@media (max-width: 750px) {
+  .fullContainer {
+    width: 95%;
   }
 }
 

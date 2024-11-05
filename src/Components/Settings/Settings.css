@@ -1,6 +1,6 @@
 .settingsContainer {
     background: #0567a6;
-    height: 300px;
+    height: 340px;
     width: 100%;
     filter: drop-shadow(2px 4px 4px rgba(20,20,20,0.4));
 }
@@ -64,6 +64,7 @@
     background: white;
     padding: 0;
     margin: 0;
+    font-size: 0.9rem;
 }
 
 .settingsLabel {
@@ -85,7 +86,7 @@
     padding-top: 3em;
 }
 
-.generateChartButton {
+.generateChartButtonContainer {
     display: flex;
     justify-content: space-evenly;
     padding-top: 3em;
@@ -97,4 +98,80 @@
 
 .notSelected {
     background: lightgray !important;
+}
+
+.buttonImage {
+    width: 25px;
+    height: 25px;
+}
+
+.comingSoon {
+    min-height: 44px;
+}
+
+.buttonHeaderText {
+    color: white;
+    font-weight: bold;
+}
+
+.buttonHeadTextEmpty {
+    margin-bottom: 17px;
+}
+
+.buttonHeadTextNonEmpty {
+    margin: 0 0 5px 0;
+}
+
+#generateChartButton {
+    padding:10px !important;
+}
+
+@media (max-width: 480px) {
+    .settingsButton {
+        width: 100px !important;
+        padding: 3px 15px !important; 
+    }
+    .buttonImage {
+        width: 20px;
+        height: 20px;
+    }
+    .settingsButtonText {
+        font-size: 10px;
+    }
+    .comingSoon {
+        min-height: 40px;
+    }
+    .lineChartModeSubtextContainer p {
+        margin-top: 2em;
+        font-size: 10px;
+    }
+    .settingsGroup {
+        display: grid;
+        padding: 30px 30px 0px;
+        gap: 20px 0px;
+        grid-template-columns: 1fr 1fr; /* Two columns */
+        grid-template-rows: auto auto; /* Two rows */
+    }
+    .setting1 {
+        grid-column: 1;
+        grid-row: 1;
+    }
+    .setting2 {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    .setting3 {
+        grid-column: 1 / span 2;
+        grid-row: 2;
+    }
+    .settingsContainer {
+        height: 400px;
+    }
+    .settingsLabel {
+        font-size: 11px;
+    }
+
+    #generateChartButton p {
+        font-size: 12px;
+    }
 }

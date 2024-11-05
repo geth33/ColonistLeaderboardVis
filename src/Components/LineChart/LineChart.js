@@ -1,11 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-const MARGIN = { top: 20, right: 100, bottom: 40, left: 60 };
+const MARGIN = { top: 20, right: 100, bottom: 50, left: 60 };
 const COLORS = [
   '#e50000', '#fb9031', '#11e928', '#ba3ee1', '#d1d3d1', '#059bfb', '#747678',
   '#ffe001', '#a0f2ed', '#dbc5f8', '#219b42', '#e36728', '#8cb60c', '#e1b568'
 ];
+
+const COLORS2 = [
+  '#E5BD75', '#AF67EE','#A893E2', '#65CFDE', '#83E79F', '#DAE075', '#D9968F',
+  '#E39B8D', '#D9DC9C', '#B296A8', 
+]
 
 const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart }) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
@@ -62,7 +67,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
 
   // Utility to calculate dimensions based on window size
   const calculateDimensions = () => {
-    const width = window.innerWidth < 800 ? window.innerWidth / 1.1 : window.innerWidth / 2.5;
+    const width = window.innerWidth < 800 ? window.innerWidth / 1.1 : window.innerWidth / 2.2;
     const height = window.innerWidth < 800 ? window.innerHeight / 1.5 : window.innerHeight / 1.2;
     return { width: width - MARGIN.left - MARGIN.right, height: height - MARGIN.top - MARGIN.bottom };
   };
@@ -103,7 +108,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   };
 
   const initializeColorUsage = () => {
-    COLORS.forEach(color => colorUsage.current[color] = 0);
+    COLORS2.forEach(color => colorUsage.current[color] = 0);
   };
 
   const dispatchSnapshotEvent = (time) => {
@@ -135,11 +140,13 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
     pathsRef.current[username] = svg.append('path')
       .attr('class', `line data line-${index}`)
       .style('stroke', color)
-      .style('fill', 'none');
+      .style('fill', 'none')
+      .style('stroke-width', '2');
     labelsRef.current[username] = svg.append('text')
       .attr('class', `line-label label-${index}`)
       .style('fill', color)
-      .style('font-size', '12px');
+      .style('font-size', '12px')
+      .style('font-weight', 'bold');
   };
 
   const getStartIndexForPlayer = (username, time) => {

@@ -32,31 +32,38 @@ const Settings = ({}) => {
     <div className='settingsContainer'>
         <div className='lineChartModeContainer'>
             <div className='lineChartModeButtonContainer'>
-                <Button className={`settingsButton ${lineChartMode === 0 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(0)}}>
-                    <img src="/crown.png" alt="crown" style={{height: '25px', width: '25px'}}/>
-                    <div className='settingsButtonText'>
-                        <p>Fight</p>
-                        <p className='settingsButtonTextSmall'>for the</p>
-                        <p>Crown</p>
-                    </div>
-                </Button>
                 <div>
-                    <Button className='settingsButton disabled' disabled style={{height: '100%'}}>
-                        <img src="/map.png" alt="crown" style={{height: '25px', width: '25px'}}/>
+                    <p className='buttonHeaderText buttonHeadTextEmpty'></p>
+                    <Button className={`settingsButton ${lineChartMode === 0 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(0)}}>
+                        <img src="/crown.png" alt="crown" className={'buttonImage'}/>
+                        <div className='settingsButtonText'>
+                            <p>Fight</p>
+                            <p className='settingsButtonTextSmall'>for the</p>
+                            <p>Crown</p>
+                        </div>
+                    </Button>
+                </div>
+                <div>
+                    <p className='buttonHeaderText buttonHeadTextNonEmpty'>Coming soon!</p>
+                    <Button className='settingsButton disabled comingSoon' disabled>
+                        <img src="/map.png" alt="crown" className={'buttonImage'}/>
                         <div className='settingsButtonText'>
                             <p>Solo</p>
                             <p>Journey</p>
                         </div>
                     </Button>
                 </div>
-                <Button className='settingsButton disabled' disabled>
-                    <img src="/swordClash.png" alt="crown" style={{height: '25px', width: '25px'}}/>
-                    <div className='settingsButtonText'>
-                        <p>Head</p>
-                        <p className='settingsButtonTextSmall'>to</p>
-                        <p>Head</p>
-                    </div>
-                </Button>
+                <div>
+                    <p className='buttonHeaderText buttonHeadTextNonEmpty'>Coming soon!</p>
+                    <Button className='settingsButton disabled comingSoon' disabled>
+                        <img src="/swordClash.png" alt="crown" className={'buttonImage'}/>
+                        <div className='settingsButtonText'>
+                            <p>Head</p>
+                            <p className='settingsButtonTextSmall'>to</p>
+                            <p>Head</p>
+                        </div>
+                    </Button>
+                </div>
             </div>
             <div className='lineChartModeSubtextContainer'>
                 {
@@ -79,7 +86,7 @@ const Settings = ({}) => {
             </Button>
         </div>
         <div className='settingsGroup'>
-            <div className='setting'>
+            <div className='setting setting1'>
                 <span className='settingsLabel'>Season</span>
                 <FormControl size="small">
                     <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={season} onChange={(e) => {setSeason(e.target.value);}}>
@@ -94,7 +101,7 @@ const Settings = ({}) => {
                     </Select>
                 </FormControl>
             </div>
-            <div className='setting'>
+            <div className='setting setting2'>
                 <span className='settingsLabel'>Speed</span>
                 <FormControl size="small">
                     <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={speed} onChange={(e) => {setSpeed(e.target.value);}}>
@@ -109,10 +116,10 @@ const Settings = ({}) => {
                     </Select>
                 </FormControl>
             </div>
-            <div className='setting'>
+            <div className='setting setting3'>
                 <span className='settingsLabel'># of Players</span>
                 <FormControl size="small">
-                    <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={playerNum} onChange={(e) => {setPlayerNum(e.target.value);}}>
+                    <Select className='settingsSelect' value={playerNum} onChange={(e) => {setPlayerNum(e.target.value);}}>
                         {numOfPlayers.map((playerNum, num) => (
                             <MenuItem
                                 value={playerNum}
@@ -125,10 +132,10 @@ const Settings = ({}) => {
                 </FormControl>
             </div>
         </div>
-        <div className='generateChartButton'>
-            <Button className='settingsButton' onClick={() => {dispatchInitiateChartEvent();}}>
+        <div className='generateChartButtonContainer'>
+            <Button id='generateChartButton' className='settingsButton' onClick={() => {dispatchInitiateChartEvent();}}>
                 <div className='settingsButtonText'>
-                    <p>Generate Chart</p>
+                    <p id='generateChartText'>Generate Chart</p>
                 </div>
             </Button>
         </div>
