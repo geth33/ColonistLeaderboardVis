@@ -1,0 +1,10 @@
+.questionContainer {
+    font-size: 12px;
+    font-weight: bold;
+    justify-content: center !important;
+    color: rgb(43, 119, 198) !important;
+}
+
+.questionContainer > div{
+    justify-content: center !important;
+}
