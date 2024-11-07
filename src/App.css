@@ -281,9 +281,17 @@ text {
   .fullContainer {
     width: 95%;
   }
+  .faq {
+    width: 85%;
+  }
 }
 
 @media (max-width: 480px) {
+
+  .faq {
+    width: 80%;
+  }
+
   .visContainer {
     padding: 10px;
   }

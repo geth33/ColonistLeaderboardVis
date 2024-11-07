@@ -15,7 +15,7 @@ const FAQ = () => {
         <QuestionDropdown question={"Can I give suggestions or report bugs?"} answer={`Absolutely! Please click the "Give Feedback" link in the website's navigation bar. Alternatively, reach out to me (geth9886) on Discord. All feedback is welcome.`}/>
         <h3 className='faqSection'>About</h3>
         <QuestionDropdown question={"Who made this app?"} answer={`Hi! My tag on Colonist is TofuTyrant and I'm a top 50 player in 1v1 and top 100 player in base. I'm a full-stack web developer from Utah with a love for data visualizations.`}/>
-        <QuestionDropdown question={"Why did you make this app?"} answer={`I love uncovering the hidden story behind data. I was inspired by abcaba's "The history of the top chess players over time" video on YouTube and I felt like I could do something similar for the Colonist leaderboards.`}/>
+        <QuestionDropdown question={"Why did you make this app?"} answer={`I love uncovering the hidden story behind data. I was inspired by abacaba's "The history of the top chess players over time" video on YouTube and I felt like I could do something similar for the Colonist leaderboards.`}/>
         <QuestionDropdown question={"How did you make this app?"} answer={`This is a react application that uses D3.js for graphing and MUI for general UI components. I scrape the data from Colonist's leaderboards and store that data in a PostgreSQL DB in Cloud SQL. This website is hosted by GCP.`}/>
         <QuestionDropdown question={"Can I help work on the project?"} answer={`I'm currently keeping the project private but I'm open to having others work on it. I think the app could definitely use a designer. Reach out to me on Discord (geth9886).`}/>
 

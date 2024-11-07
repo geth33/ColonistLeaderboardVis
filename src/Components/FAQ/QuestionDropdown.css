@@ -8,3 +8,7 @@
 .questionContainer > div{
     justify-content: center !important;
 }
+
+.answerContainer {
+    font-weight: bold;
+}
