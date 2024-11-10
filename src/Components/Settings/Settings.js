@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Settings.css'; // Import CSS for styling
-import {Button, FormControl, Select, MenuItem} from "@mui/material";
-
+import {Button, FormControl, FormControlLabel, Select, MenuItem, Checkbox, Tooltip} from "@mui/material";
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
 const seasons = [7,8,9,10];
 const speeds = [0.5, 0.75, 1, 1.25, 1.5];
@@ -13,6 +13,8 @@ const Settings = ({}) => {
   const [season, setSeason] = useState(7);
   const [speed, setSpeed] = useState(1);
   const [playerNum, setPlayerNum] = useState(10);
+  const [enteringCheckboxChecked, setEnteringCheckboxChecked] = useState(false);
+  const [leavingCheckboxChecked, setLeavingCheckboxChecked] = useState(false);
 
   const dispatchInitiateChartEvent = () => {
     const event = new CustomEvent("initiateChart", { 
@@ -21,7 +23,9 @@ const Settings = ({}) => {
                 gameMode: gameMode,
                 season: season,
                 speed: speed,
-                playerNum: playerNum
+                playerNum: playerNum,
+                entering: enteringCheckboxChecked,
+                leaving: leavingCheckboxChecked
             } 
         });
     window.dispatchEvent(event);
@@ -85,7 +89,7 @@ const Settings = ({}) => {
                 </div>
             </Button>
         </div>
-        <div className='settingsGroup'>
+        <div className='settingsGroup1'>
             <div className='setting setting1'>
                 <span className='settingsLabel'>Season</span>
                 <FormControl size="small">
@@ -130,6 +134,41 @@ const Settings = ({}) => {
                             ))}
                     </Select>
                 </FormControl>
+            </div>
+        </div>
+        <div className='settingsGroup2'>
+            <div className='setting setting3'>
+                <span className='settingsLabel'>Show Players:</span>
+                <FormControlLabel control={<Checkbox checked={enteringCheckboxChecked} onChange={() => {setEnteringCheckboxChecked(!enteringCheckboxChecked)}}
+                    sx={{
+                        color: 'white',
+                        '&.Mui-checked': {
+                          color: 'white',
+                        },
+                      }}/>} sx={{color: 'white', fontSize: '12px', fontWeight: 'bold'}} label="Entering" />
+                <FormControlLabel control={<Checkbox checked={leavingCheckboxChecked} onChange={() => {setLeavingCheckboxChecked(!leavingCheckboxChecked)}}
+                    sx={{
+                        color: 'white',
+                        '&.Mui-checked': {
+                          color: 'white',
+                        },
+                      }}/>} sx={{color: 'white', fontSize: '12px', fontWeight: 'bold'}} label="Leaving" />
+                <Tooltip title={
+                    <React.Fragment>
+                        <p style={{fontWeight: 'bold', fontSize: '13px'}}>Show players entering/exiting the top ranks.</p>
+                        <p>
+                            It's generally recommended to leave these unchecked when viewing 1v1 leaderboards or if you have more than 10 players on the graph.
+                        </p>
+                        <p>
+                            The graph can get slightly disorienting if lots of players are entering/exiting. 
+                            It's very common for players to go on massive win/lose streaks when they are entering/exiting the top ranks.
+                        </p>
+                    </React.Fragment>
+                }
+                                                                        placement="right"
+                                                                        style={{display: 'inline', marginLeft: '0.5em'}}>
+                    <Button style={{margin: '0', padding: '0', minWidth: '1.2em', maxHeight: '1.2em', alignSelf: 'center'}}><HelpOutlineIcon size={'1.2em'} color={'white'} sx={{color: 'white'}}/></Button>
+                </Tooltip>
             </div>
         </div>
         <div className='generateChartButtonContainer'>

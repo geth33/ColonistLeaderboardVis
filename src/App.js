@@ -37,7 +37,7 @@ function App() {
         <AppBar position="static" color="primary">
           <Container>
             <Toolbar>
-              <Typography variant="h6" component={Link} to="/" style={{ flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
+              <Typography variant="h6" component={Link} to="/" style={{ flexGrow: 1, color: 'inherit', textDecoration: 'none', textAlign: 'left' }}>
                 Leaderboard Visualizer
               </Typography>
               {isMobile ? (

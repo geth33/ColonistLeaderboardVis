@@ -79,7 +79,7 @@ function toSx(styles, classes) {
 }
 
   const numOfTicksOnGraph = 180;
-  const lineChartSpeed = 25;
+  const lineChartSpeed = 35;
   const startingSnapshot = 10;
 
 const Home = () => {
@@ -103,7 +103,7 @@ const Home = () => {
 
 useEffect(() => {
   if (allData){
-    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap);
+    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, settings.entering, settings.leaving, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap);
     const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allData, settings.season, startingSnapshot);
     setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
     setTop10RankMap(top10RankMap);
