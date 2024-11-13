@@ -8,29 +8,43 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     });
     
     let topPlayerMap = getTopPlayersPerSnapshot(allData, startingSnapshot, season, numOfPlayersOnChart);
-    let topPlayerMapJustUsernames = {};
-    let topPlayerMapKeys = Object.keys(topPlayerMap).map(Number).sort((a, b) => a - b);
-    topPlayerMapKeys.forEach(snapshotNumber => {
-      topPlayerMapJustUsernames[snapshotNumber] = topPlayerMap[snapshotNumber].map(player => player.username);
-    });
-    setTopPlayersAtTimeMap(createTopPlayersAtTimeMap(numOfTicksOnGraph, topPlayerMapJustUsernames));
-    const bottomRatingsPerSnapshot = getBottomRatingsPerSnapshot(topPlayerMap, numOfPlayersOnChart); 
+    let topPlayerMapJustUsernames = getUsernamesMap(topPlayerMap);
+    let topPlayersAtTimeMap = createTopPlayersAtTimeMap(numOfTicksOnGraph, topPlayerMapJustUsernames);
+    let bottomRatingsPerSnapshot = getBottomRatingsPerSnapshot(topPlayerMap, numOfPlayersOnChart); 
     let playerRatingMap = {};
     let maxSnapshot = seasonMaxSnapshotMap[season];
     for (let username of playersOnGraph){
       playerRatingMap[username] = preparePlayerForLineChart(allData, username, season, numOfPlayersOnChart, startingSnapshot, maxSnapshot, bottomRatingsPerSnapshot, showEntering, showLeaving);
     }
+    setTopPlayersAtTimeMap(topPlayersAtTimeMap);
     setPlayerRatingMap(playerRatingMap);
     createMinAndMaxMaps(playerRatingMap, setMinMap, setMaxMap, numOfTicksOnGraph);
   }
 
-  export const getBottomRatingsPerSnapshot = (topPlayerMap, numOfPlayersOnChart) => {
-    let bottomPlayers = {};
-    let topPlayerMapKeys = Object.keys(topPlayerMap).map(Number).sort((a, b) => a - b);
-    topPlayerMapKeys.forEach(snapshotNumber => {
-      bottomPlayers[snapshotNumber] = topPlayerMap[snapshotNumber][numOfPlayersOnChart-1].skillRating
+  /*
+    Returns map should with only usernames (get rid of playerRank and skillRating info)
+    @param map - the map
+  */
+  export const getUsernamesMap = (map) => {
+    let mapJustUsernames = {};
+    let keys = Object.keys(map).map(Number).sort((a, b) => a - b);
+    keys.forEach(key => {
+      mapJustUsernames[key] = map[key].map(player => player.username);
     });
-    return bottomPlayers;
+    return mapJustUsernames;
+  }
+
+  /*
+    Returns a map that has the rating for the lowest ranked player in the visualization for each snapshot
+    @param map - Map that contains the player data (username, skillRating, playerRank) for each snapshot
+  */
+  export const getBottomRatingsPerSnapshot = (map, numOfPlayersOnChart) => {
+    let bottomRatings = {};
+    let keys = Object.keys(map).map(Number).sort((a, b) => a - b);
+    keys.forEach(key => {
+      bottomRatings[key] = map[key][numOfPlayersOnChart-1].skillRating
+    });
+    return bottomRatings;
   }
 
   /*
@@ -45,6 +59,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
   
     // Iterate over each player in the original data
     Object.keys(allData).forEach(username => {
+      // Get the user's data for this season
       const currSeasonData = allData[username]['Season ' + season];
     
       if (currSeasonData) {
@@ -63,16 +78,28 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
         });
       }
     });
-    let topPlayerMapKeys = Object.keys(topPlayerMap).map(Number).sort((a, b) => a - b);
+    return truncateMap(topPlayerMap, numOfPlayersOnChart);
+  }
+
+  /*
+    Sorts a map by the playerRank and then truncates it.
+    @param map - map to truncate
+    @param amountToTruncate - amount to truncate from map
+  */
+  export const truncateMap = (map, amountToTruncate) => {
+    let keys = Object.keys(map).map(Number).sort((a, b) => a - b);
     // Now, sort and trim each snapshot array to retain only the top players by rating
-    topPlayerMapKeys.forEach(snapshotNumber => {
-      topPlayerMap[snapshotNumber] = topPlayerMap[snapshotNumber]
+    keys.forEach(key => {
+      map[key] = map[key]
         .sort((a, b) => a.playerRank - b.playerRank) // Sort by skillRating descending
-        .slice(0, numOfPlayersOnChart); // Convert to usernames only
+        .slice(0, amountToTruncate); // Convert to usernames only
     });
-    return topPlayerMap;
+    return map;
   }
   
+  /*
+
+  */
   export const createTopPlayersAtTimeMap = (numOfTicksOnGraph, topPlayerMap) => {
     let topPlayerMapKeys = Object.keys(topPlayerMap).map(Number).sort((a, b) => a - b);
 
@@ -105,16 +132,23 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
       }
       topPlayerMapAllVisiblePlayersAtTime[i] = activePlayers;
     }
-    console.log(topPlayerMapAllVisiblePlayersAtTime);
     return topPlayerMapAllVisiblePlayersAtTime;
   }
   
-  export const createMinAndMaxMaps = (playerRatingMapLocal, setMinMap, setMaxMap, numOfTicksOnGraph) => {
+  /*
+    Creates the maps that will controls the y-axis range. 
+    @param playerRatingMap - The map that contains all of the playerRating arrays for users that will be displayed on the map
+    @param setMinMap - Setter for the min map 
+    @param setMinMap - Setter for the min map 
+    @param numOfTicksOnGraph - This is corresponding to the x-axis domain size. This is the max number of ratings that will be displayed of a user's playerRating array at one time.
+  */
+  export const createMinAndMaxMaps = (playerRatingMap, setMinMap, setMaxMap, numOfTicksOnGraph) => {
+    // First, find the min and max ratings for each time (tick) on the graph.
     const currMinMap = {};
     const currMaxMap = {};
   
-    // Determine the length of the longest array in playerRatingMapLocal
-    const maxLength = Math.max(...Object.values(playerRatingMapLocal).map(arr => arr.length));
+    // Determine the length of the longest array in playerRatingMap
+    const maxLength = Math.max(...Object.values(playerRatingMap).map(arr => arr.length));
   
     // Iterate through each index position (0 to maxLength - 1)
     for (let i = 0; i < maxLength; i++) {
@@ -122,7 +156,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
       let maxValue = -Infinity;
   
       // Go through each player's ratings array at the index `i`
-      Object.values(playerRatingMapLocal).forEach(ratings => {
+      Object.values(playerRatingMap).forEach(ratings => {
         const rating = ratings[i];
   
         // Check if the rating is not -1 and is a valid number
@@ -137,6 +171,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
       currMaxMap[i] = maxValue === -Infinity ? -1 : Math.ceil(maxValue); // If no valid max found, set as -1
     }
   
+    // Now we'd like to create min and max maps that account for all data points displayed on the graph.
     let minMapSmooth = {};
     let maxMapSmooth = {};
   
@@ -144,6 +179,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
   
       let minRating = Infinity;
       let maxRating = -Infinity;
+      // Chart hasn't begun moving yet, min/max values for the data points that have appeared so far.
       if (i <= numOfTicksOnGraph){
         for (let j = i; j > 0; j--){
           if (currMinMap[j] < minRating){
@@ -153,7 +189,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
             maxRating = currMaxMap[j];
           }
         }
-      } else {
+      } else { // Find min and max values for the smallest/largest ratings for the last numOfTicksOnGraph (x axis window) ratings. 
         for (let j = i; j > i-numOfTicksOnGraph; j--){
           if (currMinMap[j] < minRating){
             minRating = currMinMap[j];
@@ -168,18 +204,37 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
       minMapSmooth[i] = minRating;
       maxMapSmooth[i] = maxRating;
     }
+    // Create a smoothing effect so that the min and max ranges aren't constantly ping ponging between different ranges.
     setMinMap(smoothMinMaxMap(minMapSmooth));
     setMaxMap(smoothMinMaxMap(maxMapSmooth));
   };
   
-  
-  export const playerAppearsInGraph = (allData, player, season, numOfPlayersOnChart) => {
-    return allData[player]['Season '+season].filter(p => p.playerRank <= numOfPlayersOnChart).length > 0;
+  /*
+    Returns true if the player appears at least once on the top rankings
+    @param allData - All data loaded from either the base or 1v1 csv. Contains info for all players for all seasons.
+    @param username - The username of the player
+    @param season - The season we're interested in
+    @param numOfPlayersOnChart - The number of players we'll display on the chart. This is the lower bound for the rank they must hit to be on the graph
+  */
+  export const playerAppearsInGraph = (allData, username, season, numOfPlayersOnChart) => {
+    return allData[username]['Season '+season].filter(p => p.playerRank <= numOfPlayersOnChart).length > 0;
   }
   
-  export const preparePlayerForLineChart = (allData, player, season, numOfPlayersOnChart, startingSnapshot, maxSnapshot, bottomRatingsPerSnapshot, showEntering, showLeaving) => {
+  /*
+    Creates a number array that represents a player's ratings throughout the season.
+    @param allData - All data loaded from either the base or 1v1 csv. Contains info for all players for all seasons.
+    @param username - The username of the player
+    @param season - The season we're interested in
+    @param numOfPlayersOnChart - The number of players we'll display on the chart. This is the lower bound for the rank they must hit to be on the graph
+    @param startingSnapshot - The first snapshot the visualization will start on
+    @param maxSnapshot - The final snapshot the visualization will end on
+    @param bottomRatingsPerSnapshot - Map that contains the lowest y-axis rating for each snapshot. This is used to make sure lines aren't being drawn below this point.
+    @param showEntering - Boolean on if we want to include data where the user enters the top ranks.
+    @param showEntering - Boolean on if we want to include data where the user leaves the top ranks.
+  */
+  export const preparePlayerForLineChart = (allData, username, season, numOfPlayersOnChart, startingSnapshot, maxSnapshot, bottomRatingsPerSnapshot, showEntering, showLeaving) => {
     let ratings = [];
-    let seasonData = allData[player]['Season ' + season];
+    let seasonData = allData[username]['Season ' + season];
     seasonData = seasonData.filter(d => d.snapshotNumber > startingSnapshot-1);
     let userInLastSnapshot = false;
     let snapshotCount = startingSnapshot;
@@ -243,7 +298,7 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
                 ratings.push(stepVal);
               }
             }
-          } else {       // We don't want to graph a single point, so we'll pretend this person wasn't in the top
+          } else { // Next snapshot of data isn't going to be graphed. We don't want to graph a single point, so we'll pretend this person wasn't in the top for this snapshot.
             for (let j = 0; j < 25; j++){
               ratings.push(-1);
             }
@@ -259,16 +314,19 @@ export const createSeasonDataStruct = (allData, setPlayerRatingMap, setTopPlayer
     return smoothRatings(ratings, userInLastSnapshot);
   }
 
-/*
-
-*/
-  export const generateSnapshotMaps = (data, season, startingSnapshot) => {
+  /*
+    Creates maps that will be used by the leaderboards in the sidebar. Leaderboards track: top rating, top win rate, time in first.
+    @param allData - All data loaded from either the base or 1v1 csv. Contains info for all players for all seasons.
+    @param season - The season we're interested in
+    @param startingSnapshot - The first snapshot the visualization will start on
+  */
+  export const generateSnapshotMaps = (allData, season, startingSnapshot) => {
     const top10RankMap = {};
     const top5WinRateMap = {};
     const timeInFirstPlaceMap = {};
   
-    Object.keys(data).forEach(username => {
-      const userSeasons = data[username];
+    Object.keys(allData).forEach(username => {
+      const userSeasons = allData[username];
   
       // Ensure the specified season exists for the user
       if (userSeasons["Season " + season]) {
