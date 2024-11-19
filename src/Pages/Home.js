@@ -90,6 +90,7 @@ const Home = () => {
   const [maxMap, setMaxMap] = useState(null);
   const [seasonMaxSnapshotMap, setSeasonMaxSnapshotMap] = useState(null);
   const [generatingChart, setGeneratingChart] = useState(false);
+  const [chartInitialized, setChartInitialized] = useState(false);
   const [top1RankMap, setTop1RankMap] = useState(null);
   const [top10RankMap, setTop10RankMap] = useState(null);
   const [top5WinRateMap, setTop5WinRateMap] = useState(null);
@@ -111,6 +112,7 @@ useEffect(() => {
     setTimeInFirstPlaceMap(timeInFirstPlaceMap);
     setTabIndex(1);
     setGeneratingChart(false);
+    setChartInitialized(true);
   }
 }, [allData]);
 
@@ -157,7 +159,7 @@ useEffect(() => {
   return (
     <div className='visContainer'>
         {
-          allData && !generatingChart && <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
+          ( (allData && !generatingChart)) && <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
           minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} generatingChart={generatingChart}/> 
         }
         <div className={`${allData === null || generatingChart ? 'fullContainer' : 'supportingContentContainer'}`}>

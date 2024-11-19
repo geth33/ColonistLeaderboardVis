@@ -55,15 +55,22 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
 
   useEffect(() => {
     if (generatingChart){
-      setGraphInitialized(false);
-      d3.select(coreVisRef.current).select('svg').remove();
-      if (requestId.current) cancelAnimationFrame(requestId.current);
-      pathsRef.current = {};
-      labelsRef.current = {};
-      playerStartIndexRef.current = {};
-      colorUsage.current = {};
+      resetChart();
     }
+    return () => {
+      resetChart();    
+    };
   }, [generatingChart]);
+
+  const resetChart = () => {
+    setGraphInitialized(false);
+    d3.select(coreVisRef.current).select('svg').remove();
+    if (requestId.current) cancelAnimationFrame(requestId.current);
+    pathsRef.current = {};
+    labelsRef.current = {};
+    playerStartIndexRef.current = {};
+    colorUsage.current = {};    
+  }
 
   // Utility to calculate dimensions based on window size
   const calculateDimensions = () => {
