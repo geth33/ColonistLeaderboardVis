@@ -3,7 +3,7 @@ import './Settings.css'; // Import CSS for styling
 import {Button, FormControl, FormControlLabel, Select, MenuItem, Checkbox, Tooltip} from "@mui/material";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 
-const seasons = [7,8,9,10];
+const seasons = [7,8,9,10,11];
 const speeds = [0.5, 0.75, 1, 1.25, 1.5];
 const numOfPlayers = [5,10,15,20];
 

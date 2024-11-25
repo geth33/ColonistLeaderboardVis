@@ -9,14 +9,16 @@ import {
 	tabsClasses,
   Backdrop
 } from "@mui/material";
-import {
-  readDataFromFile
-} from '../utils/importDataUtils';
+// import {
+//   readDataFromFile
+// } from '../utils/importDataUtils';
 import {
   createSeasonDataStruct,
   generateSnapshotMaps
 } from '../utils/prepareLineChartUtils';
 import LeadingUser from '../Components/LeadingUser/LeadingUser';
+import { observer } from 'mobx-react-lite';
+import { useStore } from '../Store/storeProvider';
 
 export const tabsStyles = () => ({
 	root: {
@@ -79,8 +81,8 @@ function toSx(styles, classes) {
 }
 
   const numOfTicksOnGraph = 180;
-  const lineChartSpeed = 35;
-  const startingSnapshot = 10;
+  const lineChartSpeed = 20;
+  const startingSnapshot = 11;
 
 const Home = () => {
   const [allData, setAllData] = useState(null);
@@ -89,8 +91,10 @@ const Home = () => {
   const [minMap, setMinMap] = useState(null);
   const [maxMap, setMaxMap] = useState(null);
   const [seasonMaxSnapshotMap, setSeasonMaxSnapshotMap] = useState(null);
+  const [seasonSnapshotsMap, setSeasonSnapshotsMap] = useState(null);
   const [generatingChart, setGeneratingChart] = useState(false);
   const [chartInitialized, setChartInitialized] = useState(false);
+  const [prepareDataForChart, setPrepareDataForChart] = useState(false);
   const [top1RankMap, setTop1RankMap] = useState(null);
   const [top10RankMap, setTop10RankMap] = useState(null);
   const [top5WinRateMap, setTop5WinRateMap] = useState(null);
@@ -100,11 +104,40 @@ const Home = () => {
 	const tabItemSx = toSx(tabItemStyles, tabClasses);
   const [tabLabel, setTabLabel] = useState("Settings");
   const [settings, setSettings] = useState(null);
+  const store = useStore();
+
+  useEffect(() => {
+    console.log('store value changed')
+    retrieveChartDataFromStore();
+  }, [
+    store.oneOnOneData,
+    store.oneOnOneMaxSnapshotMap,
+    store.oneOnOneSeasonSnapshotsMap,
+    store.baseData,
+    store.baseMaxSnapshotMap,
+    store.baseSeasonSnapshotsMap
+  ]);
+
+  const retrieveChartDataFromStore = () => {
+    setTimeout(() => {
+      if (store.oneOnOneData && store.oneOnOneMaxSnapshotMap && store.oneOnOneSeasonSnapshotsMap && settings?.gameMode === '1v1') {
+        setAllData(store.oneOnOneData);
+        setSeasonMaxSnapshotMap(store.oneOnOneMaxSnapshotMap);
+        setSeasonSnapshotsMap(store.oneOnOneSeasonSnapshotsMap);
+        setPrepareDataForChart(true);
+      } else if (store.baseData && store.baseMaxSnapshotMap && store.baseSeasonSnapshotsMap && settings?.gameMode === 'Base') {
+        setAllData(store.baseData);
+        setSeasonMaxSnapshotMap(store.baseMaxSnapshotMap);
+        setSeasonSnapshotsMap(store.baseSeasonSnapshotsMap);
+        setPrepareDataForChart(true);
+      }
+    }, 0);
+  }
 
 
 useEffect(() => {
-  if (allData){
-    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, settings.entering, settings.leaving, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap);
+  if (prepareDataForChart){
+    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, settings.entering, settings.leaving, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap, seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot));
     const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allData, settings.season, startingSnapshot);
     setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
     setTop10RankMap(top10RankMap);
@@ -113,15 +146,18 @@ useEffect(() => {
     setTabIndex(1);
     setGeneratingChart(false);
     setChartInitialized(true);
+    setPrepareDataForChart(false);
   }
-}, [allData]);
+}, [prepareDataForChart]);
 
 useEffect(() => {
   if (settings != null){
+    console.log('settings not null');
     setGeneratingChart(true);
     setMinMap(null);
     setMaxMap(null);
     setSeasonMaxSnapshotMap(null);
+    setSeasonSnapshotsMap(null);
     setPlayerRatingMap(null);
     setTopPlayersAtTimeMap(null);
     setTop1RankMap(null);
@@ -130,15 +166,26 @@ useEffect(() => {
     setTimeInFirstPlaceMap(null);
     setCurrSnapshot(startingSnapshot);
 
-    let csvFileName = settings.gameMode === '1v1' ? '/leaderboards_oneOnOne.csv' : '/leaderboards_base.csv';
-    readDataFromFile(csvFileName, setAllData, setSeasonMaxSnapshotMap);
+    if (settings.gameMode === '1v1'){
+      if (store.oneOnOneData){
+        retrieveChartDataFromStore();
+      } else {
+        store.loadOneOnOneData();
+      }
+    } else {
+      if (store.baseData){
+        retrieveChartDataFromStore();
+      } else {
+        store.loadBaseData();
+      }
+    }
   }
 }, [settings]);
 
 useEffect(() => {
   const handleTickEvent = (e) => {
     const { snapshot } = e.detail;
-    setCurrSnapshot(startingSnapshot + snapshot);
+    setCurrSnapshot(snapshot);
   };
 
   window.addEventListener("nextSnapshot", handleTickEvent);
@@ -160,7 +207,7 @@ useEffect(() => {
     <div className='visContainer'>
         {
           ( (allData && !generatingChart)) && <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
-          minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} generatingChart={generatingChart}/> 
+          minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} generatingChart={generatingChart} seasonSnapshots={seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot)}/> 
         }
         <div className={`${allData === null || generatingChart ? 'fullContainer' : 'supportingContentContainer'}`}>
           <div className='tabModule'>
@@ -202,4 +249,4 @@ useEffect(() => {
   );
 };
 
-export default Home;
+export default observer(Home);

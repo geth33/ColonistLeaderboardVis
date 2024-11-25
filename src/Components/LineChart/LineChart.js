@@ -12,7 +12,7 @@ const COLORS2 = [
   '#E39B8D', '#D9DC9C', '#B296A8', 
 ]
 
-const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart }) => {
+const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots}) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null);
   const pathsRef = useRef({});
@@ -103,7 +103,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
     const y = d3.scaleLinear().range([height, 0]);
 
     const xAxis = d3.axisBottom(x).tickSizeInner(-height).tickPadding(10).ticks(4)
-      .tickFormat(d => `Day ${5 + (d / 50)}`);
+      .tickFormat(d => `Day ${seasonSnapshots[Math.floor(d / 25)]/2}`);
     const yAxis = d3.axisLeft(y).tickSizeInner(-width).tickPadding(10);
 
     const $xAxis = svg.append('g').attr('class', 'x axis').attr('transform', `translate(0, ${height})`).call(xAxis);
@@ -119,7 +119,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   };
 
   const dispatchSnapshotEvent = (time) => {
-    const event = new CustomEvent("nextSnapshot", { detail: { snapshot: Math.floor(time / 25) } });
+    const event = new CustomEvent("nextSnapshot", { detail: { snapshot: seasonSnapshots[Math.floor(time / 25)] } });
     window.dispatchEvent(event);
   };
 
