@@ -13,8 +13,10 @@ import {
 //   readDataFromFile
 // } from '../utils/importDataUtils';
 import {
-  createSeasonDataStruct,
-  generateSnapshotMaps
+  generateTopPlayerLines,
+  generateSeasonAverageLines,
+  generateSnapshotMaps,
+  generateSelectedPlayerLines
 } from '../utils/prepareLineChartUtils';
 import LeadingUser from '../Components/LeadingUser/LeadingUser';
 import { observer } from 'mobx-react-lite';
@@ -85,7 +87,7 @@ function toSx(styles, classes) {
   const startingSnapshot = 11;
 
 const Home = () => {
-  const [allData, setAllData] = useState(null);
+  const [allSeasonsData, setAllSeasonsData] = useState(null);
   const [playerRatingMap, setPlayerRatingMap] = useState(null);
   const [topPlayersAtTimeMap, setTopPlayersAtTimeMap] = useState(null);
   const [minMap, setMinMap] = useState(null);
@@ -94,6 +96,7 @@ const Home = () => {
   const [seasonSnapshotsMap, setSeasonSnapshotsMap] = useState(null);
   const [generatingChart, setGeneratingChart] = useState(false);
   const [chartInitialized, setChartInitialized] = useState(false);
+  const [chartTitle, setChartTitle] = useState("");
   const [prepareDataForChart, setPrepareDataForChart] = useState(false);
   const [top1RankMap, setTop1RankMap] = useState(null);
   const [top10RankMap, setTop10RankMap] = useState(null);
@@ -121,12 +124,12 @@ const Home = () => {
   const retrieveChartDataFromStore = () => {
     setTimeout(() => {
       if (store.oneOnOneData && store.oneOnOneMaxSnapshotMap && store.oneOnOneSeasonSnapshotsMap && settings?.gameMode === '1v1') {
-        setAllData(store.oneOnOneData);
+        setAllSeasonsData(store.oneOnOneData);
         setSeasonMaxSnapshotMap(store.oneOnOneMaxSnapshotMap);
         setSeasonSnapshotsMap(store.oneOnOneSeasonSnapshotsMap);
         setPrepareDataForChart(true);
       } else if (store.baseData && store.baseMaxSnapshotMap && store.baseSeasonSnapshotsMap && settings?.gameMode === 'Base') {
-        setAllData(store.baseData);
+        setAllSeasonsData(store.baseData);
         setSeasonMaxSnapshotMap(store.baseMaxSnapshotMap);
         setSeasonSnapshotsMap(store.baseSeasonSnapshotsMap);
         setPrepareDataForChart(true);
@@ -137,22 +140,54 @@ const Home = () => {
 
 useEffect(() => {
   if (prepareDataForChart){
-    createSeasonDataStruct(allData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, settings.entering, settings.leaving, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap, seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot));
-    const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allData, settings.season, startingSnapshot);
-    setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
-    setTop10RankMap(top10RankMap);
-    setTop5WinRateMap(top5WinRateMap);
-    setTimeInFirstPlaceMap(timeInFirstPlaceMap);
-    setTabIndex(1);
-    setGeneratingChart(false);
-    setChartInitialized(true);
-    setPrepareDataForChart(false);
+    if (settings?.lineChartMode === 0){
+      generateTopPlayerLines(allSeasonsData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, settings.entering, settings.leaving, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap, seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot));
+      const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allSeasonsData, settings.season, startingSnapshot);
+      setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
+      setTop10RankMap(top10RankMap);
+      setTop5WinRateMap(top5WinRateMap);
+      setTimeInFirstPlaceMap(timeInFirstPlaceMap);
+      let gameModeFormatted = settings.gameMode === '1v1' ? '1v1' : 'Base';
+      setChartTitle(gameModeFormatted + " Season " + settings.season + " - Top " + settings.playerNum + " Players");
+      setTabIndex(1);
+      setGeneratingChart(false);
+      setChartInitialized(true);
+      setPrepareDataForChart(false);
+    } else if (settings?.lineChartMode === 1){
+      let players = [
+        {
+          seasons: [8,9,10,11],
+          username: "ThePhantom"
+        },
+        {
+          seasons: [8,9,10],
+          username: "JWEEZY"
+        },
+        {
+          seasons: [8,9,10],
+          username: "Ghajni"
+        }
+      ]
+      generateSelectedPlayerLines(allSeasonsData, seasonMaxSnapshotMap, seasonSnapshotsMap, players, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap);
+      setTabIndex(1);
+      setChartTitle("Head to Head");
+      setGeneratingChart(false);
+      setChartInitialized(true);
+      setPrepareDataForChart(false);
+    } else if (settings?.lineChartMode === 2){
+      generateSeasonAverageLines(allSeasonsData, seasonMaxSnapshotMap, seasonSnapshotsMap, settings.playerNum, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap);
+      setTabIndex(1);
+      let gameModeFormatted = settings.gameMode === '1v1' ? '1v1' : 'Base';
+      setChartTitle(gameModeFormatted + " Season Average Rating - Top " + settings.playerNum + " Players");
+      setGeneratingChart(false);
+      setChartInitialized(true);
+      setPrepareDataForChart(false);
+    }
   }
 }, [prepareDataForChart]);
 
 useEffect(() => {
   if (settings != null){
-    console.log('settings not null');
     setGeneratingChart(true);
     setMinMap(null);
     setMaxMap(null);
@@ -206,10 +241,11 @@ useEffect(() => {
   return (
     <div className='visContainer'>
         {
-          ( (allData && !generatingChart)) && <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
-          minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} generatingChart={generatingChart} seasonSnapshots={seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot)}/> 
+          ( (allSeasonsData && !generatingChart)) && <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
+          minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} 
+          generatingChart={generatingChart} seasonSnapshots={ settings?.lineChartMode !== 0 ? Array.from({ length: 184 }, (_, i) => i + 1) : seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot)} chartTitle={chartTitle}/> 
         }
-        <div className={`${allData === null || generatingChart ? 'fullContainer' : 'supportingContentContainer'}`}>
+        <div className={`${allSeasonsData === null || generatingChart ? 'fullContainer' : 'supportingContentContainer'}`}>
           <div className='tabModule'>
             <Tabs
                 value={tabIndex}
@@ -226,23 +262,27 @@ useEffect(() => {
               <Backdrop open={generatingChart}>
                 <Loader/>
               </Backdrop>
-            </> : 
-            <div className='supportingVisContainer'>
-              <div className='leaderboardItem leadingUserModule'>
-                <LeadingUser data={top1RankMap} currSnapshot={currSnapshot}/>
+            </> : <>
+              {
+                settings?.lineChartMode === 0 && <div className='supportingVisContainer'>
+                <div className='leaderboardItem leadingUserModule'>
+                  <LeadingUser data={top1RankMap} currSnapshot={currSnapshot}/>
+                </div>
+                <div className='leaderboardItem leaderboardItem1'>
+                  <LeaderBoard title="Top Rating" data={top10RankMap} leaderBoardMetric="skillRating" size={10} currSnapshot={currSnapshot}/>
+                </div>
+  
+                <div className='leaderboardItem leaderboardItem2'>
+                  <LeaderBoard title="Top Win Rate" data={top5WinRateMap} leaderBoardMetric="winRate" size={5} currSnapshot={currSnapshot}/>
+                </div>
+  
+                <div className='leaderboardItem leaderboardItem3'>
+                  <LeaderBoard title="Time in First" data={timeInFirstPlaceMap} leaderBoardMetric="daysInFirst" size={3} currSnapshot={currSnapshot}/>
+                </div>
               </div>
-              <div className='leaderboardItem leaderboardItem1'>
-                <LeaderBoard title="Top Rating" data={top10RankMap} leaderBoardMetric="skillRating" size={10} currSnapshot={currSnapshot}/>
-              </div>
-
-              <div className='leaderboardItem leaderboardItem2'>
-                <LeaderBoard title="Top Win Rate" data={top5WinRateMap} leaderBoardMetric="winRate" size={5} currSnapshot={currSnapshot}/>
-              </div>
-
-              <div className='leaderboardItem leaderboardItem3'>
-                <LeaderBoard title="Time in First" data={timeInFirstPlaceMap} leaderBoardMetric="daysInFirst" size={3} currSnapshot={currSnapshot}/>
-              </div>
-            </div>
+              }
+            </>
+            
           }
           </div>
     </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 
-const MARGIN = { top: 20, right: 100, bottom: 50, left: 60 };
+const MARGIN = { top: 40, right: 120, bottom: 50, left: 60 };
 const COLORS = [
   '#e50000', '#fb9031', '#11e928', '#ba3ee1', '#d1d3d1', '#059bfb', '#747678',
   '#ffe001', '#a0f2ed', '#dbc5f8', '#219b42', '#e36728', '#8cb60c', '#e1b568'
@@ -12,7 +12,7 @@ const COLORS2 = [
   '#E39B8D', '#D9DC9C', '#B296A8', 
 ]
 
-const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots}) => {
+const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots, chartTitle}) => {
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null);
   const pathsRef = useRef({});
@@ -94,6 +94,24 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .text('Day # in Season');
+      // Y axis label:
+      svg.append("text")
+      .attr('class', 'y-axis-label')
+      .attr("text-anchor", "middle")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -44)
+      .attr("x", -height/2)
+      .style('font-size', '14px')
+      .text("Rating")
+      // Title
+      svg.append('text')
+      .attr('class', 'title')
+      .attr('y', -10)
+      .attr('x', width / 2)
+      .attr("text-anchor", "middle")
+      .style('font-size', '16px')
+      .style('font-weight', 'bold')
+      .text(chartTitle);
     return svg;
   };
 

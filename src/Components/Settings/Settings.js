@@ -6,6 +6,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 const seasons = [7,8,9,10,11];
 const speeds = [0.5, 0.75, 1, 1.25, 1.5];
 const numOfPlayers = [5,10,15,20];
+const numOfPlayersSeason = [1,5,10,20,50,100,200];
 
 const Settings = ({}) => {
   const [lineChartMode, setLineChartMode] = useState(0);
@@ -48,6 +49,28 @@ const Settings = ({}) => {
                     </Button>
                 </div>
                 <div>
+                    <p className='buttonHeaderText buttonHeadTextEmpty'></p>
+                    <Button className={`settingsButton ${lineChartMode === 1 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(1)}}>
+                        <img src="/swordClash.png" alt="crown" className={'buttonImage'}/>
+                        <div className='settingsButtonText'>
+                            <p>Head</p>
+                            <p className='settingsButtonTextSmall'>to</p>
+                            <p>Head</p>
+                        </div>
+                    </Button>
+                </div>
+                <div>
+                    <p className='buttonHeaderText buttonHeadTextEmpty'></p>
+                    <Button className={`settingsButton ${lineChartMode === 2 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(2)}}>
+                        <img src="/stopwatch.png" alt="crown" className={'buttonImage'}/>
+                        <div className='settingsButtonText'>
+                            <p>Clash</p>
+                            <p className='settingsButtonTextSmall'>of</p>
+                            <p>Seasons</p>
+                        </div>
+                    </Button>
+                </div>
+                <div>
                     <p className='buttonHeaderText buttonHeadTextNonEmpty'>Coming soon!</p>
                     <Button className='settingsButton disabled comingSoon' disabled>
                         <img src="/map.png" alt="crown" className={'buttonImage'}/>
@@ -57,21 +80,16 @@ const Settings = ({}) => {
                         </div>
                     </Button>
                 </div>
-                <div>
-                    <p className='buttonHeaderText buttonHeadTextNonEmpty'>Coming soon!</p>
-                    <Button className='settingsButton disabled comingSoon' disabled>
-                        <img src="/swordClash.png" alt="crown" className={'buttonImage'}/>
-                        <div className='settingsButtonText'>
-                            <p>Head</p>
-                            <p className='settingsButtonTextSmall'>to</p>
-                            <p>Head</p>
-                        </div>
-                    </Button>
-                </div>
             </div>
             <div className='lineChartModeSubtextContainer'>
                 {
                     lineChartMode === 0 && <p>Watch the battle at the top of the leaderboard!</p>
+                }
+                {
+                    lineChartMode === 1 && <p>Select players across seasons to battle!</p>
+                }
+                {
+                    lineChartMode === 2 && <p>Compare overall average ratings between seasons!</p>
                 }
             </div>
         </div>
@@ -89,88 +107,114 @@ const Settings = ({}) => {
                 </div>
             </Button>
         </div>
-        <div className='settingsGroup1'>
-            <div className='setting setting1'>
-                <span className='settingsLabel'>Season</span>
-                <FormControl size="small">
-                    <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={season} onChange={(e) => {setSeason(e.target.value);}}>
-                        {seasons.map((season, num) => (
-                            <MenuItem
-                                value={season}
-                                key={num}
-                            >
-                                {season}
-                            </MenuItem>
-                            ))}
-                    </Select>
-                </FormControl>
-            </div>
-            <div className='setting setting2'>
-                <span className='settingsLabel'>Speed</span>
-                <FormControl size="small">
-                    <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={speed} onChange={(e) => {setSpeed(e.target.value);}}>
-                        {speeds.map((speed, num) => (
-                            <MenuItem
-                                value={speed}
-                                key={num}
-                            >
-                                {speed}x
-                            </MenuItem>
-                            ))}
-                    </Select>
-                </FormControl>
-            </div>
-            <div className='setting setting3'>
-                <span className='settingsLabel'># of Players</span>
-                <FormControl size="small">
-                    <Select className='settingsSelect' value={playerNum} onChange={(e) => {setPlayerNum(e.target.value);}}>
-                        {numOfPlayers.map((playerNum, num) => (
-                            <MenuItem
-                                value={playerNum}
-                                key={num}
-                            >
-                                {playerNum}
-                            </MenuItem>
-                            ))}
-                    </Select>
-                </FormControl>
-            </div>
-        </div>
-        <div className='settingsGroup2'>
-            <div className='setting setting3'>
-                <span className='settingsLabel'>Show Players:</span>
-                <FormControlLabel control={<Checkbox checked={enteringCheckboxChecked} onChange={() => {setEnteringCheckboxChecked(!enteringCheckboxChecked)}}
-                    sx={{
-                        color: 'white',
-                        '&.Mui-checked': {
-                          color: 'white',
-                        },
-                      }}/>} sx={{color: 'white', fontSize: '12px', fontWeight: 'bold'}} label="Entering" />
-                <FormControlLabel control={<Checkbox checked={leavingCheckboxChecked} onChange={() => {setLeavingCheckboxChecked(!leavingCheckboxChecked)}}
-                    sx={{
-                        color: 'white',
-                        '&.Mui-checked': {
-                          color: 'white',
-                        },
-                      }}/>} sx={{color: 'white', fontSize: '12px', fontWeight: 'bold'}} label="Leaving" />
-                <Tooltip title={
-                    <React.Fragment>
-                        <p style={{fontWeight: 'bold', fontSize: '13px'}}>Show players entering/exiting the top ranks.</p>
-                        <p>
-                            It's generally recommended to leave these unchecked when viewing 1v1 leaderboards or if you have more than 10 players on the graph.
-                        </p>
-                        <p>
-                            The graph can get slightly disorienting if lots of players are entering/exiting. 
-                            It's very common for players to go on massive win/lose streaks when they are entering/exiting the top ranks.
-                        </p>
-                    </React.Fragment>
-                }
-                                                                        placement="right"
-                                                                        style={{display: 'inline', marginLeft: '0.5em'}}>
-                    <Button style={{margin: '0', padding: '0', minWidth: '1.2em', maxHeight: '1.2em', alignSelf: 'center'}}><HelpOutlineIcon size={'1.2em'} color={'white'} sx={{color: 'white'}}/></Button>
-                </Tooltip>
-            </div>
-        </div>
+        {
+            lineChartMode === 0 &&
+            <>
+            <div className='settingsGroup1'>
+                    <div className='setting setting1'>
+                        <span className='settingsLabel'>Season</span>
+                        <FormControl size="small">
+                            <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={season} onChange={(e) => {setSeason(e.target.value);}}>
+                                {seasons.map((season, num) => (
+                                    <MenuItem
+                                        value={season}
+                                        key={num}
+                                    >
+                                        {season}
+                                    </MenuItem>
+                                    ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <div className='setting setting2'>
+                        <span className='settingsLabel'>Speed</span>
+                        <FormControl size="small">
+                            <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={speed} onChange={(e) => {setSpeed(e.target.value);}}>
+                                {speeds.map((speed, num) => (
+                                    <MenuItem
+                                        value={speed}
+                                        key={num}
+                                    >
+                                        {speed}x
+                                    </MenuItem>
+                                    ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <div className='setting setting3'>
+                        <span className='settingsLabel'># of Players</span>
+                        <FormControl size="small">
+                            <Select className='settingsSelect' value={playerNum} onChange={(e) => {setPlayerNum(e.target.value);}}>
+                                {numOfPlayers.map((playerNum, num) => (
+                                    <MenuItem
+                                        value={playerNum}
+                                        key={num}
+                                    >
+                                        {playerNum}
+                                    </MenuItem>
+                                    ))}
+                            </Select>
+                        </FormControl>
+                    </div>
+                </div>
+            <div className='settingsGroup2'>
+                    <div className='setting setting3'>
+                        <span className='settingsLabel'>Show Players:</span>
+                        <FormControlLabel control={<Checkbox checked={enteringCheckboxChecked} onChange={() => {setEnteringCheckboxChecked(!enteringCheckboxChecked)}}
+                            sx={{
+                                color: 'white',
+                                '&.Mui-checked': {
+                                color: 'white',
+                                },
+                            }}/>} sx={{color: 'white', fontSize: '12px', fontWeight: 'bold'}} label="Entering" />
+                        <FormControlLabel control={<Checkbox checked={leavingCheckboxChecked} onChange={() => {setLeavingCheckboxChecked(!leavingCheckboxChecked)}}
+                            sx={{
+                                color: 'white',
+                                '&.Mui-checked': {
+                                color: 'white',
+                                },
+                            }}/>} sx={{color: 'white', fontSize: '12px', fontWeight: 'bold'}} label="Leaving" />
+                        <Tooltip title={
+                            <React.Fragment>
+                                <p style={{fontWeight: 'bold', fontSize: '13px'}}>Show players entering/exiting the top ranks.</p>
+                                <p>
+                                    It's generally recommended to leave these unchecked when viewing 1v1 leaderboards or if you have more than 10 players on the graph.
+                                </p>
+                                <p>
+                                    The graph can get slightly disorienting if lots of players are entering/exiting. 
+                                    It's very common for players to go on massive win/lose streaks when they are entering/exiting the top ranks.
+                                </p>
+                            </React.Fragment>
+                        }
+                                                                                placement="right"
+                                                                                style={{display: 'inline', marginLeft: '0.5em'}}>
+                            <Button style={{margin: '0', padding: '0', minWidth: '1.2em', maxHeight: '1.2em', alignSelf: 'center'}}><HelpOutlineIcon size={'1.2em'} color={'white'} sx={{color: 'white'}}/></Button>
+                        </Tooltip>
+                    </div>
+                </div>
+        </>
+        }
+        {
+            lineChartMode === 2 &&
+                <div className='settingsGroup1'>
+                    <div className='setting setting3'>
+                        <span className='settingsLabel'>Display average rating for top</span>
+                        <FormControl size="small">
+                            <Select className='settingsSelect' value={playerNum} onChange={(e) => {setPlayerNum(e.target.value);}}>
+                                {numOfPlayersSeason.map((playerNum, num) => (
+                                    <MenuItem
+                                        value={playerNum}
+                                        key={num}
+                                    >
+                                        {playerNum}
+                                    </MenuItem>
+                                    ))}
+                            </Select>
+                        </FormControl>
+                        <span className='settingsLabel' style={{marginLeft: '1em'}}> players.</span>
+                    </div>
+                </div>
+        }
         <div className='generateChartButtonContainer'>
             <Button id='generateChartButton' className='settingsButton' onClick={() => {dispatchInitiateChartEvent();}}>
                 <div className='settingsButtonText'>
