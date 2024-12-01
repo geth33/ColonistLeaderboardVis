@@ -45,7 +45,6 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     // If the map is already in the subsnapshot form (values are spread out 25 times between snapshots), then we need to roll it back up into the normal snapshot values.
     let increment = rollBackUpSubsnapshots ? 25 : 1;
     for (let i = 0; i < maxIndex; i += increment) {
-      console.log(i);
       // Collect all seasons and their values at index i
       let valuesAtIndex = Object.entries(seasonsMap)
         .map(([season, values]) => ({ season, value: values[i] || -Infinity })); // Use -Infinity if no value exists
@@ -105,13 +104,27 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
 
     let playerLineMap = {};
     let topPlayersAtTimeMap = {};
+    let allSeasons = [7,8,9,10,11];
     for (let player of players){
+      if (player.seasons[0] === 'All'){
+        player.seasons = allSeasons;
+      }
       if (player.seasons.length > 1){
         for (let season of player.seasons){
-          playerLineMap[player.username + "(S"+season+")"] = preparePlayerForLineChart(allSeasonsData, player.username, season, 100000, 1, seasonMaxSnapshotMap[season],null,seasonSnapshots[season],true,true);
+          let snapshotsToDisplay = Array.from({ length: 185 }, (_, i) => i + 1);
+          seasonSnapshots[season].forEach(value => {
+              if (!snapshotsToDisplay.includes(value)) {
+                snapshotsToDisplay.push(value);
+              }
+          });
+          if (playerInSeason(allSeasonsData, player.username, season)){
+            playerLineMap[player.username + " (S"+season+")"] = preparePlayerForLineChart(allSeasonsData, player.username, season, 100000, 1, seasonMaxSnapshotMap[season],null,snapshotsToDisplay.sort(),true,true);
+          }
         }
       } else {
-        playerLineMap[player.username] = preparePlayerForLineChart(allSeasonsData, player.username, player.seasons[0], 100000, 1, seasonMaxSnapshotMap[player.seasons[0]],null,seasonSnapshots[player.seasons[0]],true,true);
+        if (playerInSeason(allSeasonsData, player.username, player.seasons[0])){
+          playerLineMap[player.username] = preparePlayerForLineChart(allSeasonsData, player.username, player.seasons[0], 100000, 1, seasonMaxSnapshotMap[player.seasons[0]],null,Array.from({ length: 183 }, (_, i) => i + 1),true,true);
+        }
       }
     }
     console.log(playerLineMap);
@@ -537,6 +550,174 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
   
     return { top10RankMap, top5WinRateMap, timeInFirstPlaceMap };
   };
+
+  export const generateTopSeasonSnapshotMap = (allSeasonsData, numOfPlayers) => {
+    const top10RankMap = {};
+    const multiSeasonSnapshotMap = {};
+    let uniqueSnapshots = new Set();
+    let seasons = [7,8,9,10,11];
+
+    Object.keys(allSeasonsData).forEach(username => {
+      const userSeasons = allSeasonsData[username];
+  
+      for (let season of seasons){
+          // Ensure the specified season exists for the user
+        if (userSeasons["Season " + season]) {
+          userSeasons["Season " + season].forEach(entry => {
+            const { playerRank, snapshotNumber} = entry;
+            uniqueSnapshots.add(snapshotNumber);
+    
+            // Initialize snapshot entry arrays if they don’t exist
+            if (!multiSeasonSnapshotMap[season]){
+              multiSeasonSnapshotMap[season] = {};
+              multiSeasonSnapshotMap[season][snapshotNumber] = [];
+            } else if (!multiSeasonSnapshotMap[season][snapshotNumber]){
+              multiSeasonSnapshotMap[season][snapshotNumber] = [];
+            }
+    
+            // Add to multiSeasonSnapshotMap if playerRank is between 1 and 10
+            if (playerRank >= 1 && playerRank <= numOfPlayers) {
+              multiSeasonSnapshotMap[season][snapshotNumber].push({ username, ...entry });
+            }
+          });
+        }
+        }
+      });
+      for (let snapshot of uniqueSnapshots){
+        for (let season of seasons){
+          if (multiSeasonSnapshotMap[season][snapshot]){
+            let amountOfEntriesUnderSnapshot = multiSeasonSnapshotMap[season][snapshot].length;
+            if (!top10RankMap[snapshot]){
+              top10RankMap[snapshot] = [];
+            }
+            let avgWinRate = parseFloat(multiSeasonSnapshotMap[season][snapshot].reduce((accumulator, player) => accumulator + player.winRate, 0)/amountOfEntriesUnderSnapshot).toFixed(1);
+            let avgRating = parseFloat(multiSeasonSnapshotMap[season][snapshot].reduce((accumulator, player) => accumulator + player.skillRating, 0)/amountOfEntriesUnderSnapshot).toFixed(0);
+            top10RankMap[snapshot].push({
+              username: "Season " + season,
+              winRate: avgWinRate,
+              skillRating: avgRating
+            })
+          }
+        }
+      }
+
+      // Process and finalize each map to retain only the top players/countries as specified
+    Object.keys(top10RankMap).forEach(snapshotNumber => {
+      // Sort by playerRank and keep top 10, retaining full entry data
+      top10RankMap[snapshotNumber] = top10RankMap[snapshotNumber]
+        .sort((a, b) => b.skillRating - a.skillRating)
+        .slice(0, 10); // Keep the full entries
+    });
+
+    console.log(top10RankMap);
+
+    return {top10RankMap}
+  }
+
+  export const generateSnapshotMapsForUsers = (allSeasonsData, seasonUserPairs, startingSnapshot) => {
+    const top10RankMap = {};
+    const top5WinRateMap = {};
+    const timeInFirstPlaceMap = {};
+    let allSeasons = [7,8,9,10,11];
+
+    // Iterate over the provided user-season pairs
+    seasonUserPairs.forEach(({ username, seasons }) => {
+        const userSeasons = allSeasonsData[username];
+
+        // Ensure the user's data exists
+        if (userSeasons) {
+            let displayPlayerForMultipleSeasons = seasons.length > 1;
+            if (seasons.length > 0 && seasons[0] === 'All'){
+              seasons = allSeasons;
+            }
+            seasons.forEach(season => {
+                const seasonKey = "Season " + season;
+
+                // Ensure the specified season exists for the user
+                if (userSeasons[seasonKey]) {
+                    userSeasons[seasonKey].forEach(entry => {
+                        const { snapshotNumber } = entry;
+
+                        // Initialize snapshot entry arrays if they don’t exist
+                        if (!top10RankMap[snapshotNumber]) top10RankMap[snapshotNumber] = [];
+                        if (!top5WinRateMap[snapshotNumber]) top5WinRateMap[snapshotNumber] = [];
+                        if (!timeInFirstPlaceMap[snapshotNumber]) timeInFirstPlaceMap[snapshotNumber] = {};
+                        let usernameInMap = displayPlayerForMultipleSeasons ? username + " (S"+season+")": username;
+                        top10RankMap[snapshotNumber].push({ username: usernameInMap, ...entry });
+
+                        // Add to top5WinRateMap (consider all entries for win rate comparison)
+                        top5WinRateMap[snapshotNumber].push({
+                            username: usernameInMap,
+                            ...entry,
+                            winRate: parseFloat(entry.winRate.toFixed(1)),
+                        });
+                    });
+                }
+            });
+        }
+    });
+
+    // Process and finalize each map to retain only the top players as specified
+    Object.keys(top10RankMap).forEach(snapshotNumber => {
+        // Sort by playerRank and keep top 10, retaining full entry data
+        top10RankMap[snapshotNumber] = top10RankMap[snapshotNumber]
+            .sort((a, b) => b.skillRating - a.skillRating)
+            .slice(0, 10); // Keep the full entries
+    });
+
+    Object.keys(top5WinRateMap).forEach(snapshotNumber => {
+        // Sort by winRate and keep top 5, retaining full entry data
+        top5WinRateMap[snapshotNumber] = top5WinRateMap[snapshotNumber]
+            .sort((a, b) => b.winRate - a.winRate)
+            .slice(0, 5); // Keep the full entries
+    });
+
+    let previousFirstPlace = null;
+    let consecutiveFirstPlaceCount = 0;
+    const firstPlaceStreaks = {}; // Keeps track of total first-place streak for each player
+
+    Object.keys(top10RankMap).forEach(snapshotNumber => {
+        if (snapshotNumber >= startingSnapshot) {
+            const firstPlacePlayer = top10RankMap[snapshotNumber][0]?.username;
+
+            // Initialize first place streaks for the current snapshot if needed
+            if (!timeInFirstPlaceMap[snapshotNumber]) {
+                timeInFirstPlaceMap[snapshotNumber] = [];
+            }
+
+            if (firstPlacePlayer) {
+                // Update consecutive count for the current first-place player
+                if (firstPlacePlayer === previousFirstPlace) {
+                    consecutiveFirstPlaceCount += 0.5;
+                } else {
+                    if (firstPlaceStreaks[firstPlacePlayer]) {
+                        consecutiveFirstPlaceCount = firstPlaceStreaks[firstPlacePlayer] + 0.5;
+                    } else {
+                        consecutiveFirstPlaceCount = 0.5;
+                    }
+                }
+
+                // Update or initialize the streak for the current player
+                firstPlaceStreaks[firstPlacePlayer] = consecutiveFirstPlaceCount;
+
+                // Update timeInFirstPlace for the current snapshot
+                timeInFirstPlaceMap[snapshotNumber] = Object.entries(firstPlaceStreaks)
+                    .map(([username, daysInFirst]) => ({ username, daysInFirst }))
+                    .sort((a, b) => b.daysInFirst - a.daysInFirst) // Sort by most days in first place
+                    .slice(0, 3); // Keep only the top 3 players
+
+                // Update previous first-place player
+                previousFirstPlace = firstPlacePlayer;
+            }
+        }
+    });
+
+    return { top10RankMap, top5WinRateMap, timeInFirstPlaceMap };
+};
+
+const playerInSeason = (allSeasonsData, username, season) => {
+  return allSeasonsData[username] && allSeasonsData[username]["Season " + season] !== undefined && allSeasonsData[username]["Season " + season] !== null;
+}
 
   /*
     Smooths the map so that there aren't sudden jerks to a new minimum/maximum for the graph

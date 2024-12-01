@@ -1,0 +1,11 @@
+#playerSelectorGrid {
+}
+
+.playerSelectorGridHeader {
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+    margin-right: 1em;
+    align-self: center;
+    margin-bottom: 0.5em;
+}

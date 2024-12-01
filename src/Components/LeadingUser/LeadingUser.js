@@ -7,7 +7,7 @@ const LeadingUser = ({ data, currSnapshot }) => {
   const [prevLeader, setPrevLeader] = useState("");
 
   useEffect(() => {
-    if (data){
+    if (data && data[currSnapshot]){
         if (data[currSnapshot].username !== prevLeader){
             setPrevLeader(data[currSnapshot].username);
             setCurrentStreak(0.5);

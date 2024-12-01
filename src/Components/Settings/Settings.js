@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import './Settings.css'; // Import CSS for styling
 import {Button, FormControl, FormControlLabel, Select, MenuItem, Checkbox, Tooltip} from "@mui/material";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
+import PlayerSelectorGrid from './PlayerSelectorGrid';
 
 const seasons = [7,8,9,10,11];
 const speeds = [0.5, 0.75, 1, 1.25, 1.5];
@@ -16,6 +17,12 @@ const Settings = ({}) => {
   const [playerNum, setPlayerNum] = useState(10);
   const [enteringCheckboxChecked, setEnteringCheckboxChecked] = useState(false);
   const [leavingCheckboxChecked, setLeavingCheckboxChecked] = useState(false);
+  const [playerData, setPlayerData] = useState([]);
+
+  const handlePlayerDataChange = (updatedData) => {
+    setPlayerData(updatedData);
+    console.log('Updated Player Data:', updatedData);
+  };
 
   const dispatchInitiateChartEvent = () => {
     const event = new CustomEvent("initiateChart", { 
@@ -26,7 +33,8 @@ const Settings = ({}) => {
                 speed: speed,
                 playerNum: playerNum,
                 entering: enteringCheckboxChecked,
-                leaving: leavingCheckboxChecked
+                leaving: leavingCheckboxChecked,
+                players: playerData
             } 
         });
     window.dispatchEvent(event);
@@ -193,6 +201,14 @@ const Settings = ({}) => {
                     </div>
                 </div>
         </>
+        }
+        {
+            lineChartMode === 1 &&
+                <div className='settingsGroup1'>
+                    <div className='setting setting3'>
+                        <PlayerSelectorGrid onPlayerDataChange={handlePlayerDataChange}/>
+                    </div>
+                </div>
         }
         {
             lineChartMode === 2 &&

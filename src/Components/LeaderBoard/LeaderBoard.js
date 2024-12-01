@@ -3,7 +3,7 @@ import './LeaderBoard.css'; // Import CSS for styling
 import LeaderBoardEntry from '../LeaderBoardEntry/LeaderBoardEntry';
 import anime from 'animejs';
 
-const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
+const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot, subValueType}) => {
   const [sortedData, setSortedData] = useState([]);
   const [removedEntries, setRemovedEntries] = useState([]);
   const [newEntries, setNewEntries] = useState([]);
@@ -19,7 +19,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
 
   // Sort data by the given metric (rating) and set the rank
   useEffect(() => {
-    if (data){
+    if (data && data[currSnapshot]){
       const sorted = data[currSnapshot].map((userEntry) => ({
         name: userEntry[keyProp],
         ...userEntry,
@@ -154,10 +154,10 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
     if (leaderBoardMetric === 'skillRating') {
       if (window.innerWidth < 800){
         setEntryGap(35);
-        setEntrySize('large');
+        setEntrySize(subValueType ? 'xl' : 'large');
       } else {
         setEntryGap(38);
-        setEntrySize('large');
+        setEntrySize(subValueType ? 'xl' : 'large');
       }
     } else if (leaderBoardMetric === 'winRate') {
       setSuffix('%');
@@ -174,6 +174,18 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
     }
   }, []);
 
+  const calculateSubValue = (entry) => {
+    let text = "";
+    if (subValueType === 'gamesPlayed'){
+      text = "("+entry['totalGamesPlayed'] + " games)";
+    } else if (subValueType === 'seasonRank') {
+      text = "(rank: "+entry['playerRank'] + ")";
+    } else if (subValueType === 'winRate') {
+      text = "("+entry['winRate'] + "% wr)";
+    }
+    return text;
+  }
+
   return (
     <div className='leaderboard'>
       <h3>{title}</h3>
@@ -184,7 +196,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
       rank={index + 1}
       name={entry.name}
       value={entry[leaderBoardMetric] + suffix}
-      subValue={leaderBoardMetric === 'winRate' ? "("+entry['totalGamesPlayed'] + " games)" : ''}
+      subValue={calculateSubValue(entry)}
       size={entrySize}
       isNew={newEntryNames.includes(entry.name)} // Pass isNew based on newEntryNames
     />
@@ -195,7 +207,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot}) => {
       rank={''}
       name={entry.name}
       value={entry[leaderBoardMetric] + suffix}
-      subValue={leaderBoardMetric === 'winRate' ? "("+entry['totalGamesPlayed'] + " games)" : ''}
+      subValue={calculateSubValue(entry)}
       size={entrySize}
       isNew={true}
       isRemoving
