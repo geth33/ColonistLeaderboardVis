@@ -21,25 +21,29 @@ const MenuProps = {
   },
 };
 
-const seasons = ['All', '7', '8', '9', '10', '11'];
+const seasonsEnum = ['All', '7', '8', '9', '10', '11'];
 
 const PlayerSelector = ({ player, currPlayersLength, onUpdate, onRemove }) => {
   const [username, setUsername] = React.useState(player.username || '');
-  const [season, setSeason] = React.useState(['All']);
+  const [seasons, setSeasons] = React.useState(['All']);
 
   const handleSeasonChange = (event) => {
     const {
       target: { value },
     } = event;
-    const updatedSeasons = typeof value === 'string' ? value.split(',') : value.includes('All') ? ['All'] : value;
-    setSeason(updatedSeasons);
+    let options = value;
+    // Current set of seasons does not include 'All' but user now wants to include all seasons. 
+    let selectingAll = !seasons.includes('All') && options.includes('All');
+
+    const updatedSeasons = selectingAll ? ['All'] : options.filter((option) => option !== "All").sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+    setSeasons(updatedSeasons);
     onUpdate({ username, seasons: updatedSeasons });
   };
 
   const handleUsernameChange = (event) => {
     const updatedUsername = event.target.value;
     setUsername(updatedUsername);
-    onUpdate({ username: updatedUsername, seasons: season });
+    onUpdate({ username: updatedUsername, seasons: seasons });
   };
 
   return (
@@ -48,15 +52,15 @@ const PlayerSelector = ({ player, currPlayersLength, onUpdate, onRemove }) => {
         <Select
           className="seasonSelector"
           multiple
-          value={season}
+          value={seasons}
           onChange={handleSeasonChange}
           input={<OutlinedInput label="Tag" />}
           renderValue={(selected) => selected.join(', ')}
           MenuProps={MenuProps}
         >
-          {seasons.map((s) => (
+          {seasonsEnum.map((s) => (
             <MenuItem key={s} value={s} style={{ padding: '4px 8px' }}>
-              <Checkbox checked={season.includes(s)} />
+              <Checkbox checked={seasons.includes(s)} />
               <ListItemText primary={s} />
             </MenuItem>
           ))}

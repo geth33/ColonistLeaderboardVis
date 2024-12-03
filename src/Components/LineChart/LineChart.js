@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import './LineChart.css';
 import * as d3 from 'd3';
 
 const MARGIN = { top: 40, right: 120, bottom: 50, left: 60 };
@@ -13,45 +14,69 @@ const COLORS2 = [
 ]
 
 const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots, chartTitle}) => {
+  // console.log(playerData);
+  // console.log(seasonSnapshots);
+  // console.log(topPlayersAtTimeMap);
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null);
   const pathsRef = useRef({});
   const labelsRef = useRef({});
+  const savedTimeRef = useRef(0);
   const playerStartIndexRef = useRef({});
   const colorUsage = useRef({});
   let requestId = useRef(null); // Reference for requestAnimationFrame ID
 
   useEffect(() => {
-    if (!graphInitialized && playerData && Object.values(playerData).length > 0 && minMap && maxMap) {
-      setGraphInitialized(true);
-
-      const dimensions = calculateDimensions();
-      const svg = setupChart(dimensions);
-      const { x, y, xAxis, yAxis, $xAxis, $yAxis } = setupScalesAndAxes(svg, dimensions);
-
-      initializeColorUsage();
-
-      let time = 0;
-      let lastTickTime = 0;
-      const timeMax = Object.keys(topPlayersAtTimeMap).length;
-
-      function tick(timestamp) {
-        if (timestamp - lastTickTime >= lineChartSpeed) {
-          lastTickTime = timestamp;
-          time++;
-          if (time < timeMax) {
-            update(svg, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax);
-          }
-          if (time % 25 === 0) dispatchSnapshotEvent(time);
-        }
-        if (time < timeMax){
-          requestId.current = requestAnimationFrame(tick);
-        }
+    const handleResize = () => {
+      if (graphInitialized) {
+        console.log('handeling resize, resetting chart and init chart.')
+        resetChart();
+        initializeChart();
       }
+    };
 
-      requestId.current = requestAnimationFrame(tick);
+    // Attach resize event listener
+    window.addEventListener('resize', handleResize);
+
+    // Cleanup resize event listener on component unmount
+    return () => {};
+  }, [graphInitialized]);
+
+  useEffect(() => {
+    if (!graphInitialized && playerData && Object.values(playerData).length > 0 && minMap && maxMap) {
+      initializeChart();
     }
   }, [graphInitialized, playerData, topPlayersAtTimeMap, minMap, maxMap]);
+
+  const initializeChart = () => {
+    setGraphInitialized(true);
+
+    const dimensions = calculateDimensions();
+    const svg = setupChart(dimensions);
+    const { x, y, xAxis, yAxis, $xAxis, $yAxis } = setupScalesAndAxes(svg, dimensions);
+
+    initializeColorUsage();
+
+    let time = savedTimeRef.current;
+    let lastTickTime = savedTimeRef.current;
+    const timeMax = Object.keys(topPlayersAtTimeMap).length;
+
+    const tick = (timestamp) => {
+      if (timestamp - lastTickTime >= lineChartSpeed) {
+        lastTickTime = timestamp;
+        time++;
+        if (time < timeMax) {
+          update(svg, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax);
+        }
+        if (time % 25 === 0) dispatchSnapshotEvent(time);
+      }
+      if (time < timeMax) {
+        requestId.current = requestAnimationFrame(tick);
+      }
+    };
+
+    requestId.current = requestAnimationFrame(tick);
+  };
 
   useEffect(() => {
     if (generatingChart){
@@ -124,8 +149,8 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       .tickFormat(d => `Day ${seasonSnapshots[Math.floor(d / 25)]/2}`);
     const yAxis = d3.axisLeft(y).tickSizeInner(-width).tickPadding(10);
 
-    const $xAxis = svg.append('g').attr('class', 'x axis').attr('transform', `translate(0, ${height})`).call(xAxis);
-    const $yAxis = svg.append('g').attr('class', 'y axis').call(yAxis);
+    const $xAxis = svg.append('g').attr('class', 'x-axis').attr('transform', `translate(0, ${height})`).call(xAxis);
+    const $yAxis = svg.append('g').attr('class', 'y-axis').call(yAxis);
 
     svg.selectAll('.tick line').style('stroke', '#cccccc'); // Light gray grid lines
 
@@ -137,6 +162,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   };
 
   const dispatchSnapshotEvent = (time) => {
+    savedTimeRef.current = time;
     const event = new CustomEvent("nextSnapshot", { detail: { snapshot: seasonSnapshots[Math.floor(time / 25)] } });
     window.dispatchEvent(event);
   };
@@ -149,6 +175,8 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       if (!pathsRef.current[username]) createPlayerElements(svg, username, index);
 
       const startIndex = getStartIndexForPlayer(username, time);
+      // console.log(time);
+      // console.log(username);
       const lineData = playerData[username].slice(Math.max(startIndex, time - numOfTicksOnGraph), time + 1);
 
       updatePlayerPath(username, lineData, time, timeMax, x, y, startIndex);

@@ -117,7 +117,7 @@ const processPlayerData = (data) => {
     //     console.log(createdAt);
     //     console.log(hoursDifference);
     // }
-    return hoursDifference/12;
+    return Math.max(1, hoursDifference/12);
   }
 
   function calculateHoursBetweenDates(startDate, endDate) {

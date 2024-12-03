@@ -1,0 +1,19 @@
+.y-axis line{
+    stroke: #ccc; /* Set the color you want */
+    stroke-opacity: 0.2; /* Adjust the opacity if needed */
+}
+
+.x-axis line {
+    stroke: #ccc; /* Set the color you want */
+    stroke-opacity: 0.2; /* Adjust the opacity if needed */
+}
+
+.y-axis .domain{
+    stroke: #ccc; /* Set the color you want */
+    stroke-opacity: 0.5;
+}
+
+.x-axis .domain{
+    stroke: #ccc; /* Set the color you want */
+    stroke-opacity: 0.5;
+}

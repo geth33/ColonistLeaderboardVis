@@ -6,14 +6,16 @@ import PlayerSelectorGrid from './PlayerSelectorGrid';
 
 const seasons = [7,8,9,10,11];
 const speeds = [0.5, 0.75, 1, 1.25, 1.5];
+const days = [1,5,10,20,30,40,50,60,70,80];
 const numOfPlayers = [5,10,15,20];
 const numOfPlayersSeason = [1,5,10,20,50,100,200];
 
-const Settings = ({}) => {
+const Settings = ({hide}) => {
   const [lineChartMode, setLineChartMode] = useState(0);
   const [gameMode, setGameMode] = useState("1v1");
   const [season, setSeason] = useState(7);
   const [speed, setSpeed] = useState(1);
+  const [selectedDay, setSelectedDay] = useState(1);
   const [playerNum, setPlayerNum] = useState(10);
   const [enteringCheckboxChecked, setEnteringCheckboxChecked] = useState(false);
   const [leavingCheckboxChecked, setLeavingCheckboxChecked] = useState(false);
@@ -31,6 +33,7 @@ const Settings = ({}) => {
                 gameMode: gameMode,
                 season: season,
                 speed: speed,
+                startingSnapshot: selectedDay * 2,
                 playerNum: playerNum,
                 entering: enteringCheckboxChecked,
                 leaving: leavingCheckboxChecked,
@@ -42,7 +45,7 @@ const Settings = ({}) => {
 
 
   return (
-    <div className='settingsContainer'>
+    <div className='settingsContainer' style={{display: hide ? 'none' : ''}}>
         <div className='lineChartModeContainer'>
             <div className='lineChartModeButtonContainer'>
                 <div>
@@ -115,25 +118,25 @@ const Settings = ({}) => {
                 </div>
             </Button>
         </div>
-        {
-            lineChartMode === 0 &&
-            <>
-            <div className='settingsGroup1'>
-                    <div className='setting setting1'>
-                        <span className='settingsLabel'>Season</span>
-                        <FormControl size="small">
-                            <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={season} onChange={(e) => {setSeason(e.target.value);}}>
-                                {seasons.map((season, num) => (
-                                    <MenuItem
-                                        value={season}
-                                        key={num}
-                                    >
-                                        {season}
-                                    </MenuItem>
-                                    ))}
-                            </Select>
-                        </FormControl>
-                    </div>
+        <div className='settingsGroup1'>
+                    {
+                        lineChartMode === 0 &&
+                            <div className='setting setting1'>
+                                <span className='settingsLabel'>Season</span>
+                                <FormControl size="small">
+                                    <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={season} onChange={(e) => {setSeason(e.target.value);}}>
+                                        {seasons.map((season, num) => (
+                                            <MenuItem
+                                                value={season}
+                                                key={num}
+                                            >
+                                                {season}
+                                            </MenuItem>
+                                            ))}
+                                    </Select>
+                                </FormControl>
+                            </div>
+                    }
                     <div className='setting setting2'>
                         <span className='settingsLabel'>Speed</span>
                         <FormControl size="small">
@@ -149,22 +152,43 @@ const Settings = ({}) => {
                             </Select>
                         </FormControl>
                     </div>
-                    <div className='setting setting3'>
-                        <span className='settingsLabel'># of Players</span>
+                    {
+                        lineChartMode === 0 &&
+                            <div className='setting setting3'>
+                                <span className='settingsLabel'># of Players</span>
+                                <FormControl size="small">
+                                    <Select className='settingsSelect' value={playerNum} onChange={(e) => {setPlayerNum(e.target.value);}}>
+                                        {numOfPlayers.map((playerNum, num) => (
+                                            <MenuItem
+                                                value={playerNum}
+                                                key={num}
+                                            >
+                                                {playerNum}
+                                            </MenuItem>
+                                            ))}
+                                    </Select>
+                                </FormControl>
+                            </div>
+                    }
+                    <div className='setting setting2'>
+                        <span className='settingsLabel'>Start Day</span>
                         <FormControl size="small">
-                            <Select className='settingsSelect' value={playerNum} onChange={(e) => {setPlayerNum(e.target.value);}}>
-                                {numOfPlayers.map((playerNum, num) => (
+                            <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={selectedDay} onChange={(e) => {setSelectedDay(e.target.value);}}>
+                                {days.map((day, num) => (
                                     <MenuItem
-                                        value={playerNum}
+                                        value={day}
                                         key={num}
                                     >
-                                        {playerNum}
+                                        {day}
                                     </MenuItem>
                                     ))}
                             </Select>
                         </FormControl>
                     </div>
                 </div>
+        {
+            lineChartMode === 0 &&
+            <>
             <div className='settingsGroup2'>
                     <div className='setting setting3'>
                         <span className='settingsLabel'>Show Players:</span>

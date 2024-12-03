@@ -85,8 +85,7 @@ function toSx(styles, classes) {
 }
 
   const numOfTicksOnGraph = 180;
-  const lineChartSpeed = 30;
-  const startingSnapshot = 12;
+  const lineChartSpeed = 20;
 
 const Home = () => {
   const [allSeasonsData, setAllSeasonsData] = useState(null);
@@ -104,7 +103,7 @@ const Home = () => {
   const [top10RankMap, setTop10RankMap] = useState(null);
   const [top5WinRateMap, setTop5WinRateMap] = useState(null);
   const [timeInFirstPlaceMap, setTimeInFirstPlaceMap] = useState(null);
-  const [currSnapshot, setCurrSnapshot] = useState(startingSnapshot);
+  const [currSnapshot, setCurrSnapshot] = useState(1);
   const [tabIndex, setTabIndex] = React.useState(0);
 	const tabItemSx = toSx(tabItemStyles, tabClasses);
   const [tabLabel, setTabLabel] = useState("Settings");
@@ -144,8 +143,8 @@ useEffect(() => {
   if (prepareDataForChart){
     let gameModeFormatted = settings.gameMode === '1v1' ? '1v1' : 'Base';
     if (settings?.lineChartMode === 0){
-      generateTopPlayerLines(allSeasonsData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, settings.entering, settings.leaving, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap, seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot));
-      const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allSeasonsData, settings.season, startingSnapshot);
+      generateTopPlayerLines(allSeasonsData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.season, settings.playerNum, settings.entering, settings.leaving, settings.startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap, seasonSnapshotsMap[settings?.season].filter(s => s >= settings.startingSnapshot));
+      const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMaps(allSeasonsData, settings.season, settings.startingSnapshot);
       setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
       setTop10RankMap(top10RankMap);
       setTop5WinRateMap(top5WinRateMap);
@@ -156,8 +155,8 @@ useEffect(() => {
       setChartInitialized(true);
       setPrepareDataForChart(false);
     } else if (settings?.lineChartMode === 1){
-      generateSelectedPlayerLines(allSeasonsData, seasonMaxSnapshotMap, seasonSnapshotsMap, settings?.players, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap);
-      const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMapsForUsers(allSeasonsData, settings?.players, 1);
+      generateSelectedPlayerLines(allSeasonsData, seasonMaxSnapshotMap, seasonSnapshotsMap, settings?.players, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.startingSnapshot);
+      const {top10RankMap, top5WinRateMap, timeInFirstPlaceMap} = generateSnapshotMapsForUsers(allSeasonsData, settings?.players, settings.startingSnapshot);
       setTop1RankMap(Object.fromEntries(Object.entries(top10RankMap).map(([key, array]) => [key, array[0]])));
       setTop10RankMap(top10RankMap);
       setTop5WinRateMap(top5WinRateMap);
@@ -168,7 +167,7 @@ useEffect(() => {
       setChartInitialized(true);
       setPrepareDataForChart(false);
     } else if (settings?.lineChartMode === 2){
-      generateSeasonAverageLines(allSeasonsData, seasonMaxSnapshotMap, seasonSnapshotsMap, settings.playerNum, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap);
+      generateSeasonAverageLines(allSeasonsData, seasonMaxSnapshotMap, seasonSnapshotsMap, settings.playerNum, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings.startingSnapshot);
       const {top10RankMap} = generateTopSeasonSnapshotMap(allSeasonsData, settings.playerNum);
       setTop10RankMap(top10RankMap);
       setTabIndex(1);
@@ -193,7 +192,7 @@ useEffect(() => {
     setTop10RankMap(null);
     setTop5WinRateMap(null);
     setTimeInFirstPlaceMap(null);
-    setCurrSnapshot(settings?.lineChartMode === 0 ? startingSnapshot : 1);
+    setCurrSnapshot(settings.startingSnapshot);
 
     if (settings.gameMode === '1v1'){
       if (store.oneOnOneData){
@@ -214,6 +213,7 @@ useEffect(() => {
 useEffect(() => {
   const handleTickEvent = (e) => {
     const { snapshot } = e.detail;
+    console.log(snapshot);
     setCurrSnapshot(snapshot);
   };
 
@@ -237,7 +237,7 @@ useEffect(() => {
         {
           ( (allSeasonsData && !generatingChart)) && <LineChart playerData={playerRatingMap} topPlayersAtTimeMap={topPlayersAtTimeMap} 
           minMap={minMap} maxMap={maxMap} numOfTicksOnGraph={numOfTicksOnGraph} lineChartSpeed={settings?.speed ? lineChartSpeed/settings.speed : lineChartSpeed} 
-          generatingChart={generatingChart} seasonSnapshots={ settings?.lineChartMode !== 0 ? Array.from({ length: 184 }, (_, i) => i + 1) : seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot)} chartTitle={chartTitle}/> 
+          generatingChart={generatingChart} seasonSnapshots={ settings?.lineChartMode !== 0 ? Array.from({ length: (185-settings?.startingSnapshot) }, (_, i) => i + settings?.startingSnapshot) : seasonSnapshotsMap[settings?.season].filter(s => s >= settings.startingSnapshot)} chartTitle={chartTitle}/> 
         }
         <div className={`${allSeasonsData === null || generatingChart ? 'fullContainer' : 'supportingContentContainer'}`}>
           <div className='tabModule'>
@@ -250,35 +250,35 @@ useEffect(() => {
                 <Tab disableRipple label={"Leaderboards"} sx={tabItemSx} disabled={settings === null}/>
 						</Tabs>
           </div>
-          {
-            tabIndex === 0 ? <>
-              <Settings/>
+          
+              <Settings hide={tabIndex !== 0}/>
               <Backdrop open={generatingChart}>
                 <Loader/>
               </Backdrop>
-            </> :
-                <div className='supportingVisContainer'>
-                  { 
-                    settings?.lineChartMode !== 2 && <div className='leaderboardItem leadingUserModule'>
-                    <LeadingUser data={top1RankMap} currSnapshot={currSnapshot}/>
-                  </div>
-                  }
-                <div className='leaderboardItem leaderboardItem1'>
-                  <LeaderBoard title="Top Rating" data={top10RankMap} leaderBoardMetric="skillRating" size={settings?.lineChartMode !== 0 ? 8 : 10} currSnapshot={currSnapshot} subValueType={settings?.lineChartMode === 1 ? 'seasonRank' : settings?.lineChartMode === 2 ? 'winRate' : ''}/>
-                </div>
+              {
+                tabIndex !== 0 && <div className='supportingVisContainer'>
                 { 
-                  settings?.lineChartMode !== 2 && <>
-                    <div className='leaderboardItem leaderboardItem2'>
-                      <LeaderBoard title="Top Win Rate" data={top5WinRateMap} leaderBoardMetric="winRate" size={5} currSnapshot={currSnapshot} subValueType={'gamesPlayed'}/>
-                    </div>
-      
-                    <div className='leaderboardItem leaderboardItem3'>
-                      <LeaderBoard title="Time in First" data={timeInFirstPlaceMap} leaderBoardMetric="daysInFirst" size={3} currSnapshot={currSnapshot}/>
-                    </div>
-                  </>
+                  settings?.lineChartMode !== 2 && <div className='leaderboardItem leadingUserModule'>
+                  <LeadingUser data={top1RankMap} currSnapshot={currSnapshot}/>
+                </div>
                 }
+              <div className='leaderboardItem leaderboardItem1'>
+                <LeaderBoard title="Top Rating" data={top10RankMap} leaderBoardMetric="skillRating" size={settings?.lineChartMode !== 0 ? 8 : 10} currSnapshot={currSnapshot} subValueType={settings?.lineChartMode === 1 ? 'seasonRank' : settings?.lineChartMode === 2 ? 'winRate' : ''}/>
               </div>
-          }
+              { 
+                settings?.lineChartMode !== 2 && <>
+                  <div className='leaderboardItem leaderboardItem2'>
+                    <LeaderBoard title="Top Win Rate" data={top5WinRateMap} leaderBoardMetric="winRate" size={5} currSnapshot={currSnapshot} subValueType={'gamesPlayed'}/>
+                  </div>
+    
+                  <div className='leaderboardItem leaderboardItem3'>
+                    <LeaderBoard title="Time in First" data={timeInFirstPlaceMap} leaderBoardMetric="daysInFirst" size={3} currSnapshot={currSnapshot}/>
+                  </div>
+                </>
+              }
+            </div>
+              }
+          
           </div>
     </div>
   );
