@@ -34,26 +34,75 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <AppBar position="static" color="primary">
-          <Container>
-            <Toolbar>
-              <Typography variant="h6" component={Link} to="/" style={{ flexGrow: 1, color: 'inherit', textDecoration: 'none', textAlign: 'left' }}>
-                Leaderboard Visualizer
-              </Typography>
-              {isMobile ? (
-                <IconButton color="inherit" edge="end" onClick={handleDrawerToggle}>
-                  <MenuIcon />
-                </IconButton>
-              ) : (
-                <>
-                  <Button color="inherit" component={Link} to="/">Home</Button>
-                  <Button color="inherit" component={Link} to="/faq">FAQ</Button>
-                  <Button color="inherit" target="_blank" href="https://qualtricsxmvtb8mdg33.qualtrics.com/jfe/form/SV_8euSp8O04krdUjQ">Give Feedback</Button>
-                </>
-              )}
-            </Toolbar>
-          </Container>
-        </AppBar>
+      <AppBar position="static" sx={{ backgroundColor: '#1e63ac' }}>
+      <Container maxWidth="xl">
+        <Toolbar
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between', // Distribute space between title and button group
+            paddingX: 2, // Add horizontal padding to create space from screen edges
+          }}
+        >
+          {/* Title */}
+          <Typography
+            variant="h5" // Slightly larger title
+            component={Link}
+            to="/"
+            sx={{
+              color: 'white',
+              fontWeight: 'bold',
+              textDecoration: 'none',
+              marginRight: 'auto', // Push it to the left
+            }}
+          >
+            Leaderboard Visualizer
+          </Typography>
+
+          {/* Button Group */}
+          {isMobile ? (
+            <IconButton color="inherit" edge="end" onClick={handleDrawerToggle}>
+              <MenuIcon />
+            </IconButton>
+          ) : (
+            <div style={{ display: 'flex', gap: '1rem' }}> {/* Add spacing between buttons */}
+              <Button
+                color="inherit"
+                component={Link}
+                to="/"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'bold',
+                }}
+              >
+                Home
+              </Button>
+              <Button
+                color="inherit"
+                component={Link}
+                to="/faq"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'bold',
+                }}
+              >
+                FAQ
+              </Button>
+              <Button
+                color="inherit"
+                target="_blank"
+                href="https://qualtricsxmvtb8mdg33.qualtrics.com/jfe/form/SV_8euSp8O04krdUjQ"
+                sx={{
+                  color: 'white',
+                  fontWeight: 'bold',
+                }}
+              >
+                Give Feedback
+              </Button>
+            </div>
+          )}
+        </Toolbar>
+      </Container>
+    </AppBar>
 
         {/* Drawer for mobile view */}
         <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
