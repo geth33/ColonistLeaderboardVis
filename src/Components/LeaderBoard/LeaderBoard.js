@@ -153,10 +153,10 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot, subVa
   useEffect(() => {
     if (leaderBoardMetric === 'skillRating') {
       if (window.innerWidth < 800){
-        setEntryGap(35);
+        setEntryGap(subValueType ? 40 : 35);
         setEntrySize(subValueType ? 'xl' : 'large');
       } else {
-        setEntryGap(38);
+        setEntryGap(subValueType ? 42 : 38);
         setEntrySize(subValueType ? 'xl' : 'large');
       }
     } else if (leaderBoardMetric === 'winRate') {
