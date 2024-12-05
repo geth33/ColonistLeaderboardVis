@@ -1,21 +1,24 @@
 import React, { useEffect, useRef, useState } from 'react';
 import './Settings.css'; // Import CSS for styling
-import {Button, FormControl, FormControlLabel, Select, MenuItem, Checkbox, Tooltip} from "@mui/material";
+import {Button, FormControl, FormControlLabel, Select, MenuItem, Checkbox, Tooltip, Alert} from "@mui/material";
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayerSelectorGrid from './PlayerSelectorGrid';
 
 const seasons = [7,8,9,10,11];
 const speeds = [0.5, 0.75, 1, 1.25, 1.5];
-const days = [1,5,10,20,30,40,50,60,70,80];
+const currentSeasonDays = [1,5,10,20,30];
+const finishedSeasonDays = [1,5,10,20,30,40,50,60,70,80];
 const numOfPlayers = [5,10,15,20];
 const numOfPlayersSeason = [1,5,10,20,50,100,200];
 
-const Settings = ({hide}) => {
+const Settings = ({hide, playersWithoutData}) => {
   const [lineChartMode, setLineChartMode] = useState(0);
   const [gameMode, setGameMode] = useState("1v1");
   const [season, setSeason] = useState(7);
   const [speed, setSpeed] = useState(1);
+  const [selectableDays, setSelectableDays] = useState(finishedSeasonDays);
   const [selectedDay, setSelectedDay] = useState(1);
+  const [submittedWithEmptyRows, setSubmittedWithEmptyRows] = useState(false);
   const [playerNum, setPlayerNum] = useState(10);
   const [enteringCheckboxChecked, setEnteringCheckboxChecked] = useState(false);
   const [leavingCheckboxChecked, setLeavingCheckboxChecked] = useState(false);
@@ -23,8 +26,28 @@ const Settings = ({hide}) => {
 
   const handlePlayerDataChange = (updatedData) => {
     setPlayerData(updatedData);
-    console.log('Updated Player Data:', updatedData);
   };
+
+  const playerRowsAreBlank = () => {
+    for (let player of playerData){
+        if (player.username == "" || player.seasons.length === 0){
+            return true;
+        }
+    }
+    return false;
+  }
+
+  const submitForm = () => {
+    if (lineChartMode === 1){
+        if (playerRowsAreBlank()){
+            setSubmittedWithEmptyRows(true);
+            return;
+        } else {
+            setSubmittedWithEmptyRows(false);
+        }
+    }
+    dispatchInitiateChartEvent();
+  }
 
   const dispatchInitiateChartEvent = () => {
     const event = new CustomEvent("initiateChart", { 
@@ -42,6 +65,24 @@ const Settings = ({hide}) => {
         });
     window.dispatchEvent(event);
   };
+
+  useEffect(() => {
+    if (lineChartMode === 0 || lineChartMode === 2){
+        setPlayerNum(10);
+    }
+  }, [lineChartMode])
+
+  useEffect(() => {
+    // If going to the current season, need to make
+    if (season === 11){
+        setSelectableDays(currentSeasonDays);
+        if (selectedDay > 30){
+            setSelectedDay(10);
+        }
+    } else {
+        setSelectableDays(finishedSeasonDays);
+    }
+  }, [season])
 
 
   return (
@@ -174,14 +215,16 @@ const Settings = ({hide}) => {
                         <span className='settingsLabel'>Start Day</span>
                         <FormControl size="small">
                             <Select className='settingsSelect' sx={{ fontSize: '0.9rem' }} value={selectedDay} onChange={(e) => {setSelectedDay(e.target.value);}}>
-                                {days.map((day, num) => (
+                                {
+                                selectableDays.map((day, num) => (
                                     <MenuItem
                                         value={day}
                                         key={num}
                                     >
                                         {day}
                                     </MenuItem>
-                                    ))}
+                                    ))
+                                    }
                             </Select>
                         </FormControl>
                     </div>
@@ -227,12 +270,18 @@ const Settings = ({hide}) => {
         </>
         }
         {
-            lineChartMode === 1 &&
-                <div className='settingsGroup1'>
+            lineChartMode === 1 && <>
+                <div style={{ margin: '3em auto 1.5em', maxWidth: '40em', overflow: 'hidden' }}>
+                    <Alert severity="info" style={{ maxWidth: '100%', whiteSpace: 'normal', overflowWrap: 'break-word' }}>
+                        Note: Data is only for time spent in top 200. <br/>Also, Season 10 is missing days 5-19 and 49-66.
+                    </Alert>
+                </div>
+                <div style={{justifyContent: 'center', display: 'flex'}}>
                     <div className='setting setting3'>
                         <PlayerSelectorGrid onPlayerDataChange={handlePlayerDataChange}/>
                     </div>
                 </div>
+            </>
         }
         {
             lineChartMode === 2 &&
@@ -256,12 +305,31 @@ const Settings = ({hide}) => {
                 </div>
         }
         <div className='generateChartButtonContainer'>
-            <Button id='generateChartButton' className='settingsButton' onClick={() => {dispatchInitiateChartEvent();}}>
+            <Button id='generateChartButton' className='settingsButton' onClick={() => {submitForm();}}>
                 <div className='settingsButtonText'>
                     <p id='generateChartText'>Generate Chart</p>
                 </div>
             </Button>
         </div>
+        {
+  lineChartMode === 1 && playersWithoutData?.length > 0 && !submittedWithEmptyRows && (
+    <div style={{ margin: '1.5em auto 0em', maxWidth: '40em', overflow: 'hidden' }}>
+      <Alert severity="error" style={{ maxWidth: '100%', whiteSpace: 'normal', overflowWrap: 'break-word' }}>
+        The following users do not have data for the selected seasons: {playersWithoutData?.join(", ")}. Either remove these players or expand your season selection.
+      </Alert>
+    </div>
+  )
+}
+{
+  lineChartMode === 1 && submittedWithEmptyRows && (
+    <div style={{ margin: '1.5em auto 0em', maxWidth: '30em', overflow: 'hidden' }}>
+      <Alert severity="error" style={{ maxWidth: '100%', whiteSpace: 'normal', overflowWrap: 'break-word' }}>
+        Please fill out the season and username for each row.
+      </Alert>
+    </div>
+  )
+}
+
     </div>
   );
 };

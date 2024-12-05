@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './PlayerSelectorGrid.css'; // Import CSS for styling
 import PlayerSelector from './PlayerSelector'; // Import the PlayerSelector component
 import Button from '@mui/material/Button';
@@ -7,8 +7,16 @@ import Button from '@mui/material/Button';
 const PlayerSelectorGrid = ({ onPlayerDataChange }) => {
   const [players, setPlayers] = useState([{ id: Date.now(), username: '', seasons: [] }]); // Use unique IDs
 
+  useEffect(() => {
+    onPlayerDataChange(players);
+  }, [])
+
   const addPlayer = () => {
-    setPlayers([...players, { id: Date.now(), username: '', seasons: [] }]);
+    let updatedPlayers = [...players, { id: Date.now(), username: '', seasons: [] }];
+    setPlayers(updatedPlayers);
+    if (onPlayerDataChange) {
+        onPlayerDataChange(updatedPlayers);
+      }
   };
 
   const updatePlayer = (id, updatedPlayer) => {
@@ -41,7 +49,7 @@ const PlayerSelectorGrid = ({ onPlayerDataChange }) => {
           Username
         </span>
       </div>
-      {players.map((player) => (
+      {players?.map((player) => (
         <PlayerSelector
           key={player.id}
           player={player}

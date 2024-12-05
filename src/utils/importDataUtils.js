@@ -102,7 +102,7 @@ const processPlayerData = (data) => {
         seasonMaxSnapshotMap[currentSeason] = snapshotNumber;
     }
     });
-    console.log("Processed Data:", processedData);
+    //console.log("Processed Data:", processedData);
     return {
         fileData: processedData,
         fileMaxSnapshotMap: seasonMaxSnapshotMap,

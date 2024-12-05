@@ -9,7 +9,6 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     
     let topPlayerMap = getTopPlayersPerSnapshot(allSeasonsData, startingSnapshot, season, numOfPlayersOnChart);
     let topPlayerMapJustUsernames = getUsernamesMap(topPlayerMap);
-    console.log(topPlayerMapJustUsernames);
     let topPlayersAtTimeMap = createTopPlayersAtTimeMap(numOfTicksOnGraph, topPlayerMapJustUsernames);
     let bottomRatingsPerSnapshot = getBottomRatingsPerSnapshot(topPlayerMap, numOfPlayersOnChart); 
     let playerRatingMap = {};
@@ -22,13 +21,13 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     createMinAndMaxMaps(playerRatingMap, setMinMap, setMaxMap, numOfTicksOnGraph);
   }
 
-  export const generateSeasonAverageLines = (allSeasonsData, seasonMaxSnapshotMap, seasonSnapshots, numOfPlayers, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, startingSnapshot) => {
+  export const generateSeasonAverageLines = (allSeasonsData, seasonMaxSnapshotMap, seasonSnapshots, numOfPlayers, gameMode, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, startingSnapshot) => {
     let seasonLineMap = {};
     let seasonLineMapSubsnapshots = {};
     let topSeasonsAtTimeMap = {};
     let seasons = [7,8,9,10,11];
     for (let season of seasons){
-      seasonLineMap["Season " + season] = generateSeasonAverageLine(allSeasonsData, season, seasonSnapshots, seasonMaxSnapshotMap, numOfPlayers, startingSnapshot);
+      seasonLineMap["Season " + season] = generateSeasonAverageLine(allSeasonsData, season, seasonSnapshots, seasonMaxSnapshotMap, numOfPlayers, startingSnapshot, gameMode);
       seasonLineMapSubsnapshots["Season " + season] = generateSeasonAverageLineSubsnapshots(seasonLineMap["Season " + season]);
     }
     let sortedSeasons = sortSeasonsPerSnapshot(seasonLineMap, false);
@@ -46,8 +45,6 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     // If the map is already in the subsnapshot form (values are spread out 25 times between snapshots), then we need to roll it back up into the normal snapshot values.
     let increment = rollBackUpSubsnapshots ? 25 : 1;
     const maxIndex = rollBackUpSubsnapshots ? largestLength + 1 : largestLength;
-    console.log(seasonsMap);
-    console.log(maxIndex);
     for (let i = 0; i < maxIndex; i += increment) {
       // Collect all seasons and their values at index i
       let valuesAtIndex = Object.entries(seasonsMap)
@@ -62,11 +59,16 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     return result;
   }
 
-  export const generateSeasonAverageLine = (allSeasonsData, season, seasonSnapshots, seasonMaxSnapshotMap, numOfPlayers, startingSnapshot) => {
+  export const generateSeasonAverageLine = (allSeasonsData, season, seasonSnapshots, seasonMaxSnapshotMap, numOfPlayers, startingSnapshot, gameMode) => {
     let line = [];
-    let snapshotsForSeason = seasonSnapshots[season];
+    let snapshotsForSeason = [];
+    if (season === 10 && numOfPlayers > 10 && gameMode === 'Base'){
+      snapshotsForSeason = seasonSnapshots[season].filter(snapshot => snapshot < 170);
+    } else {
+      snapshotsForSeason = seasonSnapshots[season];
+    }
     let topPlayersSnapshotMap = getTopPlayersPerSnapshot(allSeasonsData, startingSnapshot, season, numOfPlayers);
-    for (let i=startingSnapshot; i < seasonMaxSnapshotMap[season]; i++){
+    for (let i=startingSnapshot; i <= seasonMaxSnapshotMap[season]; i++){
       if (snapshotsForSeason.includes(i)){
         let average = calculateAverageRatingForSnapshot(topPlayersSnapshotMap, i);
         line.push(average);
@@ -100,41 +102,99 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     return smoothRatings(lineSubSnapshots, true);
   }
 
-  export const generateSelectedPlayerLines = (allSeasonsData, seasonMaxSnapshotMap, seasonSnapshots, players, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, startingSnapshot) => {
-    // let playersNotInTop200 = playersNotInDataset(allSeasonsData, players);
-    // if (playersNotInTop200.length > 0){
-    //   return "The following players are not ";
-    // } 
-
-    let playerLineMap = {};
-    let topPlayersAtTimeMap = {};
+  const findFirstSnapshotWithData = (allSeasonsData, players) => {
     let allSeasons = [7,8,9,10,11];
     let usernamesInData = Object.keys(allSeasonsData);
+    let firstSnapshotWithData = Infinity;
+
     for (let player of players){
       let usernameMatch = findMatchingUsername(usernamesInData, player.username);
       if (player.seasons[0] === 'All'){
         player.seasons = allSeasons;
       }
       for (let season of player.seasons){
-        let snapshotsToDisplay = Array.from({ length: (185-startingSnapshot) }, (_, i) => i + startingSnapshot + 1);
+        if (playerInSeason(allSeasonsData, usernameMatch, season)){
+          let firstSnapshot = allSeasonsData[usernameMatch]["Season " + season][0].snapshotNumber;
+          if (firstSnapshot < firstSnapshotWithData){
+            firstSnapshotWithData = firstSnapshot;
+          }
+        }
+      }
+    }
+    return firstSnapshotWithData;
+  }
+
+  const findPlayersWithoutData = (allSeasonsData, players) => {
+    let allSeasons = [7,8,9,10,11];
+    let usernamesInData = Object.keys(allSeasonsData);
+    let playersWithoutData = [];
+
+    for (let player of players){
+      let playerHasAtLeastOneSeason = false;
+      let usernameMatch = findMatchingUsername(usernamesInData, player.username);
+      // Only check season data if there is a matching user. Otherwise, we default to saying this user has no data for the selected seasons.
+      if (usernameMatch){
+        if (player.seasons[0] === 'All'){
+          player.seasons = allSeasons;
+        }
+        for (let season of player.seasons){
+          if (!playerHasAtLeastOneSeason && playerInSeason(allSeasonsData, usernameMatch, season)){
+            playerHasAtLeastOneSeason = true;
+          }
+        }
+      }
+      if (!playerHasAtLeastOneSeason){
+        playersWithoutData.push(player.username);
+      }
+    }
+    return playersWithoutData;
+  }
+
+  export const generateSelectedPlayerLines = (allSeasonsData, seasonMaxSnapshotMap, seasonSnapshots, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings, setStartingSnapshot) => {
+    // let playersNotInTop200 = playersNotInDataset(allSeasonsData, players);
+    // if (playersNotInTop200.length > 0){
+    //   return "The following players are not ";
+    // } 
+    let playersWithoutData = findPlayersWithoutData(allSeasonsData, settings.players);
+    if (playersWithoutData.length !== 0){
+      return playersWithoutData;
+    }
+
+    let playerLineMap = {};
+    let topPlayersAtTimeMap = {};
+    let allSeasons = [7,8,9,10,11];
+    let usernamesInData = Object.keys(allSeasonsData);
+    // Update the starting snapshot to begin on the snapshot that has the first data. (we don't want an empty chart for 30 seconds)
+    let updatedStartingSnapshot = Math.max(findFirstSnapshotWithData(allSeasonsData, settings.players) + 1, settings.startingSnapshot);
+    setStartingSnapshot(updatedStartingSnapshot);
+
+    for (let player of settings.players){
+      let usernameMatch = findMatchingUsername(usernamesInData, player.username);
+      if (player.seasons[0] === 'All'){
+        player.seasons = allSeasons;
+      }
+      for (let season of player.seasons){
+        let snapshotsToDisplay = Array.from({ length: (186-updatedStartingSnapshot) }, (_, i) => i + updatedStartingSnapshot);
         seasonSnapshots[season].forEach(value => {
             if (!snapshotsToDisplay.includes(value)) {
               snapshotsToDisplay.push(value);
             }
         });
         if (playerInSeason(allSeasonsData, usernameMatch, season)){
-          playerLineMap[usernameMatch + " (S"+season+")"] = preparePlayerForLineChart(allSeasonsData, usernameMatch, season, 100000, startingSnapshot, seasonMaxSnapshotMap[season],null,snapshotsToDisplay.sort(),true,true);
+          playerLineMap[usernameMatch + " (S"+season+")"] = preparePlayerForLineChart(allSeasonsData, usernameMatch, season, 100000, updatedStartingSnapshot, seasonMaxSnapshotMap[season],null,snapshotsToDisplay.sort(),true,true);
         }
       }
     }
-    console.log(playerLineMap);
+    // console.log(playerLineMap);
     let sortedPlayers = sortSeasonsPerSnapshot(playerLineMap, true);
-    console.log(sortedPlayers)
+    // console.log(sortedPlayers)
     topPlayersAtTimeMap = createTopPlayersAtTimeMap(numOfTicksOnGraph, sortedPlayers);
-    console.log(topPlayersAtTimeMap);
+    // console.log(topPlayersAtTimeMap);
     setTopPlayersAtTimeMap(topPlayersAtTimeMap);
     setPlayerRatingMap(playerLineMap);
     createMinAndMaxMaps(playerLineMap, setMinMap, setMaxMap, numOfTicksOnGraph);
+
+    return [];
   }
 
   export const playersNotInDataset = (allSeasonsData, players) => {
@@ -234,6 +294,20 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     let players = map[snapshot];
     return players.reduce((accumulator, player) => accumulator + player.skillRating, 0)/players.length;
   }
+
+  const findFirstSnapshotWithUserData = (playerLines) => {
+    let firstSubSnapshotWithValue = Infinity;
+    for (let line of playerLines){
+      for (let i = 0; i < line.length; i++){
+        if (i < firstSubSnapshotWithValue && line[i] !== -1){
+          firstSubSnapshotWithValue = i;
+        }
+      }
+    }
+    if (firstSubSnapshotWithValue === Infinity) console.log("Infinity error!");
+
+    return firstSubSnapshotWithValue !== Infinity ? Math.floor(firstSubSnapshotWithValue/25) : 2;
+  }
   
   /*
 
@@ -301,8 +375,16 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
       });
   
       // Store the min and max values at the index in the respective maps
-      currMinMap[i] = minValue === Infinity ? -1 : Math.floor(minValue); // If no valid min found, set as -1
-      currMaxMap[i] = maxValue === -Infinity ? -1 : Math.ceil(maxValue); // If no valid max found, set as -1
+      currMinMap[i] = minValue === Infinity ? currMinMap[i-1] : Math.floor(minValue); // If no valid min found, set as -1
+      currMaxMap[i] = maxValue === -Infinity ? currMaxMap[i-1] : Math.ceil(maxValue); // If no valid max found, set as -1
+    }
+
+    // Add 5% white space buffer to top and bottom of graph.
+    for (let i = 0; i < maxLength; i++) {
+      let range = currMaxMap[i] - currMinMap[i];
+      let buffer = Math.max(range * 0.05, 10);
+      currMaxMap[i] += buffer;
+      currMinMap[i] -= buffer;
     }
   
     // Now we'd like to create min and max maps that account for all data points displayed on the graph.
@@ -372,7 +454,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     seasonData = seasonData.filter(d => d.snapshotNumber >= startingSnapshot);
     let userInLastSnapshot = false;
     let snapshotCount = startingSnapshot;
-    let prevSnapshotCount = 0;
+    let prevSnapshotCount = startingSnapshot;
     for (let i = 0; i < seasonData.length; i++){
       if (seasonData[i].snapshotNumber >= startingSnapshot){
         while (snapshotCount != seasonData[i].snapshotNumber && snapshotCount < 186){
@@ -387,9 +469,12 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
         if (seasonData[i].snapshotNumber === maxSnapshot){
           userInLastSnapshot = true;
         }
+        // If there is a large break between snapshots and the season does not have data between the two snapshots, we don't want this rising effect to occur.
+        // Ex: season 10 has two instances of 15 days of missing data. So snapshot 30 may be right next to snapshot 61. We don't want all players at snapshot 61 to rise from 100 below.
+        let largeBreakSincePrevSnapshot = seasonSnapshots.indexOf(snapshotCount - 1) === -1;
+        
         let stepCount = maxSnapshot !== snapshotCount ? 25 : 12;
-        if (seasonData[i].playerRank <= numOfPlayersOnChart && (i == 0 || seasonData[i - 1].snapshotNumber != prevSnapshotCount) && snapshotCount > startingSnapshot) {
-          
+        if (seasonData[i].playerRank <= numOfPlayersOnChart && ((i == 0 || seasonData[i - 1].snapshotNumber != prevSnapshotCount) && !largeBreakSincePrevSnapshot) && snapshotCount > startingSnapshot) {
           // Calculate the new rating values to replace the last 30 elements
           let rating1 = seasonData[i].skillRating - 100;
           let rating2 = seasonData[i].skillRating;
@@ -609,7 +694,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
         .slice(0, 10); // Keep the full entries
     });
 
-    console.log(top10RankMap);
+    // console.log(top10RankMap);
 
     return {top10RankMap}
   }

@@ -5,29 +5,29 @@ import './Loader.scss'; // Import SCSS for styling
 const Loader = ({}) => {
 
   return (
-    <main class="main container">
+    <main className="main container">
 
-    <div class="col col--full">
-        <div class="loader">
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
-            <div class="hex"></div>
+    <div className="col col--full">
+        <div className="loader">
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
+            <div className="hex"></div>
         </div>
     </div>
     </main>

@@ -14,9 +14,6 @@ const COLORS2 = [
 ]
 
 const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots, chartTitle}) => {
-  // console.log(playerData);
-  // console.log(seasonSnapshots);
-  // console.log(topPlayersAtTimeMap);
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null);
   const pathsRef = useRef({});
@@ -25,21 +22,30 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   const playerStartIndexRef = useRef({});
   const colorUsage = useRef({});
   let requestId = useRef(null); // Reference for requestAnimationFrame ID
+  const resizeTimeout = useRef(null); // Ref to store the resize timeout ID
 
   useEffect(() => {
     const handleResize = () => {
-      if (graphInitialized) {
-        console.log('handeling resize, resetting chart and init chart.')
-        resetChart();
-        initializeChart();
-      }
+      // Clear any existing timeout
+      clearTimeout(resizeTimeout.current);
+
+      // Set a new timeout to reset and reinitialize the chart
+      resizeTimeout.current = setTimeout(() => {
+        if (graphInitialized) {
+          resetChart();
+          initializeChart();
+        }
+      }, 800); // Adjust the debounce time as needed (e.g., 300ms)
     };
 
-    // Attach resize event listener
+    // Attach the resize event listener
     window.addEventListener('resize', handleResize);
 
-    // Cleanup resize event listener on component unmount
-    return () => {};
+    // Cleanup the event listener and timeout on component unmount
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout.current); // Clear timeout when the component unmounts
+    };
   }, [graphInitialized]);
 
   useEffect(() => {
@@ -175,8 +181,6 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       if (!pathsRef.current[username]) createPlayerElements(svg, username, index);
 
       const startIndex = getStartIndexForPlayer(username, time);
-      // console.log(time);
-      // console.log(username);
       const lineData = playerData[username].slice(Math.max(startIndex, time - numOfTicksOnGraph), time + 1);
 
       updatePlayerPath(username, lineData, time, timeMax, x, y, startIndex);
