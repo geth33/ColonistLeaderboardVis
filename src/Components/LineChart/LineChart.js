@@ -106,8 +106,8 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
 
   // Utility to calculate dimensions based on window size
   const calculateDimensions = () => {
-    const width = window.innerWidth < 800 ? window.innerWidth / 1.1 : window.innerWidth / 2.2;
-    const height = window.innerWidth < 800 ? window.innerHeight / 1.5 : window.innerHeight / 1.2;
+    const width = window.innerWidth < 1100 ? window.innerWidth / 1.1 : window.innerWidth / 2.2;
+    const height = window.innerWidth < 1100 ? window.innerHeight / 1.5 : window.innerHeight / 1.2;
     return { width: width - MARGIN.left - MARGIN.right, height: height - MARGIN.top - MARGIN.bottom };
   };
 

@@ -17,7 +17,7 @@ class Store {
 
   loadOneOnOneData() {
     if (this.oneOnOneData === null) {
-      readDataFromFile('http://34.8.141.205/leaderboards_oneOnOne.csv')
+      readDataFromFile('/leaderboards_oneOnOne.csv')
         .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
             runInAction(() => {
                 this.oneOnOneData = fileData;
@@ -33,7 +33,7 @@ class Store {
   
   loadBaseData() {
     if (this.baseData === null) {
-      readDataFromFile('http://34.8.141.205/leaderboards_base.csv')
+      readDataFromFile('/leaderboards_base.csv')
         .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
             runInAction(() => {
                 this.baseData = fileData;

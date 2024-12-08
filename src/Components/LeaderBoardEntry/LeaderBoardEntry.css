@@ -146,5 +146,19 @@
 }
 
 @media (max-width: 480px) {
-  
+  .gold {
+    font-size: 12px;
+  }
+  .silver {
+    font-size: 11px;
+  }
+  .bronze {
+    font-size: 10px;
+  }
+  .default {
+    font-size: 10px;
+  }
+  .value{
+    margin-right: 5px;
+  }
 }

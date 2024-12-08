@@ -226,7 +226,7 @@ text {
   }
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1100px) {
   .leadingUserModule {
     display: none;
   }

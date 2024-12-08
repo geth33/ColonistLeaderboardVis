@@ -9,3 +9,8 @@
     color: white;
     background: #0567a6;
 }
+.goldBackground{
+    background-image: url("../../../public/bluegold.png");
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+}

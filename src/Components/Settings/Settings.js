@@ -89,7 +89,7 @@ const Settings = ({hide, playersWithoutData}) => {
     <div className='settingsContainer' style={{display: hide ? 'none' : ''}}>
         <div className='lineChartModeContainer'>
             <div className='lineChartModeButtonContainer'>
-                <div>
+                <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextEmpty'></p>
                     <Button className={`settingsButton ${lineChartMode === 0 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(0)}}>
                         <img src="/crown.png" alt="crown" className={'buttonImage'}/>
@@ -100,7 +100,7 @@ const Settings = ({hide, playersWithoutData}) => {
                         </div>
                     </Button>
                 </div>
-                <div>
+                <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextEmpty'></p>
                     <Button className={`settingsButton ${lineChartMode === 1 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(1)}}>
                         <img src="/swordClash.png" alt="crown" className={'buttonImage'}/>
@@ -111,7 +111,7 @@ const Settings = ({hide, playersWithoutData}) => {
                         </div>
                     </Button>
                 </div>
-                <div>
+                <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextEmpty'></p>
                     <Button className={`settingsButton ${lineChartMode === 2 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(2)}}>
                         <img src="/stopwatch.png" alt="crown" className={'buttonImage'}/>
@@ -122,7 +122,7 @@ const Settings = ({hide, playersWithoutData}) => {
                         </div>
                     </Button>
                 </div>
-                <div>
+                <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextNonEmpty'>Coming soon!</p>
                     <Button className='settingsButton disabled comingSoon' disabled>
                         <img src="/map.png" alt="crown" className={'buttonImage'}/>
@@ -135,13 +135,13 @@ const Settings = ({hide, playersWithoutData}) => {
             </div>
             <div className='lineChartModeSubtextContainer'>
                 {
-                    lineChartMode === 0 && <p>Watch the battle at the top of the leaderboard!</p>
+                    lineChartMode === 0 && <p className='lineChartModeText'>Watch the battle at the top of the leaderboard!</p>
                 }
                 {
-                    lineChartMode === 1 && <p>Select players across seasons to battle!</p>
+                    lineChartMode === 1 && <p className='lineChartModeText'>Select players across seasons to battle!</p>
                 }
                 {
-                    lineChartMode === 2 && <p>Compare overall average ratings between seasons!</p>
+                    lineChartMode === 2 && <p className='lineChartModeText'>Compare overall average ratings between seasons!</p>
                 }
             </div>
         </div>
@@ -285,7 +285,7 @@ const Settings = ({hide, playersWithoutData}) => {
         }
         {
             lineChartMode === 2 &&
-                <div className='settingsGroup1'>
+                <div className='settingsGroup4'>
                     <div className='setting setting3'>
                         <span className='settingsLabel'>Display average rating for top</span>
                         <FormControl size="small">
