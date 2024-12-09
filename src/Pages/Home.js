@@ -84,7 +84,7 @@ function toSx(styles, classes) {
 	};
 }
 
-  const numOfTicksOnGraph = 180;
+  const numOfTicksOnGraph = window.innerWidth < 800 ? 90 : 180;
   const lineChartSpeed = 20;
 
 const Home = () => {

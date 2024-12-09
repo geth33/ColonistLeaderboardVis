@@ -83,7 +83,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot, subVa
                 targets: itemToRemove,
                 translateY: size * entryGap, // Move it down beyond the list
                 opacity: 0, // Fade out
-                duration: 500,
+                duration: 300,
                 easing: 'easeInOutQuad',
                 complete: () => {
                   // Remove the element after the animation
@@ -117,7 +117,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot, subVa
                 targets: newItem,
                 translateY: newIndex * entryGap, // Move to its final position
                 opacity: 1,
-                duration: 500,
+                duration: 300,
                 easing: 'easeInOutQuad',
                 complete: () => newItem.classList.remove('new') // Remove 'new' class after animation
               });
@@ -144,7 +144,7 @@ const LeaderBoard = ({ title, data, leaderBoardMetric, size, currSnapshot, subVa
         translateY: function (el, i) {
           return i * entryGap; // Move based on the new index in the sorted array
         },
-        duration: 500, // Duration of the animation
+        duration: 300, // Duration of the animation
         easing: 'easeInOutQuad', // Smooth animation
       });
     }
