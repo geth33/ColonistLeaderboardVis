@@ -9,9 +9,18 @@ const COLORS = [
 ];
 
 const COLORS2 = [
-  '#E5BD75', '#AF67EE','#A893E2', '#65CFDE', '#83E79F', '#DAE075', '#D9968F',
-  '#E39B8D', '#D9DC9C', '#B296A8', 
-]
+  '#E5BD75', // Adjusted complementary for Gold
+  '#AF67EE', '#51EE68', // Bright Purple and its Green complement
+  '#A893E2', '#70E27A', // Slightly brightened complementary Lime Green
+  '#65CFDE', '#E0744A', // Cyan and its complementary bright Orange
+  '#83E79F', '#E09742', // Green and its complementary brighter Orange
+  '#DAE075', '#7580E0', // Yellow and its complementary Blue
+  '#D9968F', '#8FD9C8', // Peach and Teal (visible contrast)
+  '#E39B8D', '#8DE3E4', // Coral and Light Cyan
+  '#D9DC9C', '#9C9CD9', // Light Green and Light Purple
+  '#B296A8', '#A8B2A0', // Mauve and slightly brightened Sage Green
+];
+
 
 const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots, chartTitle}) => {
 
