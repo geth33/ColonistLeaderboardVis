@@ -1,7 +1,7 @@
 // src/App.js
 import React, { useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, Navigate } from 'react-router-dom';
 import { AppBar, Toolbar, Typography, Button, Container, IconButton, Drawer, List, ListItem, ListItemText, useMediaQuery } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import FAQ from './Pages/FAQ';
@@ -111,9 +111,11 @@ function App() {
 
         {/* Routes */}
         <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/faq" element={<FAQ />} />
-        </Routes>
+        <Route path="/csvs/*" element={<Navigate to="/csvs" replace />} />
+        <Route path="/" element={<Home />} />
+        <Route path="/faq" element={<FAQ />} />
+      </Routes>
+
       </div>
     </Router>
   );
