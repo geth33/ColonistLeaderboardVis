@@ -92,7 +92,7 @@ const Settings = ({hide, playersWithoutData}) => {
                 <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextEmpty'></p>
                     <Button className={`settingsButton ${lineChartMode === 0 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(0)}}>
-                        <img src="/crown.png" alt="crown" className={'buttonImage'}/>
+                        <img src="/img/crown.png" alt="crown" className={'buttonImage'}/>
                         <div className='settingsButtonText'>
                             <p>Fight</p>
                             <p className='settingsButtonTextSmall'>for the</p>
@@ -103,7 +103,7 @@ const Settings = ({hide, playersWithoutData}) => {
                 <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextEmpty'></p>
                     <Button className={`settingsButton ${lineChartMode === 1 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(1)}}>
-                        <img src="/swordClash.png" alt="crown" className={'buttonImage'}/>
+                        <img src="/img/swordClash.png" alt="crown" className={'buttonImage'}/>
                         <div className='settingsButtonText'>
                             <p>Head</p>
                             <p className='settingsButtonTextSmall'>to</p>
@@ -114,7 +114,7 @@ const Settings = ({hide, playersWithoutData}) => {
                 <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextEmpty'></p>
                     <Button className={`settingsButton ${lineChartMode === 2 ? 'selected' : 'notSelected'}`} onClick={(e) => {setLineChartMode(2)}}>
-                        <img src="/stopwatch.png" alt="crown" className={'buttonImage'}/>
+                        <img src="/img/stopwatch.png" alt="crown" className={'buttonImage'}/>
                         <div className='settingsButtonText'>
                             <p>Clash</p>
                             <p className='settingsButtonTextSmall'>of</p>
@@ -125,7 +125,7 @@ const Settings = ({hide, playersWithoutData}) => {
                 <div className='lineChartModeButton'>
                     <p className='buttonHeaderText buttonHeadTextNonEmpty'>Coming soon!</p>
                     <Button className='settingsButton disabled comingSoon' disabled>
-                        <img src="/map.png" alt="crown" className={'buttonImage'}/>
+                        <img src="/img/map.png" alt="crown" className={'buttonImage'}/>
                         <div className='settingsButtonText'>
                             <p>Solo</p>
                             <p>Journey</p>
@@ -147,13 +147,13 @@ const Settings = ({hide, playersWithoutData}) => {
         </div>
         <div className='gameModeContainer'>
             <Button className={`settingsButton ${gameMode === 'Base' ? 'selected' : 'notSelected'}`} onClick={(e) => {setGameMode('Base')}}>
-                <img src="/sheep.png" alt="crown" style={{height: '25px', width: '25px'}}/>
+                <img src="/img/sheep.png" alt="crown" style={{height: '25px', width: '25px'}}/>
                 <div className='settingsButtonText'>
                     <p>Base</p>
                 </div>
             </Button>
             <Button className={`settingsButton ${gameMode === '1v1' ? 'selected' : 'notSelected'}`} onClick={(e) => {setGameMode('1v1')}}>
-                <img src="/fight.png" alt="crown" style={{height: '25px', width: '25px'}}/>
+                <img src="/img/fight.png" alt="crown" style={{height: '25px', width: '25px'}}/>
                 <div className='settingsButtonText'>
                     <p>1v1</p>
                 </div>

@@ -64,7 +64,7 @@
   line-height: 1;
   text-align: center;
   color: #fff;
-  background-image: url("../../../public/gold.png");
+  background-image: url("../../../public/img/gold.png");
   background-repeat: no-repeat;
   background-attachment: fixed; 
   background-size: 100% 100%;
@@ -75,7 +75,7 @@
   line-height: 1;
   text-align: center;
   color: #fff;
-  background-image: url("../../../public/silver.png");
+  background-image: url("../../../public/img/silver.png");
   background-repeat: no-repeat;
   background-attachment: fixed; 
   background-size: 100% 100%;
@@ -86,7 +86,7 @@
   line-height: 1;
   text-align: center;
   color: #fff;
-  background-image: url("../../../public/bronze.png");
+  background-image: url("../../../public/img/bronze.png");
   background-repeat: no-repeat;
   background-attachment: fixed; 
   background-size: 100% 100%;
