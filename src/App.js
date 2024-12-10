@@ -111,7 +111,6 @@ function App() {
 
         {/* Routes */}
         <Routes>
-        <Route path="/csvs/*" element={<Navigate to="/csvs" replace />} />
         <Route path="/" element={<Home />} />
         <Route path="/faq" element={<FAQ />} />
       </Routes>
