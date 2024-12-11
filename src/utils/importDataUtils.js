@@ -4,14 +4,12 @@ export const readDataFromFile = (url) => {
   return new Promise((resolve, reject) => {
     fetch(url) // Now fetching the file from the CDN URL
       .then((response) => {
-        console.log(response);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.text();
       })
       .then((csvText) => {
-        console.log(csvText);
         Papa.parse(csvText, {
           header: true,
           complete: (results) => {

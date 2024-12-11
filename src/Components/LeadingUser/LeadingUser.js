@@ -23,7 +23,7 @@ const LeadingUser = ({ data, currSnapshot }) => {
             data && <>
             <div>
                 <div style={{display: 'flex'}} className='goldBackground'>
-                    <img src="/userHat.png" alt="User" style={{height: '80px', width: '80px', margin: '0 1em 0 2em'}}/>
+                    <img src="/img/userHat.png" alt="User" style={{height: '80px', width: '80px', margin: '0 1em 0 2em'}}/>
                     <div style={{fontSize:'1.5em', color: 'white', filter: 'drop-shadow(2px 4px 4px rgba(20,20,20,0.4))', textAlign: 'left', flex: '1'}}>
                         <h3 style={{margin: '0.6em 0 0 0', fontSize:'1.5em'}}>{data[currSnapshot]?.username}</h3>
                         <p style={{marginTop: '0.5em', fontSize: '14px', fontWeight: 'bold'}}>#1 for {currentStreak} days</p>
