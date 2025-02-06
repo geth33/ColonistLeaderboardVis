@@ -7,10 +7,10 @@
     font-size: 12px;
     font-weight: bold;
     color: white;
-    background: #0567a6;
+    background: #1e63ac;
 }
 .goldBackground{
-    background-image: url("../../../public/img/bluegold.png");
+    background-image: url("../../../public/img/bluegoldlight.png");
     background-repeat: no-repeat;
     background-size: 100% 100%;
 }

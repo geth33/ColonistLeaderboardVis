@@ -111,6 +111,7 @@ const Home = () => {
 	const tabItemSx = toSx(tabItemStyles, tabClasses);
   const [tabLabel, setTabLabel] = useState("Settings");
   const [settings, setSettings] = useState(null);
+  const [hideKeyPressed, setHideKeyPressed] = useState(false);
   const store = useStore();
 
   useEffect(() => {
@@ -123,6 +124,21 @@ const Home = () => {
     store.baseMaxSnapshotMap,
     store.baseSeasonSnapshotsMap
   ]);
+
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      console.log('key pressed');
+      if (event.key.toLowerCase() === "h") {
+        console.log('is h');
+        setHideKeyPressed((prevState) => !prevState);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
 
   const retrieveChartDataFromStore = () => {
     setTimeout(() => {
@@ -254,7 +270,8 @@ useEffect(() => {
           generatingChart={generatingChart} seasonSnapshots={ settings?.lineChartMode !== 0 ? Array.from({ length: (186-startingSnapshot) }, (_, i) => i + startingSnapshot) : seasonSnapshotsMap[settings?.season].filter(s => s >= startingSnapshot)} chartTitle={chartTitle}/> 
         }
         <div className={`${allSeasonsData === null || generatingChart || inErrorState ? 'fullContainer' : 'supportingContentContainer'}`}>
-          <div className='tabModule'>
+          {
+            !hideKeyPressed && <div className='tabModule'>
             <Tabs
                 value={tabIndex}
                 onChange={(e, index) => {setTabIndex(index); setTabLabel(e.target.textContent);}}
@@ -264,6 +281,7 @@ useEffect(() => {
                 <Tab disableRipple label={"Leaderboards"} sx={tabItemSx} disabled={settings === null}/>
 						</Tabs>
           </div>
+          }
           
               <Settings hide={tabIndex !== 0} playersWithoutData={playersWithErrors}/>
               <Backdrop open={generatingChart}>
