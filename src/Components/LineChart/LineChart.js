@@ -66,9 +66,8 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
 
   const initializeChart = () => {
     setGraphInitialized(true);
-
     const dimensions = calculateDimensions();
-    const svg = setupChart(dimensions);
+    const { svg, chartArea } = setupChart(dimensions);
     const { x, y, xAxis, yAxis, $xAxis, $yAxis } = setupScalesAndAxes(svg, dimensions);
 
     initializeColorUsage();
@@ -78,21 +77,22 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
     const timeMax = Object.keys(topPlayersAtTimeMap).length;
 
     const tick = (timestamp) => {
-      if (timestamp - lastTickTime >= lineChartSpeed) {
-        lastTickTime = timestamp;
-        time++;
-        if (time < timeMax) {
-          update(svg, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax);
+        if (timestamp - lastTickTime >= lineChartSpeed) {
+            lastTickTime = timestamp;
+            time++;
+            if (time < timeMax) {
+                update(chartArea, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax);
+            }
+            if (time % 25 === 0) dispatchSnapshotEvent(time);
         }
-        if (time % 25 === 0) dispatchSnapshotEvent(time);
-      }
-      if (time < timeMax) {
-        requestId.current = requestAnimationFrame(tick);
-      }
+        if (time < timeMax) {
+            requestId.current = requestAnimationFrame(tick);
+        }
     };
 
     requestId.current = requestAnimationFrame(tick);
-  };
+};
+
 
   useEffect(() => {
     if (generatingChart){
@@ -123,29 +123,59 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   // Setup SVG container and axis labels
   const setupChart = ({ width, height }) => {
     d3.select(coreVisRef.current).select('svg').remove();
+    
     const svg = d3.select(coreVisRef.current).append('svg')
       .attr('width', width + MARGIN.left + MARGIN.right)
-      .attr('height', height + MARGIN.top + MARGIN.bottom)
-      .append('g')
+      .attr('height', height + MARGIN.top + MARGIN.bottom);
+
+    // Define clipping path for just the plotting area
+    svg.append("defs")
+      .append("clipPath")
+      .attr("id", "clip")
+      .append("rect")
+      .attr("width", width + MARGIN.left + MARGIN.right)  // Only the inner chart width
+      .attr("height", height) // Only the inner chart height
+      .attr("x", 0)
+      .attr("y", 0);
+
+    // Main group for the chart (with margins)
+    const chartContainer = svg.append('g')
       .attr('transform', `translate(${MARGIN.left}, ${MARGIN.top})`);
-    svg.append('text')
+
+    // Apply clipping only to the chart area
+    const chartArea = chartContainer.append('g')
+      .attr("clip-path", "url(#clip)");
+
+    // Add X Axis
+    chartContainer.append('g')
+      .attr('class', 'x-axis')
+      .attr('transform', `translate(0, ${height})`);  // Outside the clip area
+
+    // Add Y Axis
+    chartContainer.append('g')
+      .attr('class', 'y-axis');
+
+    // X-axis label
+    chartContainer.append('text')
       .attr('class', 'x-axis-label')
       .attr('x', width / 2)
       .attr('y', height + MARGIN.bottom - 10)
       .attr('text-anchor', 'middle')
       .style('font-size', '14px')
       .text('Day # in Season');
-      // Y axis label:
-      svg.append("text")
+
+    // Y-axis label
+    chartContainer.append("text")
       .attr('class', 'y-axis-label')
       .attr("text-anchor", "middle")
       .attr("transform", "rotate(-90)")
       .attr("y", -44)
-      .attr("x", -height/2)
+      .attr("x", -height / 2)
       .style('font-size', '14px')
-      .text("Rating")
-      // Title
-      svg.append('text')
+      .text("Rating");
+
+    // Title
+    chartContainer.append('text')
       .attr('class', 'title')
       .attr('y', -10)
       .attr('x', width / 2)
@@ -153,8 +183,10 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
       .style('font-size', '16px')
       .style('font-weight', 'bold')
       .text(chartTitle);
-    return svg;
-  };
+
+    return { svg, chartContainer, chartArea };
+};
+
 
   // Setup scales and axes
   const setupScalesAndAxes = (svg, { width, height }) => {
@@ -162,16 +194,24 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
     const y = d3.scaleLinear().range([height, 0]);
 
     const xAxis = d3.axisBottom(x).tickSizeInner(-height).tickPadding(10).ticks(4)
-      .tickFormat(d => `Day ${seasonSnapshots[Math.floor(d / 25)]/2}`);
+      .tickFormat(d => `Day ${seasonSnapshots[Math.floor(d / 25)] / 2}`);
+
     const yAxis = d3.axisLeft(y).tickSizeInner(-width).tickPadding(10);
 
-    const $xAxis = svg.append('g').attr('class', 'x-axis').attr('transform', `translate(0, ${height})`).call(xAxis);
-    const $yAxis = svg.append('g').attr('class', 'y-axis').call(yAxis);
+    // Ensure the axes are correctly positioned within the margins
+    const $xAxis = svg.select('.x-axis')
+      //.attr('transform', `translate(${MARGIN.left}, ${height + MARGIN.top})`)  // Move x-axis into position
+      .call(xAxis);
+
+    const $yAxis = svg.select('.y-axis')
+      //.attr('transform', `translate(${MARGIN.left}, ${MARGIN.top})`)  // Move y-axis into position
+      .call(yAxis);
 
     svg.selectAll('.tick line').style('stroke', '#cccccc'); // Light gray grid lines
 
     return { x, y, xAxis, yAxis, $xAxis, $yAxis };
-  };
+};
+
 
   const initializeColorUsage = () => {
     COLORS2.forEach(color => colorUsage.current[color] = 0);
@@ -184,37 +224,41 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   };
 
   // Main update function
-  const update = (svg, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax) => {
+  const update = (chartArea, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax) => {
     const activePlayers = [...topPlayersAtTimeMap[time]];
 
     activePlayers.forEach((username, index) => {
-      if (!pathsRef.current[username]) createPlayerElements(svg, username, index);
+        if (!pathsRef.current[username]) createPlayerElements(chartArea, username, index);
 
-      const startIndex = getStartIndexForPlayer(username, time);
-      const lineData = playerData[username].slice(Math.max(startIndex, time - numOfTicksOnGraph), time + 1);
+        const startIndex = getStartIndexForPlayer(username, time);
+        const lineData = playerData[username].slice(Math.max(startIndex, time - numOfTicksOnGraph), time + 1);
 
-      updatePlayerPath(username, lineData, time, timeMax, x, y, startIndex);
-      updatePlayerLabel(username, lineData, x, y, time, startIndex);
+        updatePlayerPath(username, lineData, time, timeMax, x, y, startIndex);
+        updatePlayerLabel(username, lineData, x, y, time, startIndex);
     });
 
     cleanupInactivePlayers(activePlayers);
     updateScales(x, y, xAxis, yAxis, $xAxis, $yAxis, time);
-  };
+};
 
-  const createPlayerElements = (svg, username, index) => {
+
+  const createPlayerElements = (chartArea, username, index) => {
     const color = getLeastUsedColor();
     colorUsage.current[color]++;
-    pathsRef.current[username] = svg.append('path')
-      .attr('class', `line data line-${index}`)
-      .style('stroke', color)
-      .style('fill', 'none')
-      .style('stroke-width', '2');
-    labelsRef.current[username] = svg.append('text')
-      .attr('class', `line-label label-${index}`)
-      .style('fill', color)
-      .style('font-size', '12px')
-      .style('font-weight', 'bold');
-  };
+
+    pathsRef.current[username] = chartArea.append('path')
+        .attr('class', `line data line-${index}`)
+        .style('stroke', color)
+        .style('fill', 'none')
+        .style('stroke-width', '2');
+
+    labelsRef.current[username] = chartArea.append('text')
+        .attr('class', `line-label label-${index}`)
+        .style('fill', color)
+        .style('font-size', '12px')
+        .style('font-weight', 'bold');
+};
+
 
   const getStartIndexForPlayer = (username, time) => {
     if (playerStartIndexRef.current[username] === undefined) {
@@ -233,7 +277,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
     const pathGenerator = d3.line()
       .defined(d => d !== -1)
       .x((d, i) => x(Math.max(time - numOfTicksOnGraph, startIndex) + i))
-      .y(d => y(d))
+      .y((d, i) => y(d))
       .curve(d3.curveBasis);
   
     // Set path data

@@ -5,7 +5,7 @@ import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayerSelectorGrid from './PlayerSelectorGrid';
 
 const seasons = [7,8,9,10,11];
-const speeds = [0.5, 0.75, 1, 1.25, 1.5];
+const speeds = [0.3, 0.4, 0.5, 0.75, 1, 1.25];
 const currentSeasonDays = [1,5,10,20,30];
 const finishedSeasonDays = [1,5,10,20,30,40,50,60,70,80];
 const numOfPlayers = [5,10,15,20];

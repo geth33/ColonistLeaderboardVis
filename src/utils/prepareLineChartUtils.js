@@ -17,8 +17,8 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
       playerRatingMap[username] = preparePlayerForLineChart(allSeasonsData, username, season, numOfPlayersOnChart, startingSnapshot, maxSnapshot, bottomRatingsPerSnapshot, seasonSnapshots, showEntering, showLeaving);
     }
     setTopPlayersAtTimeMap(topPlayersAtTimeMap);
-    setPlayerRatingMap(playerRatingMap);
-    createMinAndMaxMaps(playerRatingMap, setMinMap, setMaxMap, numOfTicksOnGraph);
+    //setPlayerRatingMap(playerRatingMap);
+    createMinAndMaxMaps(playerRatingMap, setMinMap, setMaxMap, numOfTicksOnGraph, playersOnGraph, setPlayerRatingMap);
   }
 
   export const generateSeasonAverageLines = (allSeasonsData, seasonMaxSnapshotMap, seasonSnapshots, numOfPlayers, gameMode, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, startingSnapshot) => {
@@ -151,10 +151,6 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
   }
 
   export const generateSelectedPlayerLines = (allSeasonsData, seasonMaxSnapshotMap, seasonSnapshots, numOfTicksOnGraph, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, settings, setStartingSnapshot) => {
-    // let playersNotInTop200 = playersNotInDataset(allSeasonsData, players);
-    // if (playersNotInTop200.length > 0){
-    //   return "The following players are not ";
-    // } 
     let playersWithoutData = findPlayersWithoutData(allSeasonsData, settings.players);
     if (playersWithoutData.length !== 0){
       return playersWithoutData;
@@ -185,11 +181,8 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
         }
       }
     }
-    // console.log(playerLineMap);
     let sortedPlayers = sortSeasonsPerSnapshot(playerLineMap, true);
-    // console.log(sortedPlayers)
     topPlayersAtTimeMap = createTopPlayersAtTimeMap(numOfTicksOnGraph, sortedPlayers);
-    // console.log(topPlayersAtTimeMap);
     setTopPlayersAtTimeMap(topPlayersAtTimeMap);
     setPlayerRatingMap(playerLineMap);
     createMinAndMaxMaps(playerLineMap, setMinMap, setMaxMap, numOfTicksOnGraph);
@@ -350,7 +343,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     @param setMinMap - Setter for the min map 
     @param numOfTicksOnGraph - This is corresponding to the x-axis domain size. This is the max number of ratings that will be displayed of a user's playerRating array at one time.
   */
-  export const createMinAndMaxMaps = (playerRatingMap, setMinMap, setMaxMap, numOfTicksOnGraph) => {
+  export const createMinAndMaxMaps = (playerRatingMap, setMinMap, setMaxMap, numOfTicksOnGraph, playersOnGraph, setPlayerRatingMap) => {
     // First, find the min and max ratings for each time (tick) on the graph.
     const currMinMap = {};
     const currMaxMap = {};
@@ -382,7 +375,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     // Add 5% white space buffer to top and bottom of graph.
     for (let i = 0; i < maxLength; i++) {
       let range = currMaxMap[i] - currMinMap[i];
-      let buffer = Math.max(range * 0.05, 10);
+      let buffer = Math.max(range * 0.01, 5);
       currMaxMap[i] += buffer;
       currMinMap[i] -= buffer;
     }
@@ -406,7 +399,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
           }
         }
       } else { // Find min and max values for the smallest/largest ratings for the last numOfTicksOnGraph (x axis window) ratings. 
-        for (let j = i; j > i-numOfTicksOnGraph; j--){
+        for (let j = i; j > i-numOfTicksOnGraph + 100; j--){
           if (currMinMap[j] < minRating){
             minRating = currMinMap[j];
           }
@@ -420,10 +413,22 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
       minMapSmooth[i] = minRating;
       maxMapSmooth[i] = maxRating;
     }
+    let smoothedMinMap = smoothMinMaxMap(minMapSmooth); 
+    let smoothedMaxMap = smoothMinMaxMap(maxMapSmooth);
     // Create a smoothing effect so that the min and max ranges aren't constantly ping ponging between different ranges.
-    setMinMap(smoothMinMaxMap(minMapSmooth));
-    setMaxMap(smoothMinMaxMap(maxMapSmooth));
+    setMinMap(smoothedMinMap);
+    setMaxMap(smoothedMaxMap);
+    setPlayerRatingMap(playerRatingMap);
   };
+
+  export const adjustPlayerRatingtoMaxAndMinMaps = (ratings, smoothedMinMap, smoothedMaxMap) => {
+    for (let i=0; i < ratings.length; i++){
+      if (ratings[i] !== -1 && (ratings[i] < smoothedMinMap[i] || ratings[i] > smoothedMaxMap[i])){
+        ratings[i] = -1;
+      }
+    }
+    return ratings;
+  }
   
   /*
     Returns true if the player appears at least once on the top rankings
@@ -474,9 +479,16 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
         let largeBreakSincePrevSnapshot = seasonSnapshots.indexOf(snapshotCount - 1) === -1;
         
         let stepCount = maxSnapshot !== snapshotCount ? 25 : 12;
-        if (seasonData[i].playerRank <= numOfPlayersOnChart && ((i == 0 || seasonData[i - 1].snapshotNumber != prevSnapshotCount) && !largeBreakSincePrevSnapshot) && snapshotCount > startingSnapshot) {
-          // Calculate the new rating values to replace the last 30 elements
-          let rating1 = seasonData[i].skillRating - 100;
+        // get bottom player at this point in the graph. We don't want this player's line to nose dive far past the bottom player's y position.
+        let minValueAtPoint = 0;
+        if (i !== seasonData.length - 1 && bottomRatingsPerSnapshot != null){
+          minValueAtPoint = bottomRatingsPerSnapshot[seasonData[i+1].snapshotNumber] - 10;
+        }
+        let onGraph = seasonData[i].playerRank <= numOfPlayersOnChart;
+        let noDataForPrevSnapshot = i == 0 || seasonData[i - 1]?.snapshotNumber != prevSnapshotCount; 
+        if (onGraph && ((noDataForPrevSnapshot) && !largeBreakSincePrevSnapshot) && snapshotCount > startingSnapshot) {
+          // Calculate the new rating values to replace the last 25 elements
+          let rating1 = Math.max(seasonData[i].skillRating - 100, minValueAtPoint);
           let rating2 = seasonData[i].skillRating;
           let step = (rating2 - rating1) / stepCount;
           let newRatings = [];
@@ -503,15 +515,10 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
             let rating2 = seasonData[i+1].skillRating;
 
             let step = (rating2 - rating1)/stepCount;
-            // get bottom player at this point in the graph. We don't want this player's line to nose dive far past the bottom player's y position.
-            let minValueAtPoint = 0;
-            if (bottomRatingsPerSnapshot != null){
-              minValueAtPoint = bottomRatingsPerSnapshot[seasonData[i+1].snapshotNumber] - 50;
-            }
             for (let j = 0; j < stepCount; j++){
               let stepVal = rating1 + step * j;
               if (enteringTop){
-                if (Math.abs(rating2 - stepVal) <= 50){
+                if (Math.abs(rating2 - stepVal) <= 50 && stepVal > minValueAtPoint){
                   ratings.push(stepVal);
                 } else {
                   ratings.push(-1);
@@ -523,7 +530,9 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
                   ratings.push(-1);
                 }
               }else {
-                ratings.push(stepVal);
+                if (stepVal >= minValueAtPoint){
+                  ratings.push(stepVal);
+                }
               }
             }
           } else { // Next snapshot of data isn't going to be graphed. We don't want to graph a single point, so we'll pretend this person wasn't in the top for this snapshot.
@@ -693,8 +702,6 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
         .sort((a, b) => b.skillRating - a.skillRating)
         .slice(0, 10); // Keep the full entries
     });
-
-    // console.log(top10RankMap);
 
     return {top10RankMap}
   }

@@ -46,14 +46,6 @@ const processPlayerData = (data) => {
         if (entry.created_at){
             const [month, day, year, hour] = entry.created_at.match(/\d+/g); // Extracts parts as numbers
             createdAt = new Date(year, month-1, day, hour);
-            // if (currentSeason == 7){
-            //     console.log(entry.created_at);
-            //     console.log(month-1);
-            //     console.log(day);
-            //     console.log(year);
-            //     console.log(hour);
-            //     console.log(createdAt);
-            // }
         // Determine if a new season has started
         if (entry.playerRank === '1') {
             if (lastTopPlayerRating !== null && lastTopPlayerRating - skillRating > 300) {
@@ -102,7 +94,6 @@ const processPlayerData = (data) => {
         seasonMaxSnapshotMap[currentSeason] = snapshotNumber;
     }
     });
-    //console.log("Processed Data:", processedData);
     return {
         fileData: processedData,
         fileMaxSnapshotMap: seasonMaxSnapshotMap,
@@ -112,11 +103,6 @@ const processPlayerData = (data) => {
 
   const incrementSnapshotNumber = (previousCreatedAt, createdAt, currentSeason) => {
     let hoursDifference = calculateHoursBetweenDates(previousCreatedAt, createdAt);
-    // if (currentSeason == 7){
-    //     console.log(previousCreatedAt);
-    //     console.log(createdAt);
-    //     console.log(hoursDifference);
-    // }
     return Math.max(1, hoursDifference/12);
   }
 
