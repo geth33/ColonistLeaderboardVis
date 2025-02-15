@@ -1,13 +1,11 @@
-.leadingUserContainer{
-    height: 80px;
-}
+
 .leadingUserTitle{
     margin: 0 0 0 0;
     padding: 7px 0px; 
     font-size: 12px;
     font-weight: bold;
     color: white;
-    background: #1e63ac;
+    background: #1666ba;
 }
 .goldBackground{
     background-image: url("../../../public/img/bluegoldlight.png");

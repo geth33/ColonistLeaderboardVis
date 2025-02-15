@@ -84,7 +84,8 @@ const processPlayerData = (data) => {
               totalGamesPlayed: parseInt(entry.totalGamesPlayed),
               winRate: parseFloat(entry.winRate),
               snapshotNumber: snapshotNumber,
-              createdAt: entry.created_at
+              createdAt: entry.created_at,
+              flagURL: getTwemojiFlagURL(entry.countryCode)
           };
           processedData[username][`Season ${currentSeason}`].push(userEntry);
   
@@ -105,6 +106,22 @@ const processPlayerData = (data) => {
     let hoursDifference = calculateHoursBetweenDates(previousCreatedAt, createdAt);
     return Math.max(1, hoursDifference/12);
   }
+
+  function getTwemojiFlagURL(countryCode) {
+    const baseUrl = "https://cdn.jsdelivr.net/npm/twemoji@11.0.1/2/svg/";
+    
+    if (!countryCode || countryCode.length !== 2) return null;
+
+    // Convert the country code to uppercase (e.g., "us" -> "US")
+    countryCode = countryCode.toUpperCase();
+
+    // Convert letters to Twemoji Unicode sequence (regional indicators)
+    const codePoints = [...countryCode].map(char => 
+        `1f1${(char.charCodeAt(0) - 65 + 0xe6).toString(16)}`
+    );
+
+    return `${baseUrl}${codePoints.join('-')}.svg`;
+}
 
   function calculateHoursBetweenDates(startDate, endDate) {
     let diffInMilliseconds = endDate.getTime() - startDate.getTime();

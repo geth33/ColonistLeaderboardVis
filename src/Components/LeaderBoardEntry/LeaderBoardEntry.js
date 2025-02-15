@@ -3,7 +3,7 @@ import './LeaderBoardEntry.css'; // Import CSS for styling
 import anime from 'animejs';
 
 
-const LeaderBoardEntry = ({ rank, name, value, subValue, isNew, size }) => {
+const LeaderBoardEntry = ({ rank, name, value, flagURL, subValue, isNew, size }) => {
   const entryRef = useRef(null); // Reference to the DOM element
   const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'default';
 
@@ -21,7 +21,7 @@ const LeaderBoardEntry = ({ rank, name, value, subValue, isNew, size }) => {
     <li className={`leaderBoardRow ${rankClass} ${isNew ? "new" : ""}`} ref={entryRef} data-name={name}> {/* Add data-name attribute */}
       <div className={`rowContent ${size}`}>
         <span className='rank'>{rank}</span>
-        <span className='name'>{name}</span>
+        <span className='name'>{name} <img style={{width: '20px', marginLeft: '10px'}} src={flagURL}/></span>
         {
           subValue !== '' ? <div>
               <p className='value'>{value}</p>

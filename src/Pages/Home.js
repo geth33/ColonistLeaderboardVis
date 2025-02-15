@@ -127,9 +127,7 @@ const Home = () => {
 
   useEffect(() => {
     const handleKeyPress = (event) => {
-      console.log('key pressed');
       if (event.key.toLowerCase() === "h") {
-        console.log('is h');
         setHideKeyPressed((prevState) => !prevState);
       }
     };
