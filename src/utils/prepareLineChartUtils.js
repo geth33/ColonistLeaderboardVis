@@ -532,6 +532,8 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
               }else {
                 if (stepVal >= minValueAtPoint){
                   ratings.push(stepVal);
+                } else {
+                  ratings.push(-1);
                 }
               }
             }
@@ -630,7 +632,6 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
             // Update or initialize the streak for the current player
             firstPlaceStreaks[firstPlacePlayer] = consecutiveFirstPlaceCount;
 
-            console.log(Object.entries(firstPlaceStreaks));
 
             // Update timeInFirstPlace for the current snapshot
             timeInFirstPlaceMap[snapshotNumber] = Object.entries(firstPlaceStreaks)
@@ -802,8 +803,6 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
                 // Update or initialize the streak for the current player
                 firstPlaceStreaks[firstPlacePlayer] = consecutiveFirstPlaceCount;
 
-                console.log('here!')
-                console.log(Object.entries(firstPlaceStreaks));
                 // Update timeInFirstPlace for the current snapshot
                 timeInFirstPlaceMap[snapshotNumber] = Object.entries(firstPlaceStreaks)
                     .map(([username, daysInFirst]) => ({ username, daysInFirst }))

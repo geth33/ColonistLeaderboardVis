@@ -24,6 +24,9 @@ const COLORS2 = [
 
 const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots, chartTitle}) => {
 
+  // console.log(topPlayersAtTimeMap);
+  // console.log(playerData);
+
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null);
   const pathsRef = useRef({});
@@ -223,9 +226,17 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
     window.dispatchEvent(event);
   };
 
-  // Main update function
   const update = (chartArea, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax) => {
-    const activePlayers = [...topPlayersAtTimeMap[time]];
+    let activePlayers = [...topPlayersAtTimeMap[time]];
+
+    // Sort players by rating (descending order)
+    activePlayers.sort((a, b) => {
+        const ratingA = playerData[a][time] ?? -Infinity;
+        const ratingB = playerData[b][time] ?? -Infinity;
+        return ratingB - ratingA; // Descending order
+    });
+
+    let fullOpacityLabels = []; // Stores y-positions of full-opacity labels
 
     activePlayers.forEach((username, index) => {
         if (!pathsRef.current[username]) createPlayerElements(chartArea, username, index);
@@ -234,12 +245,13 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
         const lineData = playerData[username].slice(Math.max(startIndex, time - numOfTicksOnGraph), time + 1);
 
         updatePlayerPath(username, lineData, time, timeMax, x, y, startIndex);
-        updatePlayerLabel(username, lineData, x, y, time, startIndex);
+        updatePlayerLabel(username, lineData, x, y, time, startIndex, fullOpacityLabels);
     });
 
     cleanupInactivePlayers(activePlayers);
     updateScales(x, y, xAxis, yAxis, $xAxis, $yAxis, time);
 };
+
 
 
   const createPlayerElements = (chartArea, username, index) => {
@@ -290,17 +302,53 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   };
   
 
-  const updatePlayerLabel = (username, lineData, x, y, time, startIndex) => {
+  const labelPositions = {}; // Persistent storage for label positions
+
+const updatePlayerLabel = (username, lineData, x, y, time, startIndex, fullOpacityLabels) => {
     const lastIndex = lineData.length - 1;
     if (lineData[lastIndex] !== undefined) {
-      labelsRef.current[username]
-        .text(username)
-        .attr('x', x(Math.max(time - numOfTicksOnGraph, startIndex) + lastIndex))
-        .attr('y', y(lineData[lastIndex]))
-        .attr('dx', 5)
-        .attr('dy', 4);
+        let labelX = x(Math.max(time - numOfTicksOnGraph, startIndex) + lastIndex);
+        let labelY = y(lineData[lastIndex]);
+
+        const labelHeight = 16; // Font height in px
+        const spacing = 0; // Space between labels
+        let opacity = 1; // Default opacity is full
+
+        // Ensure labelPositions has an entry for this player
+        if (!labelPositions[username]) {
+            labelPositions[username] = labelY;
+        }
+
+        let adjustedY = labelY;
+
+        // Check overlap with full-opacity labels
+        for (let fullLabelY of fullOpacityLabels) {
+            if (Math.abs(adjustedY - fullLabelY) < labelHeight + spacing) {
+                opacity = 0.5; // Reduce opacity if overlap detected
+                break;
+            }
+        }
+
+        // If opacity remains 1, update the full-opacity reference list
+        if (opacity === 1) {
+            fullOpacityLabels.push(adjustedY);
+        }
+
+        // Store the adjusted position persistently
+        labelPositions[username] = adjustedY;
+
+        labelsRef.current[username]
+            .text(username)
+            .attr('x', labelX)
+            .attr('y', adjustedY)
+            .attr('dx', 5)
+            .attr('dy', 4)
+            .style('opacity', opacity);
     }
-  };
+};
+
+
+
 
   const cleanupInactivePlayers = (activePlayers) => {
     Object.keys(pathsRef.current).forEach(username => {
