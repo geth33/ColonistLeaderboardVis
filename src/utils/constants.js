@@ -124,8 +124,9 @@ export default {
     'tavaline': {
       imageURL: 'img/playerImage/tavaline.png',
       facts: [
-        'Rank #2 in Season 7', //Base
         'Rank #106 in Season 4', //Base
+        '1x D2 Catan Champs Champion',
+        'Rank #2 in Season 7', //Base
       ]
     },
     'AngryRobin': {

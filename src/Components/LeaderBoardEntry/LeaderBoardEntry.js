@@ -20,8 +20,14 @@ const LeaderBoardEntry = ({ rank, name, value, flagURL, subValue, isNew, size })
   return (
     <li className={`leaderBoardRow ${rankClass} ${isNew ? "new" : ""}`} ref={entryRef} data-name={name}> {/* Add data-name attribute */}
       <div className={`rowContent ${size}`}>
-        <span className='rank'>{rank}</span>
-        <span className='name'>{name} <img style={{width: '20px', marginLeft: '10px'}} src={flagURL}/></span>
+        <span className='rank'>{rank}</span>  
+          <span className='name'>{name} 
+          {
+          size !== 'small' &&
+            <img style={{width: '20px', marginLeft: '10px'}} src={flagURL}/>
+          }
+          </span>
+        
         {
           subValue !== '' ? <div>
               <p className='value'>{value}</p>

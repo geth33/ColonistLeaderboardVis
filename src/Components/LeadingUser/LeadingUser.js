@@ -35,7 +35,7 @@ const LeadingUser = ({ data, currSnapshot }) => {
             data && <>
             <div>
                 <div style={{display: 'flex'}} className='goldBackground'>
-                    <img src={leadingUserInfo?.imageURL ? leadingUserInfo.imageURL : "/img/mysteryPortrait.jpg"} alt="User" style={{height: '81px', width: '81px', margin: '0 0 0 4px', alignSelf: 'center'}}/>
+                    <img src={leadingUserInfo?.imageURL ? leadingUserInfo.imageURL : "/img/mysteryPortrait.jpg"} alt="User" style={{height: '83px', width: '83px', margin: '0 0 0 4px', alignSelf: 'center'}}/>
                     <div style={{
                         fontSize: '1.5em', 
                         color: 'white', 
