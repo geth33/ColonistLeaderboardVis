@@ -13,15 +13,15 @@ const numOfPlayersSeason = [1,5,10,20,50,100,200];
 
 const Settings = ({hide, playersWithoutData}) => {
   const [lineChartMode, setLineChartMode] = useState(0);
-  const [gameMode, setGameMode] = useState("1v1");
+  const [gameMode, setGameMode] = useState("Base");
   const [season, setSeason] = useState(7);
   const [speed, setSpeed] = useState(1);
   const [selectableDays, setSelectableDays] = useState(finishedSeasonDays);
-  const [selectedDay, setSelectedDay] = useState(1);
+  const [selectedDay, setSelectedDay] = useState(10);
   const [submittedWithEmptyRows, setSubmittedWithEmptyRows] = useState(false);
   const [playerNum, setPlayerNum] = useState(10);
-  const [enteringCheckboxChecked, setEnteringCheckboxChecked] = useState(false);
-  const [leavingCheckboxChecked, setLeavingCheckboxChecked] = useState(false);
+  const [enteringCheckboxChecked, setEnteringCheckboxChecked] = useState(true);
+  const [leavingCheckboxChecked, setLeavingCheckboxChecked] = useState(true);
   const [playerData, setPlayerData] = useState([]);
 
   const handlePlayerDataChange = (updatedData) => {
@@ -253,7 +253,7 @@ const Settings = ({hide, playersWithoutData}) => {
                             <React.Fragment>
                                 <p style={{fontWeight: 'bold', fontSize: '13px'}}>Show players entering/exiting the top ranks.</p>
                                 <p>
-                                    It's generally recommended to leave these unchecked when viewing 1v1 leaderboards or if you have more than 10 players on the graph.
+                                    It's generally recommended to leave these unchecked when you have more than 10 players on the graph.
                                 </p>
                                 <p>
                                     The graph can get slightly disorienting if lots of players are entering/exiting. 

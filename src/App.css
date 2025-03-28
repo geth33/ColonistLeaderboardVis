@@ -1,6 +1,6 @@
 .App {
   text-align: center;
-  height: 100vh;
+  height: 120vh;
   overflow: hidden;
 }
 
@@ -232,6 +232,10 @@ text {
 @media (max-width: 1100px) {
   .leadingUserModule {
     display: none;
+  }
+
+  .App {
+    overflow: visible;
   }
 
   .visContainer {

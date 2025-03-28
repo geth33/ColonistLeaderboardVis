@@ -24,9 +24,6 @@ const COLORS2 = [
 
 const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicksOnGraph, lineChartSpeed, generatingChart, seasonSnapshots, chartTitle}) => {
 
-  // console.log(topPlayersAtTimeMap);
-  // console.log(playerData);
-
   const [graphInitialized, setGraphInitialized] = useState(false);
   const coreVisRef = useRef(null);
   const pathsRef = useRef({});
@@ -118,9 +115,13 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
 
   // Utility to calculate dimensions based on window size
   const calculateDimensions = () => {
-    const width = window.innerWidth < 1100 ? window.innerWidth / 1.1 : window.innerWidth / 2.2;
-    const height = window.innerWidth < 1100 ? window.innerHeight / 1.5 : window.innerHeight / 1.05;
-    return { width: width - MARGIN.left - MARGIN.right, height: height - MARGIN.top - MARGIN.bottom };
+    const rawWidth = window.innerWidth < 1100 ? window.innerWidth / 1.1 : window.innerWidth / 2.2;
+    const rawHeight = window.innerWidth < 1100 ? window.innerHeight / 1.5 : window.innerHeight / 1.05;
+  
+    const width = Math.max(rawWidth - MARGIN.left - MARGIN.right, 100);  // prevent too-small width
+    const height = Math.max(rawHeight - MARGIN.top - MARGIN.bottom, 100); // prevent too-small height
+  
+    return { width, height };
   };
 
   // Setup SVG container and axis labels
@@ -286,8 +287,9 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   };
 
   const updatePlayerPath = (username, lineData, time, timeMax, x, y, startIndex) => {
+
     const pathGenerator = d3.line()
-      .defined(d => d !== -1)
+      .defined(d => { return d !== -1})
       .x((d, i) => x(Math.max(time - numOfTicksOnGraph, startIndex) + i))
       .y((d, i) => y(d))
       .curve(d3.curveBasis);

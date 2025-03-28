@@ -84,8 +84,8 @@ function toSx(styles, classes) {
 	};
 }
 
-  const numOfTicksOnGraph = window.innerWidth < 800 ? 90 : 180;
-  const lineChartSpeed = 25;
+  const numOfTicksOnGraph = 180;
+  const lineChartSpeed = 20;
 
 const Home = () => {
   const [allSeasonsData, setAllSeasonsData] = useState(null);
