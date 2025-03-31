@@ -31,8 +31,10 @@ export default {
     'KillaKarisma': {
       imageURL: 'img/playerImage/killaKarisma.jpg',
       facts: [
-       'Rank #16 in Season 6', // Base
+        '#1 in Season 7', // 1v1
+        '#9 in Season 6', // 1v1
        'Reigning 1v1 Champion',
+       'Rank #16 in Season 6', // Base
        '#9 in Season 6', // 1v1
        '#11 in Season 7', // Base
        '#1 in Season 7', // 1v1
@@ -137,7 +139,19 @@ export default {
         'Major League Catan Participant'
       ]
     },
+    'Ghajni': {
+      imageURL: 'img/playerImage/ghajni.png',
+      facts: [
+        'Rank #1 in Season 6',
+        'Rank #1 in Season 1'
+      ]
+    },
     // PLAYERS WITHOUT PICTURES
+    'progamer777': {
+      facts: [
+        'Rank #63 in Season 7', //1v1
+      ]
+    },
     'BootlessBill': {
       facts: [
         'Rank #92 in Season 5', //Base
