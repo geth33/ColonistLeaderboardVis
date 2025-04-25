@@ -146,6 +146,13 @@ export default {
         'Rank #1 in Season 1'
       ]
     },
+    'Sinless': {
+      imageURL: 'img/playerImage/Sinless.jpg',
+      facts: [
+        'Catan Champs Div 1 Champion',
+        'Rank #541 in Season 7',
+      ]
+    },
     // PLAYERS WITHOUT PICTURES
     'progamer777': {
       facts: [
@@ -182,6 +189,46 @@ export default {
         ''
       ]
     },
-
+    'Lion2': {
+      facts: [
+        'Catan Champs Div 2 Semifinalist',
+        'Rank #209 in Season 7', //Base
+      ]
+    },
+    'Waimea': {
+      facts: [
+        'Rank #170 in Season 7', //Base
+        ''
+      ]
+    },
+    'coldwar': {
+      facts: [
+        'Rank #177 in Season 7', //Base
+      ]
+    },
+    'RF20': {
+      facts: [
+        'Rank #192 in Season 7',
+        'Rank #450 in Season 6', //Base
+      ]
+    },
+    'Mohsen7605': {
+      facts: [
+        'Rank #32 in Season 7', //Base
+        'Rank #1027 in Season 6', //Base
+      ]
+    },
+    'azamat2': {
+      facts: [
+        'Rank #24 in Season 7',
+        'Rank #1200 in Season 6', //Base
+      ]
+    },
+    'StayingMad': {
+      facts: [
+        'Rank #19 in Season 7',
+        'Rank #14 in Season 6',
+      ]
+    },
   }
 };
