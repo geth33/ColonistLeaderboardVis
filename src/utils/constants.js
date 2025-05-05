@@ -18,12 +18,12 @@ export default {
     'rayman147': {
       imageURL: 'img/playerImage/rayman.png',
       facts: [
+        '#4 in Season 8', // 1v1
+        '#2 in Season 7', // 1v1
         '3x D1 Catan Champs Champion',
         '1v1 World Cup Champion',
         '#1 in Season 6', // Base
         '#3 in Season 6', // 1v1
-        '#2 in Season 7', // 1v1
-        '#4 in Season 8', // 1v1
         '#1 in Season 9', // 1v1
         '#13 in Season 11', // 1v1
        ]
@@ -31,8 +31,8 @@ export default {
     'KillaKarisma': {
       imageURL: 'img/playerImage/killaKarisma.jpg',
       facts: [
-        '#1 in Season 7', // 1v1
-        '#9 in Season 6', // 1v1
+      '#1 and #2 in Season 8', // 1v1
+      '#1 in Season 7', // 1v1
        'Reigning 1v1 Champion',
        'Rank #16 in Season 6', // Base
        '#9 in Season 6', // 1v1
@@ -53,8 +53,8 @@ export default {
     'ThePhantom': {
       imageURL: 'img/playerImage/thePhantom.jpg',
       facts: [
-        '#26 in Season 7', // 1v1
         '#19 in Season 8', // 1v1
+        '#26 in Season 7', // 1v1
         '#2 in Season 9', // 1v1
         '#17 in Season 10', // 1v1
         '#31 in Season 11', // 1v1
@@ -107,13 +107,16 @@ export default {
     'md7': {
       imageURL: 'img/playerImage/md7.png',
       facts: [
+        '#13 in Season 8', //Base
         '2x D1 Catan Champs Champion',
         'Major League Catan Participant',
         '#29 in Season 7', //Base
-        '#13 in Season 8', //Base
         '#1 in Season 9', //Base
         '#1 in Season 11', //Base
       ]
+    },
+    'swheatchick': {
+      alias: 'md7'
     },
     'PizzaPenguin': {
       imageURL: 'img/playerImage/pizzaPenguin.jpg',
@@ -228,6 +231,99 @@ export default {
       facts: [
         'Rank #19 in Season 7',
         'Rank #14 in Season 6',
+      ]
+    },
+    'Cost5916': {
+      facts: [
+        'Rank #119 in Season 8'
+      ]
+    },
+    'BurgIdentity': {
+      facts: [
+        'Rank #61 in Season 8',
+        'Rank #38 in Season 7',
+      ]
+    },
+    'Maggie8293': {
+      facts: [
+        'Rank #6 in Season 8',
+        'Rank #96 in Season 7',
+      ]
+    },
+    'Kwan9826': {
+      facts: [
+        'Rank #463 in Season 8'
+      ]
+    },
+    'Derse': {
+      facts: [
+        'Rank #83 in Season 8',
+        'Rank #41 in Season 7',
+      ]
+    },
+    'SirJustice': {
+      facts: [
+        'Rank #165 in Season 8',
+        'Rank #226 in Season 7',
+      ]
+    },
+    'Biddy': {
+      facts: [
+        'Rank #25 in Season 8',
+        'Rank #371 in Season 6',
+      ]
+    },
+    'stampede': {
+      facts: [
+        'Rank #129 in Season 8',
+        'Rank #19 in Season 7',
+      ]
+    },
+    'Maxpain': {
+      facts: [
+        'Rank #23 in Season 8',
+        'Rank #2 in Season 6',
+      ]
+    },
+    'JWEEZY': {
+      facts: [
+        'Rank #10 in Season 8',
+        'Rank #135 in Season 7',
+      ]
+    },
+    'wonder2792': {
+      facts: [
+        'Rank #106 in Season 8',
+        'Rank #1067 in Season 7',
+      ]
+    },
+    'snackjar': {
+      facts: [
+        'Rank #204 in Season 8'
+      ]
+    },
+    'trailerrrr': {
+      facts: [
+        'Rank #21 in Season 8',
+        'Rank #181 in Season 7',
+      ]
+    },
+    'Robijs': {
+      facts: [
+        'Rank #28 in Season 7',
+        'Rank #149 in Season 6',
+      ]
+    },
+    'Giangi503': {
+      facts: [
+        'Rank #91 in Season 8',
+        'Rank #150 in Season 7',
+      ]
+    },
+    'Colih': {
+      facts: [
+        'Rank #37 in Season 6',
+        'Rank #317 in Season 5',
       ]
     },
   }
