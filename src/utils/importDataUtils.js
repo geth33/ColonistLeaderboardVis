@@ -59,7 +59,7 @@ const processPlayerData = (data) => {
         }
   
         // Check if it's a new snapshot
-        if (previousCreatedAt && previousCreatedAt.getTime() !== createdAt.getTime()) {
+        if (previousCreatedAt && calculateHoursBetweenDates(previousCreatedAt,createdAt) > 1) {
             snapshotNumber += incrementSnapshotNumber(previousCreatedAt, createdAt,currentSeason);
             seasonSnapshotsMap[currentSeason].push(snapshotNumber);
             currentSnapshotPlayers = [];

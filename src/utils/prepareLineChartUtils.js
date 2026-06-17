@@ -1,5 +1,5 @@
 export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTopPlayersAtTimeMap, setMinMap, setMaxMap, season, numOfPlayersOnChart, showEntering, showLeaving, startingSnapshot, numOfTicksOnGraph, seasonMaxSnapshotMap, seasonSnapshots) => {
-    const playersOnGraph = [];
+  const playersOnGraph = [];
     // Loop through each user in the allSeasonsData object
     Object.keys(allSeasonsData).forEach(username => {
         if (allSeasonsData[username]['Season ' + season] && allSeasonsData[username]['Season ' + season].length > 0 && playerAppearsInGraph(allSeasonsData, username, season, numOfPlayersOnChart)) {
@@ -25,7 +25,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     let seasonLineMap = {};
     let seasonLineMapSubsnapshots = {};
     let topSeasonsAtTimeMap = {};
-    let seasons = [7,8,9,10,11,12,13,14,15];
+    let seasons = [7,8,9,10,11,12,13,14,15,16,17];
     for (let season of seasons){
       seasonLineMap["Season " + season] = generateSeasonAverageLine(allSeasonsData, season, seasonSnapshots, seasonMaxSnapshotMap, numOfPlayers, startingSnapshot, gameMode);
       seasonLineMapSubsnapshots["Season " + season] = generateSeasonAverageLineSubsnapshots(seasonLineMap["Season " + season]);
@@ -103,7 +103,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
   }
 
   const findFirstSnapshotWithData = (allSeasonsData, players) => {
-    let allSeasons = [7,8,9,10,11,12,13,14,15];
+    let allSeasons = [7,8,9,10,11,12,13,14,15,16,17];
     let usernamesInData = Object.keys(allSeasonsData);
     let firstSnapshotWithData = Infinity;
 
@@ -125,7 +125,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
   }
 
   const findPlayersWithoutData = (allSeasonsData, players) => {
-    let allSeasons = [7,8,9,10,11,12,13,14,15];
+    let allSeasons = [7,8,9,10,11,12,13,14,15,16,17];
     let usernamesInData = Object.keys(allSeasonsData);
     let playersWithoutData = [];
 
@@ -158,7 +158,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
 
     let playerLineMap = {};
     let topPlayersAtTimeMap = {};
-    let allSeasons = [7,8,9,10,11,12,13,14,15];
+    let allSeasons = [7,8,9,10,11,12,13,14,15,16,17];
     let usernamesInData = Object.keys(allSeasonsData);
     // Update the starting snapshot to begin on the snapshot that has the first data. (we don't want an empty chart for 30 seconds)
     let updatedStartingSnapshot = Math.max(findFirstSnapshotWithData(allSeasonsData, settings.players) + 1, settings.startingSnapshot);
@@ -278,7 +278,8 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     keys.forEach(key => {
       map[key] = map[key]
         .sort((a, b) => a.playerRank - b.playerRank) // Sort by skillRating descending
-        .slice(0, amountToTruncate); // Convert to usernames only
+        .slice(0, amountToTruncate)
+        .filter(player => player.playerRank <= amountToTruncate); // Convert to usernames only
     });
     return map;
   }
@@ -651,7 +652,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     const top10RankMap = {};
     const multiSeasonSnapshotMap = {};
     let uniqueSnapshots = new Set();
-    let seasons = [7,8,9,10,11,12,13,14,15];
+    let seasons = [7,8,9,10,11,12,13,14,15,16,17];
 
     Object.keys(allSeasonsData).forEach(username => {
       const userSeasons = allSeasonsData[username];
@@ -718,7 +719,7 @@ export const generateTopPlayerLines = (allSeasonsData, setPlayerRatingMap, setTo
     const top10RankMap = {};
     const top5WinRateMap = {};
     const timeInFirstPlaceMap = {};
-    let allSeasons = [7,8,9,10,11,12,13,14,15];
+    let allSeasons = [7,8,9,10,11,12,13,14,15,16,17];
     let usernamesInData = Object.keys(allSeasonsData);
 
     // Iterate over the provided user-season pairs

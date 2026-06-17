@@ -230,7 +230,7 @@ const LineChart = ({ playerData, topPlayersAtTimeMap, minMap, maxMap, numOfTicks
   const update = (chartArea, x, y, xAxis, yAxis, $xAxis, $yAxis, dimensions, time, timeMax) => {
     let activePlayers = [...topPlayersAtTimeMap[time]];
 
-    // Sort players by rating (descending order)
+      // Sort players by rating (descending order)
     activePlayers.sort((a, b) => {
         const ratingA = playerData[a][time] ?? -Infinity;
         const ratingB = playerData[b][time] ?? -Infinity;
