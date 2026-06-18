@@ -17,7 +17,7 @@ class Store {
 
   loadOneOnOneData() {
     if (this.oneOnOneData === null) {
-      readDataFromFile('/csvs/leaderboards_oneOnOne.csv')
+      readDataFromFile('https://storage.googleapis.com/leaderboard_files/leaderboards_oneOnOne.csv')
         .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
             runInAction(() => {
                 this.oneOnOneData = fileData;
@@ -33,8 +33,8 @@ class Store {
   
   loadBaseData() {
     if (this.baseData === null) {
-      readDataFromFile('/csvs/leaderboards_base.csv')
-        .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
+        readDataFromFile('https://storage.googleapis.com/leaderboard_files/leaderboards_base.csv')
+            .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
             runInAction(() => {
                 this.baseData = fileData;
           this.baseMaxSnapshotMap = fileMaxSnapshotMap;
