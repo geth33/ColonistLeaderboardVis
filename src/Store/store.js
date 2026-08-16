@@ -19,6 +19,8 @@ class Store {
 
   loadOneOnOneData() {
     if (this.oneOnOneData === null) {
+      this.clearBaseData();
+
       readDataFromFile('https://storage.googleapis.com/leaderboard_files/csvs/leaderboards_oneOnOne.csv')
         .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap, fileSeasonFinalRankingMap }) => {
             runInAction(() => {
@@ -36,6 +38,8 @@ class Store {
   
   loadBaseData() {
     if (this.baseData === null) {
+      this.clearOneOnOneData();
+
         readDataFromFile('https://storage.googleapis.com/leaderboard_files/csvs/leaderboards_base.csv')
             .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap, fileSeasonFinalRankingMap }) => {
             runInAction(() => {
@@ -49,6 +53,22 @@ class Store {
           console.error("Error loading Base data:", error);
         });
     }
+  }
+
+  clearOneOnOneData() {
+    runInAction(() => {
+      this.oneOnOneData = null;
+      this.oneOnOneMaxSnapshotMap = null;
+      this.oneOnOneSeasonSnapshotsMap = null;
+    });
+  }
+
+  clearBaseData() {
+    runInAction(() => {
+      this.baseData = null;
+      this.baseMaxSnapshotMap = null;
+      this.baseSeasonSnapshotsMap = null;
+    });
   }
 
   // Optional: Reset the objects

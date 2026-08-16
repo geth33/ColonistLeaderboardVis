@@ -1,7 +1,6 @@
-// src/App.js
 import React, { useState } from 'react';
 import './App.css';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import {
   AppBar,
   Toolbar,
@@ -24,11 +23,12 @@ import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 
 import FAQ from './Pages/FAQ';
+import ColonistHallOfFame from './Pages/ColonistHallOfFame';
 import Leaderboards from './Pages/Leaderboards';
 import Home from './Pages/Home';
 import { useTheme } from '@mui/material/styles';
 
-function App() {
+function Navigation() {
   const [mobileOpen, setMobileOpen] = useState(false);
   
   // Desktop Menu Anchor States
@@ -41,6 +41,12 @@ function App() {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  // 1. Listen to active location changes
+  const location = useLocation();
+
+  // 2. Check if the current path includes any Hall of Fame route
+  const isHallOfFame = location.pathname.toLowerCase().includes('halloffame');
 
   // Mobile Drawer Toggle
   const handleDrawerToggle = () => {
@@ -88,7 +94,7 @@ function App() {
           <ListItemButton
             sx={{ pl: 4 }}
             component={Link}
-            to="/colonist/hallofFame"
+            to="/colonist/hallOfFame"
             onClick={handleDrawerToggle}
           >
             <ListItemText primary="Hall of Fame" />
@@ -114,7 +120,7 @@ function App() {
           <ListItemButton
             sx={{ pl: 4 }}
             component={Link}
-            to="/duel-division/hallofFame"
+            to="/duel-division/hallOfFame"
             onClick={handleDrawerToggle}
           >
             <ListItemText primary="Hall of Fame" />
@@ -146,140 +152,156 @@ function App() {
   );
 
   return (
-    <Router>
-      <div className="App">
-        <AppBar position="static" sx={{ backgroundColor: '#1e63ac' }}>
-          <Container maxWidth="xl">
-            <Toolbar
+    <>
+      <AppBar 
+        position="static" 
+        sx={{ 
+          // 3. Dynamically set background color based on active path
+          backgroundColor: isHallOfFame ? '#121212' : '#1e63ac',
+          transition: 'background-color 0.3s ease'
+        }}
+      >
+        <Container maxWidth="xl">
+          <Toolbar
+            sx={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              paddingX: 2,
+            }}
+          >
+            {/* Title */}
+            <Typography
+              variant="h5"
+              component={Link}
+              to="/"
               sx={{
-                display: 'flex',
-                justify: 'space-between',
-                paddingX: 2,
+                color: 'white',
+                fontWeight: 'bold',
+                textDecoration: 'none',
+                marginRight: 'auto',
               }}
             >
-              {/* Title */}
-              <Typography
-                variant="h5"
-                component={Link}
-                to="/"
-                sx={{
-                  color: 'white',
-                  fontWeight: 'bold',
-                  textDecoration: 'none',
-                  marginRight: 'auto',
-                }}
-              >
-                Leaderboard Visualizer
-              </Typography>
+              Leaderboard Visualizer
+            </Typography>
 
-              {/* Navigation Items */}
-              {isMobile ? (
-                <IconButton color="inherit" edge="end" onClick={handleDrawerToggle}>
-                  <MenuIcon />
-                </IconButton>
-              ) : (
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-                  <Button
-                    color="inherit"
+            {/* Navigation Items */}
+            {isMobile ? (
+              <IconButton color="inherit" edge="end" onClick={handleDrawerToggle}>
+                <MenuIcon />
+              </IconButton>
+            ) : (
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/"
+                  sx={{ color: 'white', fontWeight: 'bold' }}
+                >
+                  Visualizer
+                </Button>
+
+                {/* Colonist Dropdown */}
+                <Button
+                  color="inherit"
+                  onClick={handleColonistClick}
+                  endIcon={<KeyboardArrowDownIcon />}
+                  sx={{ color: 'white', fontWeight: 'bold' }}
+                >
+                  Colonist
+                </Button>
+                <Menu
+                  anchorEl={colonistAnchor}
+                  open={Boolean(colonistAnchor)}
+                  onClose={handleColonistClose}
+                >
+                  <MenuItem
                     component={Link}
-                    to="/"
-                    sx={{ color: 'white', fontWeight: 'bold' }}
+                    to="/colonist/hallOfFame"
+                    onClick={handleColonistClose}
                   >
-                    Visualizer
-                  </Button>
-
-                  {/* Colonist Dropdown */}
-                  <Button
-                    color="inherit"
-                    onClick={handleColonistClick}
-                    endIcon={<KeyboardArrowDownIcon />}
-                    sx={{ color: 'white', fontWeight: 'bold' }}
-                  >
-                    Colonist
-                  </Button>
-                  <Menu
-                    anchorEl={colonistAnchor}
-                    open={Boolean(colonistAnchor)}
-                    onClose={handleColonistClose}
-                  >
-                    <MenuItem
-                      component={Link}
-                      to="/colonist/hallofFame"
-                      onClick={handleColonistClose}
-                    >
-                      Hall of Fame
-                    </MenuItem>
-                    <MenuItem
-                      component={Link}
-                      to="/leaderboards"
-                      onClick={handleColonistClose}
-                    >
-                      Past Leaderboards
-                    </MenuItem>
-                  </Menu>
-
-                  {/* Duel Division Dropdown */}
-                  <Button
-                    color="inherit"
-                    onClick={handleDuelDivisionClick}
-                    endIcon={<KeyboardArrowDownIcon />}
-                    sx={{ color: 'white', fontWeight: 'bold' }}
-                  >
-                    Duel Division
-                  </Button>
-                  <Menu
-                    anchorEl={duelDivisionAnchor}
-                    open={Boolean(duelDivisionAnchor)}
-                    onClose={handleDuelDivisionClose}
-                  >
-                    <MenuItem
-                      component={Link}
-                      to="/duel-division/hallofFame"
-                      onClick={handleDuelDivisionClose}
-                    >
-                      Hall of Fame
-                    </MenuItem>
-                    <MenuItem
-                      component={Link}
-                      to="/duel-division/players"
-                      onClick={handleDuelDivisionClose}
-                    >
-                      Players
-                    </MenuItem>
-                  </Menu>
-
-                  <Button
-                    color="inherit"
+                    Hall of Fame
+                  </MenuItem>
+                  <MenuItem
                     component={Link}
-                    to="/faq"
-                    sx={{ color: 'white', fontWeight: 'bold' }}
+                    to="/leaderboards"
+                    onClick={handleColonistClose}
                   >
-                    FAQ
-                  </Button>
+                    Past Leaderboards
+                  </MenuItem>
+                </Menu>
 
-                  <Button
-                    color="inherit"
-                    target="_blank"
-                    href="https://qualtricsxmvtb8mdg33.qualtrics.com/jfe/form/SV_8euSp8O04krdUjQ"
-                    sx={{ color: 'white', fontWeight: 'bold' }}
+                {/* Duel Division Dropdown */}
+                <Button
+                  color="inherit"
+                  onClick={handleDuelDivisionClick}
+                  endIcon={<KeyboardArrowDownIcon />}
+                  sx={{ color: 'white', fontWeight: 'bold' }}
+                >
+                  Duel Division
+                </Button>
+                <Menu
+                  anchorEl={duelDivisionAnchor}
+                  open={Boolean(duelDivisionAnchor)}
+                  onClose={handleDuelDivisionClose}
+                >
+                  <MenuItem
+                    component={Link}
+                    to="/duel-division/hallOfFame"
+                    onClick={handleDuelDivisionClose}
                   >
-                    Give Feedback
-                  </Button>
-                </div>
-              )}
-            </Toolbar>
-          </Container>
-        </AppBar>
+                    Hall of Fame
+                  </MenuItem>
+                  <MenuItem
+                    component={Link}
+                    to="/duel-division/players"
+                    onClick={handleDuelDivisionClose}
+                  >
+                    Players
+                  </MenuItem>
+                </Menu>
 
-        {/* Mobile Drawer */}
-        <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
-          {drawer}
-        </Drawer>
+                <Button
+                  color="inherit"
+                  component={Link}
+                  to="/faq"
+                  sx={{ color: 'white', fontWeight: 'bold' }}
+                >
+                  FAQ
+                </Button>
+
+                <Button
+                  color="inherit"
+                  target="_blank"
+                  href="https://qualtricsxmvtb8mdg33.qualtrics.com/jfe/form/SV_8euSp8O04krdUjQ"
+                  sx={{ color: 'white', fontWeight: 'bold' }}
+                >
+                  Give Feedback
+                </Button>
+              </div>
+            )}
+          </Toolbar>
+        </Container>
+      </AppBar>
+
+      {/* Mobile Drawer */}
+      <Drawer anchor="right" open={mobileOpen} onClose={handleDrawerToggle}>
+        {drawer}
+      </Drawer>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <Router>
+      <div className="App">
+        <Navigation />
 
         {/* Routes */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/leaderboards" element={<Leaderboards />} />
+          <Route path="/colonist/hallOfFame" element={<ColonistHallOfFame type="colonist"/>} />
           <Route path="/faq" element={<FAQ />} />
           {/* Add Duel Division & Colonist Hall of Fame routes here */}
         </Routes>
