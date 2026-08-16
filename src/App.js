@@ -118,6 +118,7 @@ function Navigation() {
       <Collapse in={mobileDuelDivisionOpen} timeout="auto" unmountOnExit>
         <List component="div" disablePadding>
           <ListItemButton
+            disabled
             sx={{ pl: 4 }}
             component={Link}
             to="/duel-division/hallOfFame"
@@ -126,6 +127,7 @@ function Navigation() {
             <ListItemText primary="Hall of Fame" />
           </ListItemButton>
           <ListItemButton
+            disabled
             sx={{ pl: 4 }}
             component={Link}
             to="/duel-division/players"
@@ -245,6 +247,7 @@ function Navigation() {
                   onClose={handleDuelDivisionClose}
                 >
                   <MenuItem
+                    disabled
                     component={Link}
                     to="/duel-division/hallOfFame"
                     onClick={handleDuelDivisionClose}
@@ -252,6 +255,7 @@ function Navigation() {
                     Hall of Fame
                   </MenuItem>
                   <MenuItem
+                    disabled
                     component={Link}
                     to="/duel-division/players"
                     onClick={handleDuelDivisionClose}
