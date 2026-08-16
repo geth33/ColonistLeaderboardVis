@@ -10,6 +10,8 @@ class Store {
   baseMaxSnapshotMap = null;
   oneOnOneSeasonSnapshotsMap = null;
   baseSeasonSnapshotsMap = null;
+  oneOnOneSeasonFinalRankingMap = null;
+  baseSeasonFinalRankingMap = null;
 
   constructor() {
     makeAutoObservable(this);
@@ -18,11 +20,12 @@ class Store {
   loadOneOnOneData() {
     if (this.oneOnOneData === null) {
       readDataFromFile('https://storage.googleapis.com/leaderboard_files/csvs/leaderboards_oneOnOne.csv')
-        .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
+        .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap, fileSeasonFinalRankingMap }) => {
             runInAction(() => {
                 this.oneOnOneData = fileData;
                 this.oneOnOneMaxSnapshotMap = fileMaxSnapshotMap;
                 this.oneOnOneSeasonSnapshotsMap = fileSeasonsSnapshotsMap;
+                this.oneOnOneSeasonFinalRankingMap = fileSeasonFinalRankingMap;
             })
         })
         .catch((error) => {
@@ -34,11 +37,12 @@ class Store {
   loadBaseData() {
     if (this.baseData === null) {
         readDataFromFile('https://storage.googleapis.com/leaderboard_files/csvs/leaderboards_base.csv')
-            .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
+            .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap, fileSeasonFinalRankingMap }) => {
             runInAction(() => {
                 this.baseData = fileData;
-          this.baseMaxSnapshotMap = fileMaxSnapshotMap;
-          this.baseSeasonSnapshotsMap = fileSeasonsSnapshotsMap;
+                this.baseMaxSnapshotMap = fileMaxSnapshotMap;
+                this.baseSeasonSnapshotsMap = fileSeasonsSnapshotsMap;
+                this.baseSeasonFinalRankingMap = fileSeasonFinalRankingMap;
             })
         })
         .catch((error) => {

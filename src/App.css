@@ -217,6 +217,7 @@ text {
   color: white;
 }
 
+
 @media (max-width: 1824px) {
   .fullContainer {
     width: 50%;
@@ -285,6 +286,9 @@ text {
 }
 
 @media (max-width: 750px) {
+  .colonistLeaderboardPage {
+    flex-direction: row;
+  }
   .fullContainer {
     width: 95%;
   }

@@ -38,6 +38,7 @@ const processPlayerData = (data) => {
     let currentSnapshotPlayers = [];
     let seasonMaxSnapshotMap = {};
     let seasonSnapshotsMap = { 6: []};
+    let seasonFinalRankingMap = {6: []}
   
     data.forEach((entry, index) => {
         // Parse the relevant numeric fields
@@ -52,6 +53,7 @@ const processPlayerData = (data) => {
                 seasonMaxSnapshotMap[currentSeason] = snapshotNumber;
                 currentSeason++; // New season detected
                 seasonSnapshotsMap[currentSeason] = [1];
+                seasonFinalRankingMap[currentSeason] = [];
                 snapshotNumber = 1; // Reset snapshot count
                 previousCreatedAt = null;
             }
@@ -73,7 +75,7 @@ const processPlayerData = (data) => {
         if (!processedData[username][`Season ${currentSeason}`]) {
             processedData[username][`Season ${currentSeason}`] = [];
         }
-        // It's possible some players can be on the leaderboard twice. Only add new entry for nsapshot if they are not already in this snapshot
+        // It's possible some players can be on the leaderboard twice. Only add new entry for snapshot if they are not already in this snapshot
         if (!currentSnapshotPlayers.includes(username)){
           // Add the entry data to the specific season
             const userEntry = {
@@ -88,6 +90,10 @@ const processPlayerData = (data) => {
               flagURL: getTwemojiFlagURL(entry.countryCode)
           };
           processedData[username][`Season ${currentSeason}`].push(userEntry);
+
+          if (entry.finalSnapshot === "1"){
+            seasonFinalRankingMap[currentSeason].push(entry);
+          }
   
           currentSnapshotPlayers.push(username);
         }
@@ -98,7 +104,8 @@ const processPlayerData = (data) => {
     return {
         fileData: processedData,
         fileMaxSnapshotMap: seasonMaxSnapshotMap,
-        fileSeasonsSnapshotsMap: seasonSnapshotsMap
+        fileSeasonsSnapshotsMap: seasonSnapshotsMap,
+        fileSeasonFinalRankingMap: seasonFinalRankingMap
     };
   };
 
@@ -107,7 +114,7 @@ const processPlayerData = (data) => {
     return Math.max(1, hoursDifference/12);
   }
 
-  function getTwemojiFlagURL(countryCode) {
+  export const getTwemojiFlagURL = (countryCode) => {
     const baseUrl = "https://cdn.jsdelivr.net/npm/twemoji@11.0.1/2/svg/";
     
     if (!countryCode || countryCode.length !== 2) return null;

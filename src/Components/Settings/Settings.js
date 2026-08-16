@@ -149,7 +149,7 @@ const Settings = ({hide, playersWithoutData}) => {
             <Button className={`settingsButton ${gameMode === 'Base' ? 'selected' : 'notSelected'}`} onClick={(e) => {setGameMode('Base')}}>
                 <img src="/img/sheep.png" alt="crown" style={{height: '25px', width: '25px'}}/>
                 <div className='settingsButtonText'>
-                    <p>Base</p>
+                    <p>4 Player</p>
                 </div>
             </Button>
             <Button className={`settingsButton ${gameMode === '1v1' ? 'selected' : 'notSelected'}`} onClick={(e) => {setGameMode('1v1')}}>

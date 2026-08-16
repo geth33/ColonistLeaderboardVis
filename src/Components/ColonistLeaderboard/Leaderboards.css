@@ -1,0 +1,196 @@
+.colonistLeaderboardPage {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  background: #177fde;
+  color: #fff;
+}
+.colonistLeaderboardMainContainer {
+    display: flex;
+  width: 60%;
+  margin: 60px auto;
+}
+.colonistGameModeContainer {
+  display: flex;
+  width: 20%;
+}
+.colonistLeaderboardContainer {
+    width: 80%;
+    padding-left: 2em;
+}
+.leaderboardTable {
+    max-height: 800px; /* Adjust this value to match your exact row height */
+    overflow-y: auto;
+    position: relative;
+    scrollbar-color: #fff rgba(0,0,0,.1);
+}
+body::-webkit-scrollbar-track {
+    border-radius: 12px;
+    background-color: rgba(0, 0, 0, .1);
+}
+table{
+    border-collapse: separate;
+    border-spacing: 0px;
+    width: 100%;
+}
+.tableHeaderCell {
+    padding: 12px 8px;
+    position: sticky;
+    top: 0;
+    background-color: #1062b0;
+    font-size: .875rem;
+}
+.globalContainer{
+    align-items: center;
+    border-radius: 8px 8px 0 0;
+    padding: 12px 40px;
+    position: sticky;
+    top: 0;
+    background-color: #1062b0;
+    font-size: 1.125rem;
+    font-weight: bold;
+}
+.seasonContainer {
+    align-items: center;
+    display: flex;
+    margin-right: 5em;
+}
+.colonistLeaderboardSettingsLabel {
+    font-size: 1.125rem;
+    margin-right: 0.75em;
+}
+.colonistLeaderboardSettingsContainer {
+    display: flex;
+}
+.searchContainer {
+    align-items: center;
+    display: flex;
+}
+.alignLeft {
+    text-align: left;
+}
+.alignRight {
+    text-align: right;
+}
+.alignCenter {
+    text-align: center;
+}
+.rankColumn {
+
+}
+.usernameColumnWidth {
+    width: 30%;
+}
+.divisionColumn {
+
+}
+.ratingColumn {
+
+}
+.winPercentColumn {
+
+}
+.gamesColumn {
+
+}
+
+@media (max-width: 1600px) {
+    .colonistLeaderboardMainContainer {
+        width: 80%;
+    }
+    .seasonContainer {
+        margin-right: 3em;
+    }
+}
+
+@media (max-width: 1200px) {
+    .seasonContainer {
+        margin-right: 1.5em;
+    }
+    .colonistLeaderboardMainContainer {
+        width: 90%;
+    }
+}
+
+@media (max-width: 850px) {
+    .colonistLeaderboardContainer {
+        width: 98%;
+        padding-left: 0em;
+    }
+    .colonistLeaderboardMainContainer {
+        width: 100%;
+    }
+    .colonistLeaderboardMainContainer {
+        flex-direction: column;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .colonistLeaderboardSettingsContainer {
+        justify-content: center;
+        width: 100%;
+        margin-top: 1em;
+        margin-bottom: 1em;
+    }
+    .colonistGameModeLeaderboard {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 1em;
+    }
+    .colonistLeaderboardPage {
+        flex-direction: row;
+    }
+    .leaderboardTable {
+        width: 100%;
+    }
+    .globalContainer{
+        display: none;
+    }
+}
+
+@media (max-width: 700px) {
+    .colonistLeaderboardMainContainer {
+        flex-direction: column;
+        align-items: center;
+        margin: 20px 0;
+    }
+    .colonistLeaderboardPage {
+        flex-direction: row;
+    }
+    .leaderboardTable {
+        width: 100%;
+    }
+}
+
+@media (max-width: 600px) {
+    td {
+        font-size: 0.8rem;
+    }
+    th {
+        font-size: 0.8rem;
+    }
+    .divisionColumn {
+        display: none;
+    }
+    .divisionCell {
+        display: none;
+    }
+    .colonistLeaderboardSettingsLabel {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 450px) {
+    td {
+        padding: 8px 2px;
+        font-size: 0.75rem;
+    }
+    th {
+        font-size: 0.75rem;
+    }
+    .divisionColumn {
+        display: none;
+    }
+    .divisionCell {
+        display: none;
+    }
+}
