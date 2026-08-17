@@ -48,8 +48,6 @@ const LeaderBoards = () => {
     useEffect(() => {
         retrieveChartDataFromStore();
     }, [
-        store.oneOnOneData,
-        store.baseData,
         store.oneOnOneSeasonFinalRankingMap,
         store.baseSeasonFinalRankingMap,
         season
@@ -57,20 +55,20 @@ const LeaderBoards = () => {
 
     useEffect(() => {
         if (activeGameMode === '1v1'){
-            if (store.oneOnOneData && store.oneOnOneSeasonFinalRankingMap){
+            if (store.oneOnOneSeasonFinalRankingMap){
                 setFetchingData(false);
                 retrieveChartDataFromStore();
             } else {
                 setFetchingData(true);
-                store.loadOneOnOneData();
+                store.loadFinalRanking("oneOnOne");
             }
         } else {
-            if (store.baseData){
+            if (store.oneOnOneSeasonFinalRankingMap){
                 setFetchingData(false);
                 retrieveChartDataFromStore();
             } else {
                 setFetchingData(true);
-                store.loadBaseData();
+                store.loadFinalRanking("base");
             }
         }
     }, [activeGameMode]);

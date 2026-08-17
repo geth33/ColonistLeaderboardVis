@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
 
-export const readDataFromFile = (url) => {
+export const readDataFromFile = (url, top100, finalRankings) => {
   return new Promise((resolve, reject) => {
     fetch(url) // Now fetching the file from the CDN URL
       .then((response) => {
@@ -14,8 +14,15 @@ export const readDataFromFile = (url) => {
           header: true,
           complete: (results) => {
             try {
-              const processedData = processPlayerData(results.data);
-              resolve(processedData); // Resolve the Promise with the processed data
+              let processedData = {};
+              if (finalRankings){
+                processedData = processFinalRankings(results.data);
+              } else if (top100){
+                //processedData = processTop100PlayerData(results.data);
+              } else {
+                processedData = processPlayerData(results.data);
+              }
+              resolve(processedData);
             } catch (error) {
               reject(error); // Reject the Promise if there's an error in processing
             }
@@ -28,6 +35,20 @@ export const readDataFromFile = (url) => {
       .catch((error) => reject(`Error fetching CSV file: ${error}`));
   });
 };
+
+const processFinalRankings = (data) => {
+  let finalRankings = {};
+  data.forEach((entry) => {
+    if (!finalRankings[entry.season]){
+      finalRankings[entry.season] = [entry];
+    } else {
+      finalRankings[entry.season].push(entry);
+    }
+  })
+  return {
+        fileSeasonFinalRankingMap: finalRankings
+    };
+}
 
 const processPlayerData = (data) => {
     let processedData = {};
