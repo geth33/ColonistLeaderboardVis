@@ -35,79 +35,74 @@ const processPlayerData = (data) => {
     let lastTopPlayerRating = null;
     let snapshotNumber = 1;
     let previousCreatedAt = null;
-    let currentSnapshotPlayers = [];
+    let currentSnapshotPlayers = new Set();
     let seasonMaxSnapshotMap = {};
-    let seasonSnapshotsMap = { 6: []};
-    let seasonFinalRankingMap = {6: []}
+    let seasonSnapshotsMap = { 6: [] };
+    let seasonFinalRankingMap = { 6: [] };
   
-    data.forEach((entry, index) => {
-        // Parse the relevant numeric fields
+    data.forEach((entry) => {
         const skillRating = parseFloat(entry.skillRating);
         let createdAt = null;
-        if (entry.created_at){
-            const [month, day, year, hour] = entry.created_at.match(/\d+/g); // Extracts parts as numbers
-            createdAt = new Date(year, month-1, day, hour);
-        // Determine if a new season has started
-        if (entry.playerRank === '1') {
-            if (lastTopPlayerRating !== null && lastTopPlayerRating - skillRating > 300) {
-                seasonMaxSnapshotMap[currentSeason] = snapshotNumber;
-                currentSeason++; // New season detected
-                seasonSnapshotsMap[currentSeason] = [1];
-                seasonFinalRankingMap[currentSeason] = [];
-                snapshotNumber = 1; // Reset snapshot count
-                previousCreatedAt = null;
-            }
-            lastTopPlayerRating = skillRating; // Update the top player rating
-        }
-  
-        // Check if it's a new snapshot
-        if (previousCreatedAt && calculateHoursBetweenDates(previousCreatedAt,createdAt) > 1) {
-            snapshotNumber += incrementSnapshotNumber(previousCreatedAt, createdAt,currentSeason);
-            seasonSnapshotsMap[currentSeason].push(snapshotNumber);
-            currentSnapshotPlayers = [];
-        }
-        previousCreatedAt = createdAt;
-  
-        const username = entry.username;
-        if (!processedData[username]) {
-            processedData[username] = {};
-        }
-        if (!processedData[username][`Season ${currentSeason}`]) {
-            processedData[username][`Season ${currentSeason}`] = [];
-        }
-        // It's possible some players can be on the leaderboard twice. Only add new entry for snapshot if they are not already in this snapshot
-        if (!currentSnapshotPlayers.includes(username)){
-          // Add the entry data to the specific season
-            const userEntry = {
-              countryCode: entry.countryCode,
-              division: parseInt(entry.division),
-              playerRank: parseInt(entry.playerRank),
-              skillRating: skillRating,
-              totalGamesPlayed: parseInt(entry.totalGamesPlayed),
-              winRate: parseFloat(entry.winRate),
-              snapshotNumber: snapshotNumber,
-              createdAt: entry.created_at,
-              flagURL: getTwemojiFlagURL(entry.countryCode)
-          };
-          processedData[username][`Season ${currentSeason}`].push(userEntry);
 
-          if (entry.finalSnapshot === "1"){
-            seasonFinalRankingMap[currentSeason].push(entry);
-          }
-  
-          currentSnapshotPlayers.push(username);
+        if (entry.created_at) {
+            createdAt = new Date(entry.created_at);
+
+            if (entry.playerRank === '1') {
+                if (lastTopPlayerRating !== null && lastTopPlayerRating - skillRating > 300) {
+                    seasonMaxSnapshotMap[currentSeason] = snapshotNumber;
+                    currentSeason++;
+                    seasonSnapshotsMap[currentSeason] = [1];
+                    seasonFinalRankingMap[currentSeason] = [];
+                    snapshotNumber = 1;
+                    previousCreatedAt = null;
+                }
+                lastTopPlayerRating = skillRating;
+            }
+
+            if (previousCreatedAt && calculateHoursBetweenDates(previousCreatedAt, createdAt) > 1) {
+                snapshotNumber += incrementSnapshotNumber(previousCreatedAt, createdAt, currentSeason);
+                seasonSnapshotsMap[currentSeason].push(snapshotNumber);
+                currentSnapshotPlayers.clear();
+            }
+            previousCreatedAt = createdAt;
+
+            const username = entry.username;
+            if (!processedData[username]) processedData[username] = {};
+            if (!processedData[username][`Season ${currentSeason}`]) {
+                processedData[username][`Season ${currentSeason}`] = [];
+            }
+
+            if (!currentSnapshotPlayers.has(username)) {
+                processedData[username][`Season ${currentSeason}`].push({
+                    countryCode: entry.countryCode,
+                    division: parseInt(entry.division, 10),
+                    playerRank: parseInt(entry.playerRank, 10),
+                    skillRating,
+                    totalGamesPlayed: parseInt(entry.totalGamesPlayed, 10),
+                    winRate: parseFloat(entry.winRate),
+                    snapshotNumber,
+                    createdAt: entry.created_at,
+                    flagURL: getTwemojiFlagURL(entry.countryCode)
+                });
+
+                if (entry.finalSnapshot === "1") {
+                    seasonFinalRankingMap[currentSeason].push(entry);
+                }
+
+                currentSnapshotPlayers.add(username);
+            }
+        } else {
+            seasonMaxSnapshotMap[currentSeason] = snapshotNumber;
         }
-    } else {
-        seasonMaxSnapshotMap[currentSeason] = snapshotNumber;
-    }
     });
+
     return {
         fileData: processedData,
         fileMaxSnapshotMap: seasonMaxSnapshotMap,
         fileSeasonsSnapshotsMap: seasonSnapshotsMap,
         fileSeasonFinalRankingMap: seasonFinalRankingMap
     };
-  };
+};
 
   const incrementSnapshotNumber = (previousCreatedAt, createdAt, currentSeason) => {
     let hoursDifference = calculateHoursBetweenDates(previousCreatedAt, createdAt);

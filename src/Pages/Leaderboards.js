@@ -35,10 +35,10 @@ const LeaderBoards = () => {
 
     const retrieveChartDataFromStore = () => {
         setTimeout(() => {
-            if (store.oneOnOneData && store.oneOnOneSeasonFinalRankingMap && activeGameMode === '1v1') {
+            if (store.oneOnOneSeasonFinalRankingMap && activeGameMode === '1v1') {
                 setPlayers(store.oneOnOneSeasonFinalRankingMap[season] || []);
                 setFetchingData(false);
-            } else if (store.baseData && store.baseSeasonFinalRankingMap && activeGameMode === '4 Player') {
+            } else if (store.baseSeasonFinalRankingMap && activeGameMode === '4 Player') {
                 setPlayers(store.baseSeasonFinalRankingMap[season] || []);
                 setFetchingData(false);
             }

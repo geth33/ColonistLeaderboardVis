@@ -40,7 +40,7 @@ class Store {
       // Flush Base data before downloading 1v1 data to keep mobile memory low
       this.clearBaseData();
 
-      readDataFromFile('https://storage.googleapis.com/leaderboard_files/csvs/leaderboards_oneOnOne.csv')
+      readDataFromFile('https://storage.googleapis.com/leaderboard_files/exported_csvs/oneOnOne_all_data.csv')
         .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap, fileSeasonFinalRankingMap }) => {
           runInAction(() => {
             this.oneOnOneData = fileData;
@@ -60,7 +60,7 @@ class Store {
       // Flush 1v1 data before downloading Base data to keep mobile memory low
       this.clearOneOnOneData();
 
-      readDataFromFile('https://storage.googleapis.com/leaderboard_files/csvs/leaderboards_base.csv')
+      readDataFromFile('https://storage.googleapis.com/leaderboard_files/exported_csvs/base_all_data.csv')
         .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap, fileSeasonFinalRankingMap }) => {
           runInAction(() => {
             this.baseData = fileData;

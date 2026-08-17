@@ -1,5 +1,4 @@
 export default {
-
   notablePlayersMap: {
     // PLAYERS WITH PICTURES
     'rayman200': {
