@@ -117,6 +117,10 @@ const processPlayerData = (data) => {
         }
     });
 
+    console.log(processedData);
+    console.log(seasonMaxSnapshotMap);
+    console.log(seasonSnapshotsMap);
+
     return {
         fileData: processedData,
         fileMaxSnapshotMap: seasonMaxSnapshotMap,
@@ -127,7 +131,7 @@ const processPlayerData = (data) => {
 
   const incrementSnapshotNumber = (previousCreatedAt, createdAt, currentSeason) => {
     let hoursDifference = calculateHoursBetweenDates(previousCreatedAt, createdAt);
-    return Math.max(1, hoursDifference/12);
+    return Math.round(Math.max(1, hoursDifference/12));
   }
 
   export const getTwemojiFlagURL = (countryCode) => {
