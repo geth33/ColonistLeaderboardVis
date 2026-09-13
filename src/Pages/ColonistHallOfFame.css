@@ -1,0 +1,387 @@
+.App {
+    overflow: hidden;
+    height: 100%;
+}
+
+/* STREAMING_CHUNK:Styling main stage container and layout... */
+.stage-wrapper {
+  position: relative;
+  width: 100vw;
+  height: 100%;
+  background-color: #050505;
+  color: #ffffff;
+  display: flex;
+      min-height: 100vh;
+  /* flex-direction: column;
+  align-items: flex-start; */
+  justify-content: center;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+body {
+  overflow-x: hidden;
+    overflow-y: visible;
+}
+
+.leaderboardRow {
+    display: flex;
+    justify-content: space-evenly;
+    z-index: 5;
+}
+
+.leaderboardRows {
+    display: none;
+    min-width: 80%;
+}
+.leaderboardRows.visible {
+    display: block;
+}
+
+.leaderboardsRow1 {
+    margin-top: 3em;
+}
+.leaderboardsRow2 {
+    margin-top: 5em;
+}
+.leaderboardsRow3 {
+    margin-top: 5em;
+}
+.leaderboardsRow4 {
+    margin-top: 5em;
+}
+
+/* =========================================
+   TOP LIGHTS (hangingLight.png)
+   ========================================= */
+.top-light {
+  position: absolute;
+  top: 0;
+  width: 250px; /* Adjust as needed */
+  height: 250px; /* Adjust as needed */
+  background-image: url("../../public/img/hangingLight.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.top-light.visible {
+  opacity: 0.85; /* Adjust visibility opacity */
+}
+
+/* Position top left light */
+.top-light-left {
+    top: -110px;
+  left: 0px; /* Adjust this value to shift right/inwards (e.g., 50px, 100px, 5%) */
+  background-position: top left;
+  transform-origin: top left; /* Keeps scaling anchored cleanly from the top-left corner */
+    transform: scale(2);
+}
+
+/* Position top right light & flip horizontally */
+.top-light-right {
+    top: -110px;
+  right: 500px; /* Adjust this value to shift left/inwards (e.g., 50px, 100px, 5%) */
+  background-position: top right;
+  transform: scale(2) scaleX(-1);
+  transform-origin: top right; /* Keeps scaling anchored cleanly from the top-right corner */
+}
+
+.colonistHallOfFame {
+    opacity: 0;
+  margin-top: 2em;
+  display: flex;
+  width: 320px;
+  justify-content: space-between;
+}
+
+.colonistHallOfFame.visible {
+    opacity: 1;
+}
+
+.title-stage {
+  position: relative;
+  padding: 20px 0px 0 0px;
+  margin-top: calc(10vh - 50px);
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.main-title {
+  position: relative; /* Maintain relative positioning within title-stage context */
+  z-index: 3; /* Ensure title is on top */
+  font-size: 4rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  margin-bottom: 0.2em;
+}
+
+.subtitle {
+  position: relative;
+  z-index: 2;
+  font-size: 1.5rem;
+  color: #689bff;
+  margin-top: 0em;
+  opacity: 0;
+  letter-spacing: 4px;
+  transition: opacity 1s ease-in-out;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+}
+
+.main-title.visible,
+.subtitle.visible {
+  opacity: 1;
+}
+
+.limo-position-wrapper {
+  position: absolute;
+  top: calc(4rem + 5em);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: 1;
+}
+
+.limo-position-wrapper.visible {
+  opacity: 0.15;
+}
+
+.limo-container {
+  width: 1106px;
+  height: 260px;
+
+  /* Background Properties */
+  background-image: url("../../public/img/limo.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+
+  /* 3. FLIP THE LIMO IMAGE HORIZONTALLY */
+  transform: scale(0.7) scaleX(-1);
+}
+
+.redCarpet-position-wrapper {
+  position: absolute;
+  top: calc(4rem + 100em);
+  left: 49%;
+  transform: translateX(-50%);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+  z-index: -1;
+}
+
+.redCarpet-position-wrapper.visible {
+  opacity: 0.15;
+}
+
+.redCarpet-container {
+  width: 1106px;
+  height: 260px;
+
+  /* Background Properties */
+  background-image: url("../../public/img/redCarpet.png");
+  background-repeat: no-repeat;
+  background-size: contain;
+  background-position: center;
+  transform: scale(6.5);
+}
+
+/* STREAMING_CHUNK:Styling paparazzi borders and scaling... */
+.paparazzi-border {
+  position: absolute;
+  top: 60%;
+  bottom: 0;
+  width: 200px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 1s ease-in-out;
+  transform: scale(3);
+}
+
+.paparazzi-border.visible {
+  opacity: 0.12;
+}
+
+.paparazzi-left {
+  left: 0;
+}
+
+.paparazzi-right {
+  right: 0;
+}
+
+/* Base style for individual stacked tiles */
+.paparazzi-tile {
+  width: 180px;
+  height: auto;
+  flex-shrink: 0;
+  margin-bottom: 20px;
+}
+
+/* Left side: Rotated -90 degrees */
+.paparazzi-left .paparazzi-tile {
+  transform: rotate(-90deg);
+}
+
+/* Right side: Rotated +90 degrees */
+.paparazzi-right .paparazzi-tile {
+  transform: rotate(90deg);
+}
+
+/* Stage Lights Cones */
+.light-cone {
+  position: fixed; /* Changed from absolute to fixed to keep anchored to viewport bottom */
+  bottom: -20px;
+  width: 400px;
+  height: 1200px;
+  background: linear-gradient(
+    to top,
+    rgba(255, 240, 200, 0.4) 0%,
+    rgba(255, 240, 200, 0.15) 50%,
+    transparent 100%
+  );
+  clip-path: polygon(0% 0%, 100% 0%, 52% 100%, 48% 100%);
+  filter: blur(15px);
+  pointer-events: none;
+  z-index: 1;
+  transform-origin: bottom center;
+  transition: opacity 2s ease;
+}
+
+.light-left {
+  left: -100px;
+  transform: rotate(35deg);
+  animation: sweepLeft 1.2s infinite alternate ease-in-out;
+}
+
+.light-right {
+  right: -100px;
+  transform: rotate(-35deg);
+  animation: sweepRight 1.2s infinite alternate ease-in-out;
+}
+
+.light-cone.dimmed {
+  opacity: 0;
+}
+
+@keyframes sweepLeft {
+  0% {
+    transform: rotate(30deg);
+  }
+  100% {
+    transform: rotate(40deg);
+  }
+}
+
+@keyframes sweepRight {
+  0% {
+    transform: rotate(-30deg);
+  }
+  100% {
+    transform: rotate(-40deg);
+  }
+}
+
+/* Cross-flare Lens System */
+.lens-flare-assembly {
+  position: absolute;
+  pointer-events: none;
+  z-index: 10;
+  transform: translate(-50%, -50%);
+  width: 1px;
+  height: 1px;
+  animation: flareFade 0.225s ease-out forwards;
+}
+
+.flare-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.9);
+}
+
+.flare-streak-h {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 360px;
+  height: 3px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.8) 20%,
+    rgba(240, 240, 240, 0.3) 50%,
+    transparent 95%
+  );
+  filter: blur(0.5px);
+}
+
+.flare-streak-v {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 3px;
+  height: 180px;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.8) 20%,
+    rgba(240, 240, 240, 0.3) 50%,
+    transparent 95%
+  );
+  filter: blur(0.5px);
+}
+
+@keyframes flareFade {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.2);
+  }
+  25% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.3);
+  }
+}
+
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 1s ease-out, transform 1s ease-out;
+}
+
+/* Revealed state triggered when scrolled into view */
+.scroll-reveal.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}

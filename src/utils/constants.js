@@ -325,5 +325,21 @@ export default {
         'Rank #317 in Season 5',
       ]
     },
-  }
+  },
+  testHallOfFameLeaderboard : [
+    {rank: 1, name: 'Dashed', value: 4},
+    {rank: 2, name: 'KillaKarisma', value: 3},
+    {rank: 3, name: 'Ghajni', value: 2},
+    {rank: 4, name: 'Derse', value: 1},
+    {rank: 5, name: 'Hawkeye', value: 1},
+    {rank: 6, name: 'itsOKK', value: 1},
+    {rank: 7, name: 'Rayman200', value: 1},
+    {rank: 8, name: 'ThePhantom', value: 0},
+    {rank: 9, name: 'DudeNolann', value: 0},
+    {rank: 10, name: 'Griff1n', value: 0},
+    {rank: 11, name: 'Eyesick', value: 0},
+    {rank: 12, name: 'Karmo', value: 0},
+    {rank: 13, name: 'TofuTyrant', value: 0},
+    {rank: 14, name: 'Squashhh', value: 0},
+  ]
 };

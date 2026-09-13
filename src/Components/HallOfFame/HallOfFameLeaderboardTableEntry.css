@@ -1,0 +1,8 @@
+.hallOfFameLeaderboardTableEntry > td{
+    margin:0;
+    padding: 2.5px 0px;
+}
+
+td {
+    border-bottom: 0.5px solid white;
+}

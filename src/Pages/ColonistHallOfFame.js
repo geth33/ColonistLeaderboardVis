@@ -1,16 +1,87 @@
 import React, { useState, useEffect, useRef } from 'react';
+import './ColonistHallOfFame.css';
+import constants from '../utils/constants';
+import GameModeOption from '../Components/ColonistLeaderboard/GameModeOption';
+import HallOfFameLeaderboard from '../Components/HallOfFame/HallOfFameLeaderboard';
+import PeakEloChart from '../Components/HallOfFame/PeakEloChart';
 
 export default function StageIntro({ titleText = "" }) {
   const [titleVisible, setTitleVisible] = useState(false);
   const [isDimmed, setIsDimmed] = useState(false);
+  const [activeGameMode, setActiveGameMode] = useState("1v1");
+  
+  // Track visibility states for rows 2, 3, and 4
+  const [row2Visible, setRow2Visible] = useState(false);
+  const [row3Visible, setRow3Visible] = useState(false);
+  const [row4Visible, setRow4Visible] = useState(false);
+
+  const { testHallOfFameLeaderboard } = constants;
+
   const stageRef = useRef(null);
 
-  // Dynamic flash frequency in ms (halved initial interval)
-  const flashFrequencyRef = useRef(225);
+  // Refs for scroll observer targets
+  const row2Ref = useRef(null);
+  const row3Ref = useRef(null);
+  const row4Ref = useRef(null);
 
+  // Dynamic timing refs to control rate changes without component re-renders
+  const titleFlashFreqRef = useRef(225);
+  const leftFlashFreqRef = useRef(333);   // ~3 flashes per second
+  const rightFlashFreqRef = useRef(333);  // ~3 flashes per second
+
+  // Array to generate stacked tiles down the page borders
+  const tileArray = Array.from({ length: 10 });
+
+  // 1. Scroll Observer for Rows 2-4
   useEffect(() => {
-    let timeoutId;
+    const observerOptions = {
+      root: null, // Default viewport
+      rootMargin: '0px 0px -50px 0px', // Triggers slightly before reaching bottom
+      threshold: 0.15 // Triggers when 15% of row is visible
+    };
 
+    const handleIntersect = (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          if (entry.target === row2Ref.current) setRow2Visible(true);
+          if (entry.target === row3Ref.current) setRow3Visible(true);
+          if (entry.target === row4Ref.current) setRow4Visible(true);
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(handleIntersect, observerOptions);
+
+    if (row2Ref.current) observer.observe(row2Ref.current);
+    if (row3Ref.current) observer.observe(row3Ref.current);
+    if (row4Ref.current) observer.observe(row4Ref.current);
+
+    return () => observer.disconnect();
+  }, [titleVisible]);
+
+  // 2. Camera Flares and Initial Timers
+  useEffect(() => {
+    let titleTimeoutId;
+    let leftTimeoutId;
+    let rightTimeoutId;
+
+    const spawnFlare = (x, y) => {
+      const flash = document.createElement('div');
+      flash.className = 'lens-flare-assembly';
+      flash.style.left = `${x}px`;
+      flash.style.top = `${y}px`;
+
+      flash.innerHTML = `
+        <div class="flare-core"></div>
+        <div class="flare-streak-h"></div>
+        <div class="flare-streak-v"></div>
+      `;
+
+      document.body.appendChild(flash);
+      setTimeout(() => flash.remove(), 500);
+    };
+
+    // 1. Title Perimeter Flashes
     const triggerPerimeterFlash = () => {
       if (!stageRef.current) return;
 
@@ -41,218 +112,158 @@ export default function StageIntro({ titleText = "" }) {
           y = rect.top;
       }
 
-      // Create Lens Flare Assembly Container
-      const flash = document.createElement('div');
-      flash.className = 'lens-flare-assembly';
-      flash.style.left = `${x}px`;
-      flash.style.top = `${y}px`;
-
-      // Compact core with strong horizontal & vertical cross-flares
-      flash.innerHTML = `
-        <div class="flare-core"></div>
-        <div class="flare-streak-h"></div>
-        <div class="flare-streak-v"></div>
-      `;
-
-      document.body.appendChild(flash);
-
-      // Halved cleanup timer (225ms instead of 450ms)
-      setTimeout(() => flash.remove(), 500);
+      spawnFlare(x, y);
     };
 
-    const flashLoop = () => {
+    // 2. Left Paparazzi Flashes
+    const triggerLeftPaparazziFlash = () => {
+      const winWidth = window.innerWidth;
+      const winHeight = window.innerHeight;
+
+      const x = Math.random() * (winWidth * 0.15);
+      const y = (winHeight * 0.35) + Math.random() * (winHeight * 0.65);
+
+      spawnFlare(x, y);
+    };
+
+    // 3. Right Paparazzi Flashes
+    const triggerRightPaparazziFlash = () => {
+      const winWidth = window.innerWidth;
+      const winHeight = window.innerHeight;
+
+      const x = (winWidth * 0.85) + Math.random() * (winWidth * 0.10);
+      const y = (winHeight * 0.35) + Math.random() * (winHeight * 0.65);
+
+      spawnFlare(x, y);
+    };
+
+    const titleFlashLoop = () => {
       triggerPerimeterFlash();
-      timeoutId = setTimeout(flashLoop, flashFrequencyRef.current);
+      titleTimeoutId = setTimeout(titleFlashLoop, titleFlashFreqRef.current);
     };
 
-    flashLoop();
+    const leftFlashLoop = () => {
+      triggerLeftPaparazziFlash();
+      leftTimeoutId = setTimeout(leftFlashLoop, leftFlashFreqRef.current);
+    };
 
-    // Fade title and slow down flashes after 1.25s (halved from 2.5s)
+    const rightFlashLoop = () => {
+      triggerRightPaparazziFlash();
+      rightTimeoutId = setTimeout(rightFlashLoop, rightFlashFreqRef.current);
+    };
+
+    titleFlashLoop();
+
     const transitionTimer = setTimeout(() => {
       setTitleVisible(true);
       setIsDimmed(true);
-      flashFrequencyRef.current = 2250; // Seldom ambient flashes
+
+      titleFlashFreqRef.current = 8000;
+
+      leftFlashFreqRef.current = 333;
+      rightFlashFreqRef.current = 333;
+      leftFlashLoop();
+      rightFlashLoop();
+
+      const slowPaparazziTimer = setTimeout(() => {
+        leftFlashFreqRef.current = 1700;
+        rightFlashFreqRef.current = 2000;
+      }, 2000);
+
+      return () => clearTimeout(slowPaparazziTimer);
     }, 2000);
 
     return () => {
-      clearTimeout(timeoutId);
+      clearTimeout(titleTimeoutId);
+      clearTimeout(leftTimeoutId);
+      clearTimeout(rightTimeoutId);
       clearTimeout(transitionTimer);
     };
   }, []);
 
   return (
     <div className="stage-wrapper">
-      <style>{`
-        .stage-wrapper {
-          position: relative;
-          width: 100vw;
-          height: 100vh;
-          background-color: #050505;
-          color: #ffffff;
-          overflow: hidden;
-          display: flex;
-          align-items: flex-start;
-          justify-content: center;
-          font-family: system-ui, -apple-system, sans-serif;
-        }
 
-        .title-stage {
-          position: relative;
-          padding: 20px 60px;
-          /* Adjusted to move the title ~50px higher */
-          margin-top: calc(10vh - 50px);
-          z-index: 2;
-        }
+      {/* Left Paparazzi Strip */}
+      <div className={`paparazzi-border paparazzi-left ${titleVisible ? 'visible' : ''}`}>
+        {tileArray.map((_, index) => (
+          <img
+            key={`pap-left-${index}`}
+            src="/img/paparazzi.png"
+            alt="Paparazzi"
+            className="paparazzi-tile"
+          />
+        ))}
+      </div>
 
-        .main-title {
-          font-size: 4rem;
-          letter-spacing: 4px;
-          text-transform: uppercase;
-          opacity: 0;
-          /* Halved title fade duration (1s) */
-          transition: opacity 1s ease-in-out;
-          text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-        }
+      {/* Right Paparazzi Strip */}
+      <div className={`paparazzi-border paparazzi-right ${titleVisible ? 'visible' : ''}`}>
+        {tileArray.map((_, index) => (
+          <img
+            key={`pap-right-${index}`}
+            src="/img/paparazzi.png"
+            alt="Paparazzi"
+            className="paparazzi-tile"
+          />
+        ))}
+      </div>
 
-        .main-title.visible {
-          opacity: 1;
-        }
-
-        /* Stage Lights Cones */
-        .light-cone {
-          position: absolute;
-          bottom: -100px;
-          width: 0;
-          height: 0;
-          border-left: 150px solid transparent;
-          border-right: 150px solid transparent;
-          border-bottom: 1200px solid rgba(255, 240, 200, 0.15);
-          filter: blur(30px);
-          pointer-events: none;
-          z-index: 1;
-          transform-origin: bottom center;
-          /* Halved dimming transition (0.75s) */
-          transition: opacity 2s ease;
-        }
-
-        .light-left {
-          left: -50px;
-          transform: rotate(48deg);
-          /* Halved sweep speed (0.75s) */
-          animation: sweepLeft 1.2s infinite alternate ease-in-out;
-        }
-
-        .light-right {
-          right: -50px;
-          transform: rotate(-48deg);
-          /* Halved sweep speed (0.75s) */
-          animation: sweepRight 1.2s infinite alternate ease-in-out;
-        }
-
-        .light-cone.dimmed {
-          opacity: 0.05;
-        }
-
-        @keyframes sweepLeft {
-          0% { transform: rotate(42deg); }
-          100% { transform: rotate(48deg); }
-        }
-
-        @keyframes sweepRight {
-          0% { transform: rotate(-42deg); }
-          100% { transform: rotate(-48deg); }
-        }
-
-        /* =========================================
-           CROSS-FLARE LENS SYSTEM (NO BIG CIRCLE)
-           ========================================= */
-        .lens-flare-assembly {
-          position: absolute;
-          pointer-events: none;
-          z-index: 10;
-          transform: translate(-50%, -50%);
-          width: 1px;
-          height: 1px;
-          /* Halved flash animation duration (0.225s) */
-          animation: flareFade 0.225s ease-out forwards;
-        }
-
-        /* Very Small Pinpoint White Center */
-        .flare-core {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 14px;
-          height: 14px;
-          transform: translate(-50%, -50%);
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 1);
-          box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.9);
-        }
-
-        /* Primary Horizontal Flare Streak */
-        .flare-streak-h {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 360px;
-          height: 3px;
-          transform: translate(-50%, -50%);
-          background: radial-gradient(ellipse at center,
-            rgba(255, 255, 255, 1) 0%,
-            rgba(255, 255, 255, 0.8) 20%,
-            rgba(240, 240, 240, 0.3) 50%,
-            transparent 95%
-          );
-          filter: blur(0.5px);
-        }
-
-        /* Primary Vertical Flare Streak */
-        .flare-streak-v {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          width: 3px;
-          height: 180px;
-          transform: translate(-50%, -50%);
-          background: radial-gradient(ellipse at center,
-            rgba(255, 255, 255, 1) 0%,
-            rgba(255, 255, 255, 0.8) 20%,
-            rgba(240, 240, 240, 0.3) 50%,
-            transparent 95%
-          );
-          filter: blur(0.5px);
-        }
-
-        /* Fast Assembly Fade & Scale */
-        @keyframes flareFade {
-          0% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(0.2);
-          }
-          25% {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1.1);
-          }
-          100% {
-            opacity: 0;
-            transform: translate(-50%, -50%) scale(1.3);
-          }
-        }
-      `}</style>
+      {/* Top Hanging Stage Lights */}
+      <div className={`top-light top-light-left ${titleVisible ? 'visible' : ''}`} />
+      <div className={`top-light top-light-right ${titleVisible ? 'visible' : ''}`} />
 
       {/* Stage Lights */}
       <div className={`light-cone light-left ${isDimmed ? 'dimmed' : ''}`} />
       <div className={`light-cone light-right ${isDimmed ? 'dimmed' : ''}`} />
 
       {/* Title Target Container */}
-      <div className="title-stage" ref={stageRef}>
-        <h1 className={`main-title ${titleVisible ? 'visible' : ''}`}>
+      <div className="title-stage">
+
+        {/* 1. Main Title */}
+        <h1 className={`main-title ${titleVisible ? 'visible' : ''}`} ref={stageRef}>
           Hall of Fame
         </h1>
+
+        {/* 2. Limousine */}
+        <div className={`limo-position-wrapper ${titleVisible ? 'visible' : ''}`}>
+          <div className="limo-container"></div>
+        </div>
+
+        <div className={`redCarpet-position-wrapper ${titleVisible ? 'visible' : ''}`}>
+          <div className="redCarpet-container"></div>
+        </div>
+
+        {/* 3. Subtitle */}
+        <h2 className={`subtitle ${titleVisible ? 'visible' : ''}`}>
+          -- Colonist Leaderboards --
+        </h2>
+
+        <div className='mode-selector-container'>
+          <div className={`colonistHallOfFame ${titleVisible ? 'visible' : ''}`}>
+            <GameModeOption img="/img/1v1.png" title="1v1" active={activeGameMode === '1v1'} setActiveGameMode={setActiveGameMode} displayBackground={true}/>
+            <GameModeOption img="/img/4player.png" title="4P" active={activeGameMode === '4P'} setActiveGameMode={setActiveGameMode} displayBackground={true}/>
+          </div>
+        </div>
+
+        <div className={`leaderboardRows ${titleVisible ? 'visible' : ''}`}>
+          {/* Row 1 reveals automatically with the main transition */}
+          <div className='leaderboardRow leaderboardsRow1'>
+            <HallOfFameLeaderboard title={'TIME IN FIRST'} leaderboardEntries={testHallOfFameLeaderboard} />
+            <HallOfFameLeaderboard title={'RANK 1 FINISHES'} leaderboardEntries={testHallOfFameLeaderboard} />
+          </div>
+
+          <div ref={row2Ref} className={`leaderboardRow leaderboardsRow2 scroll-reveal ${row2Visible ? 'revealed' : ''}`}>
+            <PeakEloChart/>
+          </div>
+
+          <div ref={row3Ref} className={`leaderboardRow leaderboardsRow3 scroll-reveal ${row3Visible ? 'revealed' : ''}`}>
+            <HallOfFameLeaderboard title={'Highest Ratings'} leaderboardEntries={testHallOfFameLeaderboard} />
+            <HallOfFameLeaderboard title={'Highest Win Rates'} leaderboardEntries={testHallOfFameLeaderboard} />
+          </div>
+
+        </div>
+
       </div>
     </div>
   );
 }
-
-

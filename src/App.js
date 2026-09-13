@@ -138,9 +138,9 @@ function Navigation() {
         </List>
       </Collapse>
 
-      <ListItemButton component={Link} to="/faq" onClick={handleDrawerToggle}>
+      {/* <ListItemButton component={Link} to="/faq" onClick={handleDrawerToggle}>
         <ListItemText primary="FAQ" />
-      </ListItemButton>
+      </ListItemButton> */}
 
       <ListItemButton
         component="a"
@@ -264,14 +264,14 @@ function Navigation() {
                   </MenuItem>
                 </Menu>
 
-                <Button
+                {/* <Button
                   color="inherit"
                   component={Link}
                   to="/faq"
                   sx={{ color: 'white', fontWeight: 'bold' }}
                 >
                   FAQ
-                </Button>
+                </Button> */}
 
                 <Button
                   color="inherit"
@@ -306,7 +306,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/leaderboards" element={<Leaderboards />} />
           <Route path="/colonist/hallOfFame" element={<ColonistHallOfFame type="colonist"/>} />
-          <Route path="/faq" element={<FAQ />} />
+          {/* <Route path="/faq" element={<FAQ />} /> */}
           {/* Add Duel Division & Colonist Hall of Fame routes here */}
         </Routes>
       </div>

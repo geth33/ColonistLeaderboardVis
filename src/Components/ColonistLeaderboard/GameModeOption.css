@@ -7,7 +7,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    color: #fff;
     font-size: 1rem;
 }
 
@@ -20,6 +19,8 @@
     border-radius: 8px;
     cursor: pointer;
     padding: 8px 20px;
+    z-index: 4;
+    color: #fff;
 }
 
 .gameModeOption:hover {
@@ -29,6 +30,35 @@
 .active {
     background: rgba(0,0,0,.2);
 }
+
+.displayBackground {
+    background: white;
+    border-radius: 60px;
+    max-width: 100px;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+}
+
+.displayBackground.inactive {
+    opacity: 0.8;
+}
+
+.displayBackground.active {
+    opacity: 1;
+    border: 1px solid #689BFF;
+}
+
+.displayBackground > .optionLabel {
+    font-size: 1.2rem;
+    color: #689BFF;
+    font-weight: bold;
+}
+
+.displayBackground:hover {
+    opacity: 1;
+    background: white;
+}
+
 
 @media (max-width: 600px) {
     .optionImg {

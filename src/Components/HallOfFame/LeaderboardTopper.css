@@ -1,0 +1,81 @@
+.leaderboardTopperContainer {
+    height: 190px;
+    align-content: end;
+}
+.leaderboardTopperName {
+    
+}
+.leaderboardTopperValue {
+
+}
+.goldTopperContainer {
+
+}
+.silverTopperContainer {
+
+}
+.bronzeTopperContainer {
+
+}
+.goldTopper {
+    width: 120px;
+    margin: 0 20px;
+}
+.silverTopper {
+    width: 105px;
+}
+.bronzeTopper {
+    width: 90px;
+    
+}
+.goldTopperText {
+    background: linear-gradient(
+        -180deg,
+        #efd06a 0%,
+        #d8af46 50%,
+        #efd06a 100%
+    );
+    font-family: 'Palatino';
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.45);
+    font-size: 1.5rem;
+    margin: 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: bold;
+}
+.silverTopperText {
+    background: linear-gradient(
+        -180deg,
+        #eceae7 0%,
+        #cecbc6 50%,
+        #eceae7 100%
+    );
+    font-family: 'Palatino';
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.45);
+    font-size: 1.1rem;
+    margin: 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: bold;
+}
+.bronzeTopperText {
+    background: linear-gradient(
+        -180deg,
+        #f6caa0 0%,
+        #ce9065 50%,
+        #f6caa0 100%
+    );
+    font-family: 'Palatino';
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.45);
+    font-size: 1rem;
+    margin: 0;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font-weight: bold;
+}

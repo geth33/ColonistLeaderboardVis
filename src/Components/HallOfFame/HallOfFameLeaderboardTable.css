@@ -1,0 +1,28 @@
+.hallOfFameLeaderboardTable {
+  background: black;
+  margin-top: 2em;
+  width: 85%;
+  margin: 2em auto 0 auto;
+  box-shadow: 0 0 3px 1px white;
+}
+
+.tableContainer {
+  max-height: 180px;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Firefox - Hide scrollbar */
+  scrollbar-width: none;
+
+  /* IE and Edge (Legacy) - Hide scrollbar */
+  -ms-overflow-style: none;
+
+  /* Smooth bottom fade mask to eliminate hard cutoff */
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+/* Chrome, Safari, and Edge (WebKit) - Hide scrollbar */
+.tableContainer::-webkit-scrollbar {
+  display: none;
+}
