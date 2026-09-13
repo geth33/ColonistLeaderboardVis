@@ -42,12 +42,12 @@ body {
 }
 .leaderboardsRow2 {
     margin-top: 5em;
+    display: flex;
+    flex-direction: column;
 }
 .leaderboardsRow3 {
     margin-top: 5em;
-}
-.leaderboardsRow4 {
-    margin-top: 5em;
+    margin-bottom: 5em;
 }
 
 /* =========================================

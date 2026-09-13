@@ -9,7 +9,6 @@ const sampleData = [
   { playerName: 'TofuTyrant', skillRating: 8750, date: '2025-08-02' },
   { playerName: 'TofuTyrant', skillRating: 9100, date: '2026-06-01' },
     { playerName: 'TofuTyrant', skillRating: 9100, date: '2027-06-01' },
-
 ];
 
 const BASE_SEASON_DATE = new Date(2023, 10, 1); // Season 7 (Nov 1, 2023)
