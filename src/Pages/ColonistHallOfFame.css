@@ -38,7 +38,7 @@ body {
 }
 
 .leaderboardsRow1 {
-    margin-top: 3em;
+    margin-top: 7em;
 }
 .leaderboardsRow2 {
     margin-top: 5em;
@@ -170,6 +170,35 @@ body {
 
   /* 3. FLIP THE LIMO IMAGE HORIZONTALLY */
   transform: scale(0.7) scaleX(-1);
+}
+
+.compact-icon-button {
+  padding: 0 !important;
+  margin: 0 !important;
+  height: 16px !important;
+  min-width: auto !important;
+  min-height: auto !important;
+  overflow: hidden !important;
+}
+
+.compact-icon-button .MuiSvgIcon-root {
+  font-size: 1.5rem;
+}
+
+.leaderboardTitle {
+    display: flex;
+    font-size: 2rem;
+    margin-bottom: 0;
+    letter-spacing: 2px;
+    font-family: 'Palatino';
+    text-transform: uppercase;
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+    margin-top: 2em;
+    justify-content: center;
+}
+
+.leaderboardTitle > h3{
+    margin: 0;
 }
 
 .redCarpet-position-wrapper {

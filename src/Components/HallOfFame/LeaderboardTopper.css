@@ -1,6 +1,7 @@
 .leaderboardTopperContainer {
     height: 190px;
     align-content: end;
+    justify-content: center;
 }
 .leaderboardTopperName {
     
@@ -26,7 +27,7 @@
 }
 .bronzeTopper {
     width: 90px;
-    
+    margin: 0 7.5px;
 }
 .goldTopperText {
     background: linear-gradient(

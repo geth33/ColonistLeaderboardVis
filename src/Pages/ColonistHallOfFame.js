@@ -4,16 +4,36 @@ import constants from '../utils/constants';
 import GameModeOption from '../Components/ColonistLeaderboard/GameModeOption';
 import HallOfFameLeaderboard from '../Components/HallOfFame/HallOfFameLeaderboard';
 import PeakEloChart from '../Components/HallOfFame/PeakEloChart';
+import { useStore } from '../Store/storeProvider';
+import InputLabel from '@mui/material/InputLabel';
+import FormControl from '@mui/material/FormControl';
+import NativeSelect from '@mui/material/NativeSelect';
+import {
+  Button,
+  IconButton,
+} from '@mui/material';
+import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
 export default function StageIntro({ titleText = "" }) {
   const [titleVisible, setTitleVisible] = useState(false);
   const [isDimmed, setIsDimmed] = useState(false);
   const [activeGameMode, setActiveGameMode] = useState("1v1");
+  const [finishBracketIndex, setFinishBracketIndex] = useState(0);
+  const [finishBracketOptions, setFinishBracketOptions] = useState(['Rank 1', 'Top 5', 'Top 10', 'Top 100']);
+  const [timeInBracketIndex, setTimeInBracketIndex] = useState(0);
+  const [timeInBracketOptions, setTimeInBracketOptions] = useState(['First', 'Top 5', 'Top 10', 'Top 100']);
+  const [winRateBracketIndex, setWinRateBracketIndex] = useState(0);
+  const [winRateBracketOptions, setWinRateBracketOptions] = useState(['(75+ Games)', '(100+ Games)', '(200+ Games)', '(500+ Games)']);
+
+
   
   // Track visibility states for rows 2, 3, and 4
   const [row2Visible, setRow2Visible] = useState(false);
   const [row3Visible, setRow3Visible] = useState(false);
   const [row4Visible, setRow4Visible] = useState(false);
+
+  const store = useStore();
 
   const { testHallOfFameLeaderboard } = constants;
 
@@ -31,6 +51,26 @@ export default function StageIntro({ titleText = "" }) {
 
   // Array to generate stacked tiles down the page borders
   const tileArray = Array.from({ length: 10 });
+
+  useEffect(() => {
+    store.loadOneOnOneHallOfFameData();
+  }, []);
+
+  useEffect(() => {
+      retrieveChartDataFromStore();
+    }, [
+      store.oneOnOneFinishesTop1,
+      store.oneOnOneFinishesTop5,
+      store.oneOnOneFinishesTop10,
+      store.oneOnOneFinishesTop100,
+      store.oneOnOnePeakSkillRatings
+    ]);
+  
+    const retrieveChartDataFromStore = () => {
+      setTimeout(() => {
+        
+      }, 0);
+    }
 
   // 1. Scroll Observer for Rows 2-4
   useEffect(() => {
@@ -248,18 +288,68 @@ export default function StageIntro({ titleText = "" }) {
         <div className={`leaderboardRows ${titleVisible ? 'visible' : ''}`}>
           {/* Row 1 reveals automatically with the main transition */}
           <div className='leaderboardRow leaderboardsRow1'>
-            <HallOfFameLeaderboard title={'TIME IN FIRST'} leaderboardEntries={testHallOfFameLeaderboard} />
-            <HallOfFameLeaderboard title={'RANK 1 FINISHES'} leaderboardEntries={testHallOfFameLeaderboard} />
+            <div className='leaderboardModule'>
+              <div className='leaderboardTitle'>
+                <h3>Highest Ratings</h3>
+              </div>
+              <HallOfFameLeaderboard leaderboardEntries={store && store.oneOnOnePeakSkillRatings ? store.oneOnOnePeakSkillRatings : testHallOfFameLeaderboard} property={'skillRating'}/>
+            </div>
+            <div className='leaderboardModule'>
+              <div className='leaderboardTitle'>
+                <h3><span>{finishBracketOptions[finishBracketIndex]}</span> Finishes</h3>
+                <div style={{display:'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                  <IconButton color="inherit" edge="end" className="compact-icon-button" onClick={() => {setFinishBracketIndex(finishBracketIndex - 1 >= 0 ? finishBracketIndex - 1 : 0)}}>
+                    <KeyboardArrowUpIcon />
+                  </IconButton>
+                  <IconButton color="inherit" edge="end" className="compact-icon-button" onClick={() => {setFinishBracketIndex(finishBracketIndex + 1 <= 3 ? finishBracketIndex + 1 : 3)}}>
+                    <KeyboardArrowDownIcon />
+                  </IconButton>
+                </div>
+              </div>
+              <HallOfFameLeaderboard leaderboardEntries={store && store.oneOnOneFinishes && store.oneOnOneFinishes.length > 0 ? store.oneOnOneFinishes[finishBracketIndex] : testHallOfFameLeaderboard} property={'appearances'}/>
+            </div>            
           </div>
 
           <div ref={row2Ref} className={`leaderboardRow leaderboardsRow2 scroll-reveal ${row2Visible ? 'revealed' : ''}`}>
-            <h3 className='hallOfFameLeaderboardTitle'>Highest Rating Over Time</h3>
+            <div className='leaderboardTitle'>
+              <h3 className='hallOfFameLeaderboardTitle'>Rating Record Over Time</h3>
+            </div>
             <PeakEloChart/>
           </div>
 
           <div ref={row3Ref} className={`leaderboardRow leaderboardsRow3 scroll-reveal ${row3Visible ? 'revealed' : ''}`}>
-            <HallOfFameLeaderboard title={'Highest Ratings'} leaderboardEntries={testHallOfFameLeaderboard} />
-            <HallOfFameLeaderboard title={'Highest Win Rates'} leaderboardEntries={testHallOfFameLeaderboard} />
+            <div className='leaderboardModule'>
+              <div className='leaderboardTitle'>
+                <h3><span>DAYS IN {timeInBracketOptions[timeInBracketIndex]}</span></h3>
+                <div style={{display:'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                  <IconButton color="inherit" edge="end" className="compact-icon-button" onClick={() => {setTimeInBracketIndex(timeInBracketIndex - 1 >= 0 ? timeInBracketIndex - 1 : 0)}}>
+                    <KeyboardArrowUpIcon />
+                  </IconButton>
+                  <IconButton color="inherit" edge="end" className="compact-icon-button" onClick={() => {setTimeInBracketIndex(timeInBracketIndex + 1 <= 3 ? timeInBracketIndex + 1 : 3)}}>
+                    <KeyboardArrowDownIcon />
+                  </IconButton>
+                </div>
+              </div>
+              <HallOfFameLeaderboard  leaderboardEntries={store && store.oneOnOneTimeIn && store.oneOnOneTimeIn.length > 0 ? store.oneOnOneTimeIn[timeInBracketIndex] : testHallOfFameLeaderboard} property={'days'}/>
+            </div>
+            <div className='leaderboardModule'>
+              <div className='leaderboardTitle'>
+                  <h3>TOP Win Rates</h3>
+                <div style={{display:'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                  <IconButton color="inherit" edge="end" className="compact-icon-button" onClick={() => {setWinRateBracketIndex(winRateBracketIndex - 1 >= 0 ? winRateBracketIndex - 1 : 0)}}>
+                    <KeyboardArrowUpIcon />
+                  </IconButton>
+                  <IconButton color="inherit" edge="end" className="compact-icon-button" onClick={() => {setWinRateBracketIndex(winRateBracketIndex + 1 <= 3 ? winRateBracketIndex + 1 : 3)}}>
+                    <KeyboardArrowDownIcon />
+                  </IconButton>
+                </div>
+              </div>
+              <div style={{display: 'flex', justifyContent: 'center', fontSize: '1.2rem'}}>
+                <span>{winRateBracketOptions[winRateBracketIndex]}</span>
+              </div>
+
+              <HallOfFameLeaderboard  leaderboardEntries={store && store.oneOnOneWinRates && store.oneOnOneWinRates.length > 0 ? store.oneOnOneWinRates[winRateBracketIndex] : testHallOfFameLeaderboard} property={'winRate'}/>
+            </div>
           </div>
 
         </div>

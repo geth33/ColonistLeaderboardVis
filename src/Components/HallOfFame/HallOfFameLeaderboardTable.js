@@ -3,7 +3,7 @@ import './HallOfFameLeaderboardTable.css';
 import HallOfFameLeaderboardTableEntry from './HallOfFameLeaderboardTableEntry';
 
 
-const HallOfFameLeaderboardTable = ({ entries }) => {
+const HallOfFameLeaderboardTable = ({ entries, property }) => {
   return (
     <div className='tableContainer'>
         <table className='hallOfFameLeaderboardTable'>
@@ -11,8 +11,8 @@ const HallOfFameLeaderboardTable = ({ entries }) => {
                 entries?.map((entry) => (
                     <HallOfFameLeaderboardTableEntry
                         rank={entry.rank}
-                        name={entry.name}
-                        value={entry.value}
+                        name={entry.username}
+                        value={entry[property]}
                     />
                 ))
             }
