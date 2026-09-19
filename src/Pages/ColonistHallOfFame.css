@@ -335,9 +335,9 @@ body {
 
 /* Cross-flare Lens System */
 .lens-flare-assembly {
-  position: absolute;
+  position: fixed; /* Changed from absolute to fixed */
   pointer-events: none;
-  z-index: 10;
+  z-index: 9999;
   transform: translate(-50%, -50%);
   width: 1px;
   height: 1px;
@@ -348,8 +348,8 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 14px;
-  height: 14px;
+  width: 7px;
+  height: 7px;
   transform: translate(-50%, -50%);
   border-radius: 50%;
   background: rgba(255, 255, 255, 1);
@@ -360,7 +360,7 @@ body {
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 360px;
+  width: 180px;
   height: 3px;
   transform: translate(-50%, -50%);
   background: radial-gradient(
@@ -378,7 +378,7 @@ body {
   top: 50%;
   left: 50%;
   width: 3px;
-  height: 180px;
+  height: 90px;
   transform: translate(-50%, -50%);
   background: radial-gradient(
     ellipse at center,
@@ -578,5 +578,8 @@ body {
   }
   .leaderboardTitle > h3{
       font-size: 0.9em;
+  }
+  .recordOverTimeTitle {
+    max-width: 80%;
   }
 }

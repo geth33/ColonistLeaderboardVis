@@ -97,4 +97,10 @@
         width: 85px;
         margin: 0 7.5px;
     }
+    .goldTopperText {
+        font-size: 1.35rem;
+    }
+    .silverTopperText {
+        font-size: 1.05rem;
+    }
 }

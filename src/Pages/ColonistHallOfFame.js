@@ -321,7 +321,7 @@ export default function StageIntro({ titleText = "" }) {
 
           <div ref={row2Ref} className={`leaderboardRow leaderboardsRow2 scroll-reveal ${row2Visible ? 'revealed' : ''}`}>
             <div className='leaderboardTitle'>
-              <h3 className='hallOfFameLeaderboardTitle'>Rating Record Over Time</h3>
+              <h3 className='hallOfFameLeaderboardTitle recordOverTimeTitle'>Rating Record Over Time</h3>
             </div>
             <PeakEloChart/>
           </div>
