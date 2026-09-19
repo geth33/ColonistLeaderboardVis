@@ -41,6 +41,8 @@ export default function StageIntro({ titleText = "" }) {
   const [finishes, setFinishes] = useState(store.oneOnOneFinishes);
   const [timeIn, setTimeIn] = useState(store.oneOnOneTimeIn);
   const [winRates, setWinRates] = useState(store.oneOnOneWinRates);
+  const [chartData, setChartData] = useState(store.oneOnOneRatingRecords);
+
 
   console.log(store?.oneOnOneWinRates);
 
@@ -73,11 +75,14 @@ export default function StageIntro({ titleText = "" }) {
       setPeakSkillRatings(store.oneOnOnePeakSkillRatings);
       setTimeIn(store.oneOnOneTimeIn);
       setWinRates(store.oneOnOneWinRates);
+      setChartData(store.oneOnOneRatingRecords);
+      console.log(store.oneOnOneRatingRecords);
     } else {
       setFinishes(store.baseFinishes);
       setPeakSkillRatings(store.basePeakSkillRatings);
       setTimeIn(store.baseTimeIn);
       setWinRates(store.baseWinRates);
+      setChartData(store.baseRatingRecords);
     }
   }, [activeGameMode, store.oneOnOneHallOfFameLoaded]);
 
@@ -319,11 +324,12 @@ export default function StageIntro({ titleText = "" }) {
             </div>            
           </div>
 
-          <div ref={row2Ref} className={`leaderboardRow leaderboardsRow2 scroll-reveal ${row2Visible ? 'revealed' : ''}`}>
+          <div ref={row2Ref} className={`leaderboardRow leaderboardsRow2 revealed`}>
             <div className='leaderboardTitle'>
               <h3 className='hallOfFameLeaderboardTitle recordOverTimeTitle'>Rating Record Over Time</h3>
             </div>
-            <PeakEloChart/>
+            {/* Only mount or trigger play once visible */}
+            <PeakEloChart data={chartData} isVisible={row2Visible} />
           </div>
 
           <div ref={row3Ref} className={`leaderboardRow leaderboardsRow3 scroll-reveal ${row3Visible ? 'revealed' : ''}`}>

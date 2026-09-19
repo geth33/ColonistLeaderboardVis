@@ -43,19 +43,11 @@ class Store {
 
   baseHallOfFameLoaded = false;
   baseRatingRecords = null;
-  baseWinRate75Games = null;
-  baseWinRate100Games = null;
-  baseWinRate200Games = null;
-  baseWinRate500Games = null;
-  baseFinishesTop1 = null;
-  baseFinishesTop5 = null;
-  baseFinishesTop10 = null;
-  baseFinishesTop100 = null;
   basePeakSkillRatings = null;
-  baseTimeInTop1 = null;
-  baseTimeInTop5 = null;
-  baseTimeInTop10 = null;
-  baseTimeInTop100 = null;
+  baseTimeIn = null;
+  baseFinishes = null;
+  baseWinRates = null;
+
 
   constructor() {
     // makeAutoObservable automatically sets up actions and observable.ref for non-primitive fields
@@ -69,11 +61,12 @@ class Store {
 
     try {
       // Load all 4 CSV files in parallel
-      const [appearances, peakRatings, timeInRank, winrates] = await Promise.all([
+      const [appearances, peakRatings, timeInRank, winrates, ratingRecords] = await Promise.all([
         fetchAndParseCsv('oneOnOne_appearances_brackets.csv'),
         fetchAndParseCsv('oneOnOne_highest_skill_ratings.csv'),
         fetchAndParseCsv('oneOnOne_time_in_rank_brackets.csv'),
         fetchAndParseCsv('oneOnOne_winrate_brackets.csv'),
+        fetchAndParseCsv('oneOnOne_new_rating_records.csv'),
       ]);
 
       const rankBrackets = ['Top 1', 'Top 5', 'Top 10', 'Top 100'];
@@ -84,6 +77,7 @@ class Store {
         this.oneOnOnePeakSkillRatings = peakRatings;
         this.oneOnOneTimeIn = groupByBrackets(timeInRank, rankBrackets);
         this.oneOnOneWinRates = groupByBrackets(winrates, winBrackets);
+        this.oneOnOneRatingRecords = ratingRecords;
         this.oneOnOneHallOfFameLoaded = true;
       });
     } catch (error) {
@@ -98,11 +92,12 @@ class Store {
 
     try {
       // Load all 4 CSV files in parallel
-      const [appearances, peakRatings, timeInRank, winrates] = await Promise.all([
+      const [appearances, peakRatings, timeInRank, winrates, ratingRecords] = await Promise.all([
         fetchAndParseCsv('base_appearances_brackets.csv'),
         fetchAndParseCsv('base_highest_skill_ratings.csv'),
         fetchAndParseCsv('base_time_in_rank_brackets.csv'),
         fetchAndParseCsv('base_winrate_brackets.csv'),
+        fetchAndParseCsv('base_new_rating_records.csv'),
       ]);
 
       const rankBrackets = ['Top 1', 'Top 5', 'Top 10', 'Top 100'];
@@ -113,6 +108,7 @@ class Store {
         this.basePeakSkillRatings = peakRatings;
         this.baseTimeIn = groupByBrackets(timeInRank, rankBrackets);
         this.baseWinRates = groupByBrackets(winrates, winBrackets);
+        this.baseRatingRecords = ratingRecords;
         this.baseHallOfFameLoaded = true;
       });
     } catch (error) {
