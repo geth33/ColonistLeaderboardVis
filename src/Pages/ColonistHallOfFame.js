@@ -24,7 +24,9 @@ export default function StageIntro({ titleText = "" }) {
   const [timeInBracketIndex, setTimeInBracketIndex] = useState(0);
   const [timeInBracketOptions, setTimeInBracketOptions] = useState(['First', 'Top 5', 'Top 10', 'Top 100']);
   const [winRateBracketIndex, setWinRateBracketIndex] = useState(0);
-  const [winRateBracketOptions, setWinRateBracketOptions] = useState(['(75+ Games)', '(100+ Games)', '(200+ Games)', '(500+ Games)']);
+
+  const [oneOnOneWinRateBracketOptions, setOneOnOneWinRateBracketOptions] = useState(['(75+ Games)', '(100+ Games)', '(200+ Games)', '(500+ Games)']);
+  const [baseWinRateBracketOptions, setBaseWinRateBracketOptions] = useState(['(40+ Games)', '(80+ Games)', '(120+ Games)', '(200+ Games)']);
 
 
   
@@ -34,6 +36,14 @@ export default function StageIntro({ titleText = "" }) {
   const [row4Visible, setRow4Visible] = useState(false);
 
   const store = useStore();
+
+  const [peakSkillRatings, setPeakSkillRatings] = useState(store.oneOnOnePeakSkillRatings);
+  const [finishes, setFinishes] = useState(store.oneOnOneFinishes);
+  const [timeIn, setTimeIn] = useState(store.oneOnOneTimeIn);
+  const [winRates, setWinRates] = useState(store.oneOnOneWinRates);
+
+  console.log(store?.oneOnOneWinRates);
+
 
   const { testHallOfFameLeaderboard } = constants;
 
@@ -54,23 +64,22 @@ export default function StageIntro({ titleText = "" }) {
 
   useEffect(() => {
     store.loadOneOnOneHallOfFameData();
+    store.loadBaseHallOfFameData();
   }, []);
 
   useEffect(() => {
-      retrieveChartDataFromStore();
-    }, [
-      store.oneOnOneFinishesTop1,
-      store.oneOnOneFinishesTop5,
-      store.oneOnOneFinishesTop10,
-      store.oneOnOneFinishesTop100,
-      store.oneOnOnePeakSkillRatings
-    ]);
-  
-    const retrieveChartDataFromStore = () => {
-      setTimeout(() => {
-        
-      }, 0);
+    if (activeGameMode === '1v1') {
+      setFinishes(store.oneOnOneFinishes);
+      setPeakSkillRatings(store.oneOnOnePeakSkillRatings);
+      setTimeIn(store.oneOnOneTimeIn);
+      setWinRates(store.oneOnOneWinRates);
+    } else {
+      setFinishes(store.baseFinishes);
+      setPeakSkillRatings(store.basePeakSkillRatings);
+      setTimeIn(store.baseTimeIn);
+      setWinRates(store.baseWinRates);
     }
+  }, [activeGameMode, store.oneOnOneHallOfFameLoaded]);
 
   // 1. Scroll Observer for Rows 2-4
   useEffect(() => {
@@ -292,7 +301,7 @@ export default function StageIntro({ titleText = "" }) {
               <div className='leaderboardTitle'>
                 <h3>Highest Ratings</h3>
               </div>
-              <HallOfFameLeaderboard leaderboardEntries={store && store.oneOnOnePeakSkillRatings ? store.oneOnOnePeakSkillRatings : testHallOfFameLeaderboard} property={'skillRating'}/>
+              <HallOfFameLeaderboard leaderboardEntries={peakSkillRatings ? peakSkillRatings : testHallOfFameLeaderboard} property={'skillRating'}/>
             </div>
             <div className='leaderboardModule'>
               <div className='leaderboardTitle'>
@@ -306,7 +315,7 @@ export default function StageIntro({ titleText = "" }) {
                   </IconButton>
                 </div>
               </div>
-              <HallOfFameLeaderboard leaderboardEntries={store && store.oneOnOneFinishes && store.oneOnOneFinishes.length > 0 ? store.oneOnOneFinishes[finishBracketIndex] : testHallOfFameLeaderboard} property={'appearances'}/>
+              <HallOfFameLeaderboard leaderboardEntries={finishes && finishes.length > 0 ? finishes[finishBracketIndex] : testHallOfFameLeaderboard} property={'appearances'}/>
             </div>            
           </div>
 
@@ -330,7 +339,7 @@ export default function StageIntro({ titleText = "" }) {
                   </IconButton>
                 </div>
               </div>
-              <HallOfFameLeaderboard  leaderboardEntries={store && store.oneOnOneTimeIn && store.oneOnOneTimeIn.length > 0 ? store.oneOnOneTimeIn[timeInBracketIndex] : testHallOfFameLeaderboard} property={'days'}/>
+              <HallOfFameLeaderboard  leaderboardEntries={timeIn && timeIn.length > 0 ? timeIn[timeInBracketIndex] : testHallOfFameLeaderboard} property={'days'}/>
             </div>
             <div className='leaderboardModule'>
               <div className='leaderboardTitle'>
@@ -345,10 +354,10 @@ export default function StageIntro({ titleText = "" }) {
                 </div>
               </div>
               <div style={{display: 'flex', justifyContent: 'center', fontSize: '1.2rem'}}>
-                <span>{winRateBracketOptions[winRateBracketIndex]}</span>
+                <span>{activeGameMode === '1v1' ? oneOnOneWinRateBracketOptions[winRateBracketIndex] : baseWinRateBracketOptions[winRateBracketIndex]}</span>
               </div>
 
-              <HallOfFameLeaderboard  leaderboardEntries={store && store.oneOnOneWinRates && store.oneOnOneWinRates.length > 0 ? store.oneOnOneWinRates[winRateBracketIndex] : testHallOfFameLeaderboard} property={'winRate'}/>
+              <HallOfFameLeaderboard leaderboardEntries={winRates && winRates.length > 0 ? winRates[winRateBracketIndex] : testHallOfFameLeaderboard} property={'winRate'} suffix={'%'} secondaryProperty={'totalGamesPlayed'} secondarySuffix={'games'}/>
             </div>
           </div>
 

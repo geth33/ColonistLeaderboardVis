@@ -1,257 +1,182 @@
-import { makeObservable, observable, action, runInAction } from 'mobx';
-import { readDataFromFile, readFinalRankingsFromFile } from '../utils/importDataUtils';
+import { makeAutoObservable, runInAction } from 'mobx';
+import { readDataFromFile } from '../utils/importDataUtils';
 import Papa from 'papaparse';
 
+const BASE_URL = 'https://storage.googleapis.com/leaderboard_files/exported_csvs';
+
+// Utility helper to fetch and parse CSV into a Promise
+const fetchAndParseCsv = async (fileName) => {
+  const response = await fetch(`${BASE_URL}/${fileName}`);
+  const csvText = await response.text();
+  return new Promise((resolve, reject) => {
+    Papa.parse(csvText, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => resolve(results.data),
+      error: (err) => reject(err),
+    });
+  });
+};
+
+// Helper to split array items into bracket buckets
+const groupByBrackets = (data, brackets) => 
+  brackets.map(bracket => data.filter(d => d.bracket === bracket));
 
 class Store {
-  // Use observable.ref to prevent MobX from deeply wrapping massive datasets
+  // Observables
   oneOnOneData = null;
   oneOnOneMaxSnapshotMap = null;
   oneOnOneSeasonSnapshotsMap = null;
   oneOnOneSeasonFinalRankingMap = null;
 
-  // oneOnOne Hall of Fame
-  oneOnOneFallOfFameLoaded = false;
-  // Record breaks over time (for line chart)
+  oneOnOneHallOfFameLoaded = false;
   oneOnOneRatingRecords = null;
-  // win rates
   oneOnOneWinRates = null;
-  // final ranking appearances
   oneOnOneFinishes = null;
-  // Peak Skill Ratings
   oneOnOnePeakSkillRatings = null;
-  // Time in brackets
   oneOnOneTimeIn = null;
-
 
   baseData = null;
   baseMaxSnapshotMap = null;
   baseSeasonSnapshotsMap = null;
   baseSeasonFinalRankingMap = null;
 
-  // Base Hall of Fame
-  // base Hall of Fame
-  baseFallOfFameLoaded = false;
-  // Record breaks over time (for line chart)
+  baseHallOfFameLoaded = false;
   baseRatingRecords = null;
-  // win rates
   baseWinRate75Games = null;
   baseWinRate100Games = null;
   baseWinRate200Games = null;
   baseWinRate500Games = null;
-  // final ranking appearances
   baseFinishesTop1 = null;
   baseFinishesTop5 = null;
   baseFinishesTop10 = null;
   baseFinishesTop100 = null;
-  // Peak Skill Ratings
   basePeakSkillRatings = null;
-  // Time in brackets
   baseTimeInTop1 = null;
   baseTimeInTop5 = null;
   baseTimeInTop10 = null;
   baseTimeInTop100 = null;
 
   constructor() {
-    makeObservable(this, {
-      // Mark large datasets as reference-only observables
-      oneOnOneData: observable.ref,
-      oneOnOneMaxSnapshotMap: observable.ref,
-      oneOnOneSeasonSnapshotsMap: observable.ref,
-      oneOnOneSeasonFinalRankingMap: observable.ref,
-
-      baseData: observable.ref,
-      baseMaxSnapshotMap: observable.ref,
-      baseSeasonSnapshotsMap: observable.ref,
-      baseSeasonFinalRankingMap: observable.ref,
-
-      // Actions
-      loadOneOnOneData: action,
-      loadBaseData: action,
-      clearOneOnOneData: action,
-      clearBaseData: action,
-      resetLargeObjects: action,
-    });
+    // makeAutoObservable automatically sets up actions and observable.ref for non-primitive fields
+    makeAutoObservable(this, {}, { autoBind: true });
   }
 
-  loadOneOnOneHallOfFameData() {
-  if (!this.oneOnOneHallOfFameLoaded) {
-    // Flush Base data before downloading 1v1 data to keep mobile memory low
+  async loadOneOnOneHallOfFameData() {
+    if (this.oneOnOneHallOfFameLoaded) return;
+
     this.clearBaseData();
 
-    fetch('https://storage.googleapis.com/leaderboard_files/exported_csvs/oneOnOne_appearances_brackets.csv')
-      .then((response) => response.text()) // Convert Response to raw CSV string
-      .then((csvText) => {
-        Papa.parse(csvText, {
-          header: true,
-          skipEmptyLines: true,
-          complete: (results) => {
-            try {
-              let processedData = results.data;
-              runInAction(() => {
-                // Update MobX observables here
-                this.oneOnOneFinishes = [];
-                this.oneOnOneFinishes.push(processedData.filter(d => d.bracket === 'Top 1'));
-                this.oneOnOneFinishes.push(processedData.filter(d => d.bracket === 'Top 5'));
-                this.oneOnOneFinishes.push(processedData.filter(d => d.bracket === 'Top 10'));
-                this.oneOnOneFinishes.push(processedData.filter(d => d.bracket === 'Top 100'));
-              });
-              // Get highest skill ratings
-              fetch('https://storage.googleapis.com/leaderboard_files/exported_csvs/oneOnOne_highest_skill_ratings.csv')
-              .then((response) => response.text()) // Convert Response to raw CSV string
-              .then((csvText) => {
-                Papa.parse(csvText, {
-                          header: true,
-                          skipEmptyLines: true,
-                          complete: (results) => {
-                              try {
-                                let processedData = results.data;
-                                runInAction(() => {
-                                // Update MobX observables here
-                                this.oneOnOnePeakSkillRatings = processedData;
-                                // Get Time in First
-                                fetch('https://storage.googleapis.com/leaderboard_files/exported_csvs/oneOnOne_time_in_rank_brackets.csv')
-                                .then((response) => response.text()) // Convert Response to raw CSV string
-                                .then((csvText) => {
-                                  Papa.parse(csvText, {
-                                            header: true,
-                                            skipEmptyLines: true,
-                                            complete: (results) => {
-                                                try {
-                                                  let processedData = results.data;
-                                                  runInAction(() => {
-                                                  // Update MobX observables here
-                                                  this.oneOnOneTimeIn = [];
-                                                  this.oneOnOneTimeIn.push(processedData.filter(d => d.bracket === 'Top 1'));
-                                                  this.oneOnOneTimeIn.push(processedData.filter(d => d.bracket === 'Top 5'));
-                                                  this.oneOnOneTimeIn.push(processedData.filter(d => d.bracket === 'Top 10'));
-                                                  this.oneOnOneTimeIn.push(processedData.filter(d => d.bracket === 'Top 100'));
+    try {
+      // Load all 4 CSV files in parallel
+      const [appearances, peakRatings, timeInRank, winrates] = await Promise.all([
+        fetchAndParseCsv('oneOnOne_appearances_brackets.csv'),
+        fetchAndParseCsv('oneOnOne_highest_skill_ratings.csv'),
+        fetchAndParseCsv('oneOnOne_time_in_rank_brackets.csv'),
+        fetchAndParseCsv('oneOnOne_winrate_brackets.csv'),
+      ]);
 
-                                                  fetch('https://storage.googleapis.com/leaderboard_files/exported_csvs/oneOnOne_winrate_brackets.csv')
-                                                    .then((response) => response.text()) // Convert Response to raw CSV string
-                                                    .then((csvText) => {
-                                                      Papa.parse(csvText, {
-                                                                header: true,
-                                                                skipEmptyLines: true,
-                                                                complete: (results) => {
-                                                                    try {
-                                                                      let processedData = results.data;
-                                                                      runInAction(() => {
-                                                                      // Update MobX observables here
-                                                                      this.oneOnOneWinRates = [];
-                                                                      this.oneOnOneWinRates.push(processedData.filter(d => d.bracket === '75+ Games'));
-                                                                      this.oneOnOneWinRates.push(processedData.filter(d => d.bracket === '100+ Games'));
-                                                                      this.oneOnOneWinRates.push(processedData.filter(d => d.bracket === '200+ Games'));
-                                                                      this.oneOnOneWinRates.push(processedData.filter(d => d.bracket === '500+ Games'));
-                                                                    });
-                                                                    } catch (error){
-                                                                      console.error('Oops, error processing CSV data:', error);
-                                                                    }
-                                                                }}
-                                                              )
+      const rankBrackets = ['Top 1', 'Top 5', 'Top 10', 'Top 100'];
+      const winBrackets = ['75+ Games', '100+ Games', '200+ Games', '500+ Games'];
 
-                                                    })
-                                                });
-                                                } catch (error){
-                                                  console.error('Oops, error processing CSV data:', error);
-                                                }
-                                            }}
-                                          )
-
-                                })
-                              });
-                              } catch (error){
-                                console.error('Oops, error processing CSV data:', error);
-                              }
-                          }}
-                        )
-
-              })
-
-            } catch (error) {
-              console.error('Oops, error processing CSV data:', error);
-            }
-          },
-          error: (error) => {
-            console.error(`Error parsing CSV file: ${error}`);
-          },
-        });
-      })
-      .catch((error) => {
-        console.error("Error loading OneOnOne data:", error);
+      runInAction(() => {
+        this.oneOnOneFinishes = groupByBrackets(appearances, rankBrackets);
+        this.oneOnOnePeakSkillRatings = peakRatings;
+        this.oneOnOneTimeIn = groupByBrackets(timeInRank, rankBrackets);
+        this.oneOnOneWinRates = groupByBrackets(winrates, winBrackets);
+        this.oneOnOneHallOfFameLoaded = true;
       });
-
-    this.oneOnOneHallOfFameLoaded = true;
-  }
-}
-
-  loadOneOnOneData() {
-    if (this.oneOnOneData === null) {
-      // Flush Base data before downloading 1v1 data to keep mobile memory low
-      this.clearBaseData();
-
-      readDataFromFile('https://storage.googleapis.com/leaderboard_files/exported_csvs/oneOnOne_all_data.csv', false, false)
-        .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap}) => {
-          runInAction(() => {
-            this.oneOnOneData = fileData;
-            this.oneOnOneMaxSnapshotMap = fileMaxSnapshotMap;
-            this.oneOnOneSeasonSnapshotsMap = fileSeasonsSnapshotsMap;
-          });
-        })
-        .catch((error) => {
-          console.error("Error loading OneOnOne data:", error);
-        });
+    } catch (error) {
+      console.error('Error loading OneOnOne Hall of Fame data:', error);
     }
   }
 
-  loadBaseData() {
-    if (this.baseData === null) {
-      // Flush 1v1 data before downloading Base data to keep mobile memory low
-      this.clearOneOnOneData();
+  async loadBaseHallOfFameData() {
+    if (this.baseHallOfFameLoaded) return;
 
-      readDataFromFile('https://storage.googleapis.com/leaderboard_files/exported_csvs/base_all_data.csv', false, false)
-        .then(({ fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap }) => {
-          runInAction(() => {
-            this.baseData = fileData;
-            this.baseMaxSnapshotMap = fileMaxSnapshotMap;
-            this.baseSeasonSnapshotsMap = fileSeasonsSnapshotsMap;
-          });
-        })
-        .catch((error) => {
-          console.error("Error loading Base data:", error);
-        });
+    this.clearBaseData();
+
+    try {
+      // Load all 4 CSV files in parallel
+      const [appearances, peakRatings, timeInRank, winrates] = await Promise.all([
+        fetchAndParseCsv('base_appearances_brackets.csv'),
+        fetchAndParseCsv('base_highest_skill_ratings.csv'),
+        fetchAndParseCsv('base_time_in_rank_brackets.csv'),
+        fetchAndParseCsv('base_winrate_brackets.csv'),
+      ]);
+
+      const rankBrackets = ['Top 1', 'Top 5', 'Top 10', 'Top 100'];
+      const winBrackets = ['40+ Games', '80+ Games', '120+ Games', '200+ Games'];
+
+      runInAction(() => {
+        this.baseFinishes = groupByBrackets(appearances, rankBrackets);
+        this.basePeakSkillRatings = peakRatings;
+        this.baseTimeIn = groupByBrackets(timeInRank, rankBrackets);
+        this.baseWinRates = groupByBrackets(winrates, winBrackets);
+        this.baseHallOfFameLoaded = true;
+      });
+    } catch (error) {
+      console.error('Error loading Base Hall of Fame data:', error);
     }
   }
 
-  loadFinalRanking(type) {
-    // Use _final_rankings.csv (plural) to match the Cloud Function export
-    const query = `https://storage.googleapis.com/leaderboard_files/exported_csvs/${type}_final_rankings.csv`;
+  async loadOneOnOneData() {
+    if (this.oneOnOneData !== null) return;
+    this.clearBaseData();
 
-    // Map each mode type directly to its MobX store property name
+    try {
+      const { fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap } = await readDataFromFile(
+        `${BASE_URL}/oneOnOne_all_data.csv`, false, false
+      );
+      runInAction(() => {
+        this.oneOnOneData = fileData;
+        this.oneOnOneMaxSnapshotMap = fileMaxSnapshotMap;
+        this.oneOnOneSeasonSnapshotsMap = fileSeasonsSnapshotsMap;
+      });
+    } catch (error) {
+      console.error('Error loading OneOnOne data:', error);
+    }
+  }
+
+  async loadBaseData() {
+    if (this.baseData !== null) return;
+    this.clearOneOnOneData();
+
+    try {
+      const { fileData, fileMaxSnapshotMap, fileSeasonsSnapshotsMap } = await readDataFromFile(
+        `${BASE_URL}/base_all_data.csv`, false, false
+      );
+      runInAction(() => {
+        this.baseData = fileData;
+        this.baseMaxSnapshotMap = fileMaxSnapshotMap;
+        this.baseSeasonSnapshotsMap = fileSeasonsSnapshotsMap;
+      });
+    } catch (error) {
+      console.error('Error loading Base data:', error);
+    }
+  }
+
+  async loadFinalRanking(type) {
     const mapKeyByMode = {
       oneOnOne: 'oneOnOneSeasonFinalRankingMap',
       base: 'baseSeasonFinalRankingMap',
       rush: 'rushSeasonFinalRankingMap',
-      ck: 'ckSeasonFinalRankingMap'
+      ck: 'ckSeasonFinalRankingMap',
     };
 
     const targetProperty = mapKeyByMode[type];
+    if (!targetProperty || this[targetProperty] !== null) return;
 
-    // Only fetch if valid mode and state is not yet loaded
-    if (targetProperty && this[targetProperty] === null) {
-      readDataFromFile(query, false, true)
-        .then(({fileSeasonFinalRankingMap}) => {
-          runInAction(() => {
-            // Dynamically assign the loaded data to the correct store property
-            this[targetProperty] = fileSeasonFinalRankingMap;
-          });
-        })
-        .catch((error) => {
-          console.error(`Error loading data from ${query}:`, error);
-        });
+    const query = `${BASE_URL}/${type}_final_rankings.csv`;
+    try {
+      const { fileSeasonFinalRankingMap } = await readDataFromFile(query, false, true);
+      runInAction(() => {
+        this[targetProperty] = fileSeasonFinalRankingMap;
+      });
+    } catch (error) {
+      console.error(`Error loading data from ${query}:`, error);
     }
   }
-
 
   clearOneOnOneData() {
     this.oneOnOneData = null;

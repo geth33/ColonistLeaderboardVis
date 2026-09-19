@@ -1,6 +1,5 @@
 .hallOfFameLeaderboardTable {
   background: black;
-  margin-top: 2em;
   width: 85%;
   margin: 2em auto 0 auto;
   box-shadow: 0 0 3px 1px white;
@@ -17,12 +16,29 @@
   /* IE and Edge (Legacy) - Hide scrollbar */
   -ms-overflow-style: none;
 
-  /* Smooth bottom fade mask to eliminate hard cutoff */
-  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
-  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  /* Smooth transition when mask toggles off */
+  transition: mask-image 0.2s ease, -webkit-mask-image 0.2s ease;
 }
 
 /* Chrome, Safari, and Edge (WebKit) - Hide scrollbar */
 .tableContainer::-webkit-scrollbar {
   display: none;
+}
+
+/* Mask is only applied when the user hasn't hit the bottom */
+.tableContainer.hasMask {
+  mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+
+@media (max-width: 1000px) {
+  .hallOfFameLeaderboardTable {
+    width: 360px;
+  }
+}
+
+@media (max-width: 400px) {
+  .hallOfFameLeaderboardTable {
+    width: 320px;
+  }
 }

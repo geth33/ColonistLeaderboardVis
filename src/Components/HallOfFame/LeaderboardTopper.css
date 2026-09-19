@@ -80,3 +80,21 @@
     color: transparent;
     font-weight: bold;
 }
+
+.secondaryValue {
+    font-size: 0.8rem;
+}
+
+@media (max-width: 400px) {
+    .goldTopper {
+        width: 110px;
+        margin: 0 15px;
+    }
+    .silverTopper {
+        width: 100px;
+    }
+    .bronzeTopper {
+        width: 85px;
+        margin: 0 7.5px;
+    }
+}

@@ -152,24 +152,26 @@ body {
   opacity: 0;
   transition: opacity 1s ease-in-out;
   z-index: 1;
-}
-
-.limo-position-wrapper.visible {
-  opacity: 0.15;
+  /* Prevent horizontal scrollbars if the fixed image overflows the viewport */
+  overflow: hidden; 
 }
 
 .limo-container {
+  /* Set exact dimensions or fixed scaling width */
   width: 1106px;
   height: 260px;
+  flex-shrink: 0; /* Prevents flexbox from compressing the container */
 
-  /* Background Properties */
   background-image: url("../../public/img/limo.png");
   background-repeat: no-repeat;
   background-size: contain;
   background-position: center;
 
-  /* 3. FLIP THE LIMO IMAGE HORIZONTALLY */
   transform: scale(0.7) scaleX(-1);
+}
+
+.limo-position-wrapper.visible {
+  opacity: 0.15;
 }
 
 .compact-icon-button {
@@ -282,7 +284,7 @@ body {
   position: fixed; /* Changed from absolute to fixed to keep anchored to viewport bottom */
   bottom: -20px;
   width: 400px;
-  height: 1200px;
+  height: 1000px;
   background: linear-gradient(
     to top,
     rgba(255, 240, 200, 0.4) 0%,
@@ -413,4 +415,168 @@ body {
 .scroll-reveal.revealed {
   opacity: 1;
   transform: translateY(0);
+}
+
+
+@media (max-width: 1400px) {
+  .top-light {
+    width: 220px;
+    height: 220px;
+  }
+  .top-light-right {
+    right: 450px;
+  }
+  .paparazzi-border {
+    width: 160px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .leaderboardRows {
+      min-width: 100%;
+  }
+  .top-light {
+    width: 180px;
+    height: 180px;
+  }
+  .top-light-right {
+    right: 330px;
+    top: -80px;
+  }
+  .top-light-left {
+    left: -30px;
+    top: -80px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .main-title{
+    font-size: 3.3rem;
+    max-width: 16rem;
+  }
+  .subtitle{
+    font-size: 1rem;
+  }
+  .top-light-right {
+    right: 260px;
+    top: -80px;
+  }
+  .top-light-left {
+    left: -100px;
+    top: -80px;
+  }
+  .leaderboardRows {
+      min-width: 100%;
+  }
+  .leaderboardRow {
+      display: flex !important;
+      flex-direction: column;
+  }
+  .redCarpet-container {
+    width: 1106px;
+    height: 260px;
+
+    /* Background Properties */
+    background-image: url("../../public/img/red_carpet_long.png");
+    background-repeat: repeat;
+    background-size: contain;
+    background-position: center;
+    transform: scale(10);
+  }
+  .redCarpet-position-wrapper {
+    position: absolute;
+    top: calc(4rem + 146em);
+    left: 54%;
+    transform: translateX(-50%);
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+    z-index: -1;
+  }
+  .leaderboardModule {
+    z-index: 5;
+  }
+  .paparazzi-border {
+    top: 58%;
+    width: 80px;
+  }
+}
+
+@media (max-width: 800px) {
+.paparazzi-border {
+    width: 40px;
+  }
+}
+
+@media (max-width: 600px) {
+  .main-title {
+    font-size: 2.8rem;
+    max-width: 14rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+  }
+
+  .top-light-left {
+    top: -210px;
+    left: -70px;
+    /* Keeps scale and optional rotation anchored cleanly */
+    transform-origin: top left;
+    transform: scale(2) rotate(15deg);
+  }
+
+  .top-light-right {
+    top: -110px;
+    right: 270px; /* Anchors explicitly to the right edge */
+    left: auto;   /* Overrides any default/left inheritance */
+    transform-origin: top right;
+    /* Retains scale, horizontal flip, and adds light rotation */
+    transform: scale(2) scaleX(-1) rotate(15deg); 
+  }
+
+    .paparazzi-border {
+      display: none;
+    }
+    .redCarpet-position-wrapper {
+    left: 58%;
+    }
+}
+
+@media (max-width: 400px) {
+  .top-light {
+    width: 160px;
+    height: 160px;
+  }
+  .top-light-left {
+    top: -190px;
+    left: -20px;
+    /* Keeps scale and optional rotation anchored cleanly */
+    transform-origin: top left;
+    transform: scale(2) rotate(25deg);
+  }
+
+  .top-light-right {
+    top: -50px;
+    right: 270px; /* Anchors explicitly to the right edge */
+    left: auto;   /* Overrides any default/left inheritance */
+    transform-origin: top right;
+    /* Retains scale, horizontal flip, and adds light rotation */
+    transform: scale(2) scaleX(-1) rotate(25deg); 
+  }
+  .subtitle {
+    font-size: 0.8rem;
+  }
+  .displayBackground {
+    max-width: 80px;
+  }
+  .limo-container{
+    width: 806px;
+    height: 260px;
+  }
+  .leaderboardTitle > h3{
+      font-size: 0.9em;
+  }
 }
