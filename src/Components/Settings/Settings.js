@@ -15,7 +15,7 @@ const Settings = ({hide, playersWithoutData}) => {
   const [lineChartMode, setLineChartMode] = useState(0);
   const [gameMode, setGameMode] = useState("Base");
   const [season, setSeason] = useState(7);
-  const [speed, setSpeed] = useState(1);
+  const [speed, setSpeed] = useState(0.75);
   const [selectableDays, setSelectableDays] = useState(finishedSeasonDays);
   const [selectedDay, setSelectedDay] = useState(10);
   const [submittedWithEmptyRows, setSubmittedWithEmptyRows] = useState(false);

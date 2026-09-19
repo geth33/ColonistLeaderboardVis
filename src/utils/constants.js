@@ -62,7 +62,7 @@ export default {
       ]
     },
     'itsOKK': {
-      imageURL: 'img/playerImage/itsOKK.jpg',
+      imageURL: 'img/playerImage/itsOkk.jpg',
       facts: [
         '#21 in Season 11', // 1v1
         '#101 in Season 10', // 1v1
@@ -118,7 +118,7 @@ export default {
       alias: 'md7'
     },
     'PizzaPenguin': {
-      imageURL: 'img/playerImage/pizzaPenguin.jpg',
+      imageURL: 'img/playerImage/cheesEmperor.png',
       facts: [
         '#55 in Season 7', //Base
         '#73 in Season 10', //Base
@@ -149,7 +149,7 @@ export default {
       ]
     },
     'Sinless': {
-      imageURL: 'img/playerImage/Sinless.jpg',
+      imageURL: 'img/playerImage/sinless.jpg',
       facts: [
         'Catan Champs Div 1 Champion',
         'Rank #541 in Season 7',
