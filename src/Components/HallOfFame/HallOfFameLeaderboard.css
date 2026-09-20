@@ -1,5 +1,6 @@
 .leaderboardTopperContainerList {
     display: flex;
+    justify-content: center;
     align-items: start;
 }
 
