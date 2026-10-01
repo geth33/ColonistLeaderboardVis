@@ -345,6 +345,9 @@ export default function StageIntro({ titleText = "" }) {
                   </IconButton>
                 </div>
               </div>
+              <div style={{display: 'flex', justifyContent: 'center', fontSize: '0.8rem'}}>
+                <span>(Starting from Season 7)</span>
+              </div>
               <HallOfFameLeaderboard  leaderboardEntries={timeIn && timeIn.length > 0 ? timeIn[timeInBracketIndex] : testHallOfFameLeaderboard} property={'days'}/>
             </div>
             <div className='leaderboardModule'>

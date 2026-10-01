@@ -1,13 +1,12 @@
-import React, { useEffect, useRef } from 'react';
-import './LeaderboardTopper.css'; // Import CSS for styling
+import React from 'react';
+import './LeaderboardTopper.css';
 
 const formatValue = (val) => {
-    if (val === null || val === undefined) return '';
-    return String(val).replace(/\.0$/, '');
-  };
+  if (val === null || val === undefined) return '';
+  return String(val).replace(/\.0$/, '');
+};
 
-
-const LeaderboardTopper = ({ rank, name, value, suffix, secondaryValue, secondarySuffix}) => {
+const LeaderboardTopper = ({ rank, name, value, suffix, secondaryValue, secondarySuffix }) => {
   const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : 'default';
   const imgSrc = "/img/" + rankClass + "Laurel.png";
   const imgClass = rankClass + "Topper";
@@ -16,15 +15,22 @@ const LeaderboardTopper = ({ rank, name, value, suffix, secondaryValue, secondar
 
   return (
     <div className={`leaderboardTopperContainer ${rankClass}TopperContainer`}>
+      <div className="leaderboardTopperContent">
         <img
-            src={imgSrc}
-            className={imgClass}
-          />
+          src={imgSrc}
+          className={imgClass}
+          alt={`${rankClass} laurel`}
+        />
         <p className={`leaderboardTopperName ${rankClass}TopperText`}>{name}</p>
-        <p className={`leaderboardTopperValue ${rankClass}TopperText`}>{formattedValue}{suffix ? suffix : ''}</p>
-        {
-          secondaryValue && <p className={`leaderboardTopperValue ${rankClass}TopperText secondaryValue`}>({secondaryValue} {secondarySuffix})</p>
-        }
+        <p className={`leaderboardTopperValue ${rankClass}TopperText`}>
+          {formattedValue}{suffix ? suffix : ''}
+        </p>
+        {secondaryValue && (
+          <p className={`leaderboardTopperValue ${rankClass}TopperText secondaryValue`}>
+            ({secondaryValue} {secondarySuffix})
+          </p>
+        )}
+      </div>
     </div>
   );
 };

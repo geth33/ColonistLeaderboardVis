@@ -1,23 +1,35 @@
+/* Outer container maintains min-width and flex alignment */
 .leaderboardTopperContainer {
     height: 190px;
-    align-content: end;
-    justify-content: center;
+    min-width: 125px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end; /* Push content to bottom */
+    box-sizing: border-box;
 }
-.leaderboardTopperName {
-    
-}
-.leaderboardTopperValue {
 
+/* Inner content wrapper keeps image & text centered with each other */
+.leaderboardTopperContent {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    width: fit-content;
 }
-.goldTopperContainer {
 
-}
+/* Alignment per podium position */
 .silverTopperContainer {
-
+    align-items: flex-end; /* Hugs inner wrapper to the RIGHT */
 }
+
+.goldTopperContainer {
+    align-items: center;   /* Keeps inner wrapper CENTERED */
+}
+
 .bronzeTopperContainer {
-
+    align-items: flex-start; /* Hugs inner wrapper to the LEFT */
 }
+
 .goldTopper {
     width: 120px;
     margin: 0 20px;
