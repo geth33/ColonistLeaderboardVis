@@ -12,8 +12,8 @@ const LeaderBoards = () => {
 
     const [players, setPlayers] = useState([]);
     const [activeGameMode, setActiveGameMode] = useState("4 Player");
-    const [season, setSeason] = useState(6);
-    const [seasons, setSeasons] = useState([6,7,8,9,10,11,12,13,14,15,16,17]);
+    const [season, setSeason] = useState(17);
+    const [seasons, setSeasons] = useState([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17]);
     const [username, setUsername] = useState('');
     const [debouncedUsername, setDebouncedUsername] = useState('');
     const [fetchingData, setFetchingData] = useState(false);
