@@ -4,7 +4,7 @@ import {Button, FormControl, FormControlLabel, Select, MenuItem, Checkbox, Toolt
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import PlayerSelectorGrid from './PlayerSelectorGrid';
 
-const seasons = [7,8,9,10,11,12,13,14,15,16,17,18];
+const seasons = [7,8,9,10,11,12,13,14,15,16,17,18,19];
 const speeds = [0.3, 0.4, 0.5, 0.75, 1, 1.25];
 const currentSeasonDays = [1,5,10,20];
 const finishedSeasonDays = [1,5,10,20,30,40,50,60,70,80];
@@ -74,7 +74,7 @@ const Settings = ({hide, playersWithoutData}) => {
 
   useEffect(() => {
     // If going to the current season, need to make
-    if (season === 18){
+    if (season === 19){
         setSelectableDays(currentSeasonDays);
         if (selectedDay > 90){
             setSelectedDay(10);
